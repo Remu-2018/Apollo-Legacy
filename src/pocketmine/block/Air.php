@@ -2,19 +2,22 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *
+ *    _______                    _
+ *   |__   __|                  (_)
+ *      | |_   _ _ __ __ _ _ __  _  ___
+ *      | | | | | '__/ _` | '_ \| |/ __|
+ *      | | |_| | | | (_| | | | | | (__
+ *      |_|\__,_|_|  \__,_|_| |_|_|\___|
+ *
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Turanic
  *
  *
 */
@@ -25,14 +28,9 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 
-
-/**
- * Air block
- */
-class Air extends Transparent{
+class Air extends Transparent {
 
 	protected $id = self::AIR;
-	protected $meta = 0;
 
 	public function __construct(int $meta = 0){
 		$this->meta = $meta;
@@ -41,6 +39,10 @@ class Air extends Transparent{
 	public function getName() : string{
 		return "Air";
 	}
+
+	public function getDrops(Item $item): array{
+        return [];
+    }
 
 	public function canPassThrough() : bool{
 		return true;
@@ -54,7 +56,7 @@ class Air extends Transparent{
 		return true;
 	}
 
-	public function canBeReplaced(Block $with = null) : bool{
+	public function canBeReplaced() : bool{
 		return true;
 	}
 
@@ -71,7 +73,7 @@ class Air extends Transparent{
 	}
 
 	public function getHardness() : float{
-		return -1;
+		return 0;
 	}
 
 	public function getBlastResistance() : float{

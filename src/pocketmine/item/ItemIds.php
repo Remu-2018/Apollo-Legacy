@@ -2,31 +2,31 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *    _______                    _
+ *   |__   __|                  (_)
+ *      | |_   _ _ __ __ _ _ __  _  ___
+ *      | | | | | '__/ _` | '_ \| |/ __|
+ *      | | |_| | | | (_| | | | | | (__
+ *      |_|\__,_|_|  \__,_|_| |_|_|\___|
+ *
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
- *
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Turanic
  *
 */
-
-declare(strict_types=1);
 
 namespace pocketmine\item;
 
 use pocketmine\block\BlockIds;
 
-interface ItemIds extends BlockIds{
+interface ItemIds extends BlockIds {
 
+	//All BlockIds are also accessible through this interface.
 	const IRON_SHOVEL = 256;
 	const IRON_PICKAXE = 257;
 	const IRON_AXE = 258;
@@ -51,13 +51,13 @@ interface ItemIds extends BlockIds{
 	const DIAMOND_SHOVEL = 277;
 	const DIAMOND_PICKAXE = 278;
 	const DIAMOND_AXE = 279;
-	const STICK = 280;
+	const STICK = 280, STICKS = 280;
 	const BOWL = 281;
 	const MUSHROOM_STEW = 282;
-	const GOLDEN_SWORD = 283, GOLD_SWORD = 283;
-	const GOLDEN_SHOVEL = 284, GOLD_SHOVEL = 284;
-	const GOLDEN_PICKAXE = 285, GOLD_PICKAXE = 285;
-	const GOLDEN_AXE = 286, GOLD_AXE = 286;
+	const GOLD_SWORD = 283, GOLDEN_SWORD = 283;
+	const GOLD_SHOVEL = 284, GOLDEN_SHOVEL = 284;
+	const GOLD_PICKAXE = 285, GOLDEN_PICKAXE = 285;
+	const GOLD_AXE = 286, GOLDEN_AXE = 286;
 	const STRING = 287;
 	const FEATHER = 288;
 	const GUNPOWDER = 289;
@@ -65,18 +65,18 @@ interface ItemIds extends BlockIds{
 	const STONE_HOE = 291;
 	const IRON_HOE = 292;
 	const DIAMOND_HOE = 293;
-	const GOLDEN_HOE = 294, GOLD_HOE = 294;
+	const GOLD_HOE = 294, GOLDEN_HOE = 294;
 	const SEEDS = 295, WHEAT_SEEDS = 295;
 	const WHEAT = 296;
 	const BREAD = 297;
-	const LEATHER_CAP = 298, LEATHER_HELMET = 298;
-	const LEATHER_CHESTPLATE = 299, LEATHER_TUNIC = 299;
-	const LEATHER_LEGGINGS = 300, LEATHER_PANTS = 300;
+	const LEATHER_CAP = 298;
+	const LEATHER_TUNIC = 299;
+	const LEATHER_PANTS = 300;
 	const LEATHER_BOOTS = 301;
-	const CHAINMAIL_HELMET = 302, CHAIN_HELMET = 302;
-	const CHAINMAIL_CHESTPLATE = 303, CHAIN_CHESTPLATE = 303;
-	const CHAINMAIL_LEGGINGS = 304, CHAIN_LEGGINGS = 304;
-	const CHAINMAIL_BOOTS = 305, CHAIN_BOOTS = 305;
+	const CHAIN_HELMET = 302;
+	const CHAIN_CHESTPLATE = 303;
+	const CHAIN_LEGGINGS = 304;
+	const CHAIN_BOOTS = 305;
 	const IRON_HELMET = 306;
 	const IRON_CHESTPLATE = 307;
 	const IRON_LEGGINGS = 308;
@@ -85,17 +85,17 @@ interface ItemIds extends BlockIds{
 	const DIAMOND_CHESTPLATE = 311;
 	const DIAMOND_LEGGINGS = 312;
 	const DIAMOND_BOOTS = 313;
-	const GOLDEN_HELMET = 314, GOLD_HELMET = 314;
-	const GOLDEN_CHESTPLATE = 315, GOLD_CHESTPLATE = 315;
-	const GOLDEN_LEGGINGS = 316, GOLD_LEGGINGS = 316;
-	const GOLDEN_BOOTS = 317, GOLD_BOOTS = 317;
+	const GOLD_HELMET = 314;
+	const GOLD_CHESTPLATE = 315;
+	const GOLD_LEGGINGS = 316;
+	const GOLD_BOOTS = 317;
 	const FLINT = 318;
-	const PORKCHOP = 319, RAW_PORKCHOP = 319;
+	const RAW_PORKCHOP = 319;
 	const COOKED_PORKCHOP = 320;
 	const PAINTING = 321;
 	const GOLDEN_APPLE = 322;
 	const SIGN = 323;
-	const OAK_DOOR = 324, WOODEN_DOOR = 324;
+	const WOODEN_DOOR = 324, OAK_DOOR = 324;
 	const BUCKET = 325;
 
 	const MINECART = 328;
@@ -107,19 +107,19 @@ interface ItemIds extends BlockIds{
 	const LEATHER = 334;
 
 	const BRICK = 336;
-	const CLAY = 337, CLAY_BALL = 337;
-	const REEDS = 338, SUGARCANE = 338;
+	const CLAY = 337;
+	const SUGARCANE = 338, SUGAR_CANE = 338, SUGAR_CANES = 338;
 	const PAPER = 339;
 	const BOOK = 340;
-	const SLIMEBALL = 341, SLIME_BALL = 341;
-	const CHEST_MINECART = 342, MINECART_WITH_CHEST = 342;
+	const SLIMEBALL = 341;
+	const MINECART_WITH_CHEST = 342, CHEST_MINECART = 342;
 
 	const EGG = 344;
 	const COMPASS = 345;
 	const FISHING_ROD = 346;
 	const CLOCK = 347;
 	const GLOWSTONE_DUST = 348;
-	const FISH = 349, RAW_FISH = 349;
+	const RAW_FISH = 349;
 	const COOKED_FISH = 350;
 	const DYE = 351;
 	const BONE = 352;
@@ -133,15 +133,15 @@ interface ItemIds extends BlockIds{
 	const MELON = 360, MELON_SLICE = 360;
 	const PUMPKIN_SEEDS = 361;
 	const MELON_SEEDS = 362;
-	const BEEF = 363, RAW_BEEF = 363;
-	const COOKED_BEEF = 364, STEAK = 364;
-	const CHICKEN = 365, RAW_CHICKEN = 365;
+	const RAW_BEEF = 363;
+	const STEAK = 364, COOKED_BEEF = 364;
+	const RAW_CHICKEN = 365;
 	const COOKED_CHICKEN = 366;
 	const ROTTEN_FLESH = 367;
 	const ENDER_PEARL = 368;
 	const BLAZE_ROD = 369;
 	const GHAST_TEAR = 370;
-	const GOLDEN_NUGGET = 371, GOLD_NUGGET = 371;
+	const GOLD_NUGGET = 371, GOLDEN_NUGGET = 371;
 	const NETHER_WART = 372;
 	const POTION = 373;
 	const GLASS_BOTTLE = 374;
@@ -151,50 +151,50 @@ interface ItemIds extends BlockIds{
 	const MAGMA_CREAM = 378;
 	const BREWING_STAND = 379;
 	const CAULDRON = 380;
-	const ENDER_EYE = 381, EYE_OF_ENDER = 381;
-	const GLISTERING_MELON = 382, SPECKLED_MELON = 382;
+	const EYE_OF_ENDER = 381;
+	const GLISTERING_MELON = 382;
 	const SPAWN_EGG = 383;
-	const BOTTLE_O_ENCHANTING = 384, EXPERIENCE_BOTTLE = 384;
-	const FIREBALL = 385, FIRE_CHARGE = 385;
+	const BOTTLE_O_ENCHANTING = 384, ENCHANTING_BOTTLE = 384;
+	const FIRE_CHARGE = 385;
 	const WRITABLE_BOOK = 386;
-	const WRITTEN_BOOK = 387;
+	const WRITTEN_BOOK = 387;  
 	const EMERALD = 388;
-	const FRAME = 389, ITEM_FRAME = 389;
+	const ITEM_FRAME = 389;
 	const FLOWER_POT = 390;
-	const CARROT = 391;
-	const POTATO = 392;
-	const BAKED_POTATO = 393;
+	const CARROT = 391, CARROTS = 391;
+	const POTATO = 392, POTATOES = 392;
+	const BAKED_POTATO = 393, BAKED_POTATOES = 393;
 	const POISONOUS_POTATO = 394;
-	const EMPTYMAP = 395, EMPTY_MAP = 395, MAP = 395;
+	const MAP = 395, EMPTY_MAP = 395;
 	const GOLDEN_CARROT = 396;
 	const MOB_HEAD = 397, SKULL = 397;
-	const CARROTONASTICK = 398, CARROT_ON_A_STICK = 398;
-	const NETHERSTAR = 399, NETHER_STAR = 399;
+	const CARROT_ON_A_STICK = 398;
+	const NETHER_STAR = 399;
 	const PUMPKIN_PIE = 400;
-	const FIREWORKS = 401;
-	const FIREWORKSCHARGE = 402, FIREWORKS_CHARGE = 402;
+	const FIREWORK = 401;
+	const FIREWORK_STAR = 402;
 	const ENCHANTED_BOOK = 403;
 	const COMPARATOR = 404;
-	const NETHERBRICK = 405;
-	const NETHER_QUARTZ = 406, QUARTZ = 406;
-	const MINECART_WITH_TNT = 407, TNT_MINECART = 407;
-	const HOPPER_MINECART = 408, MINECART_WITH_HOPPER = 408;
+	const NETHER_BRICK = 405;
+	const QUARTZ = 406, NETHER_QUARTZ = 406;
+	const MINECART_WITH_TNT = 407;
+	const MINECART_WITH_HOPPER = 408;
 	const PRISMARINE_SHARD = 409;
 	const HOPPER = 410;
-	const RABBIT = 411, RAW_RABBIT = 411;
+	const RAW_RABBIT = 411;
 	const COOKED_RABBIT = 412;
 	const RABBIT_STEW = 413;
 	const RABBIT_FOOT = 414;
 	const RABBIT_HIDE = 415;
-	const HORSEARMORLEATHER = 416, HORSE_ARMOR_LEATHER = 416, LEATHER_HORSE_ARMOR = 416;
-	const HORSEARMORIRON = 417, HORSE_ARMOR_IRON = 417, IRON_HORSE_ARMOR = 417;
-	const GOLD_HORSE_ARMOR = 418, HORSEARMORGOLD = 418, HORSE_ARMOR_GOLD = 418;
-	const DIAMOND_HORSE_ARMOR = 419, HORSEARMORDIAMOND = 419, HORSE_ARMOR_DIAMOND = 419;
-	const LEAD = 420;
-	const NAMETAG = 421, NAME_TAG = 421;
+	const LEATHER_HORSE_ARMOR = 416; //I hate being forced to spell this wrong
+	const IRON_HORSE_ARMOR = 417;
+	const GOLD_HORSE_ARMOR = 418;
+	const DIAMOND_HORSE_ARMOR = 419;
+	const LEAD = 420, LEASH = 420;
+	const NAMETAG = 421;
 	const PRISMARINE_CRYSTALS = 422;
-	const MUTTONRAW = 423, MUTTON_RAW = 423, RAW_MUTTON = 423;
-	const COOKED_MUTTON = 424, MUTTONCOOKED = 424, MUTTON_COOKED = 424;
+	const RAW_MUTTON = 423;
+	const COOKED_MUTTON = 424;
 	const ARMOR_STAND = 425;
 	const END_CRYSTAL = 426;
 	const SPRUCE_DOOR = 427;
@@ -203,43 +203,42 @@ interface ItemIds extends BlockIds{
 	const ACACIA_DOOR = 430;
 	const DARK_OAK_DOOR = 431;
 	const CHORUS_FRUIT = 432;
-	const CHORUS_FRUIT_POPPED = 433;
+	const POPPED_CHORUS_FRUIT = 433, CHORUS_FRUIT_POPPED = 433;
 
-	const DRAGON_BREATH = 437;
+	const DRAGONS_BREATH = 437;
 	const SPLASH_POTION = 438;
 
 	const LINGERING_POTION = 441;
-
-	const COMMAND_BLOCK_MINECART = 443, MINECART_WITH_COMMAND_BLOCK = 443;
-	const ELYTRA = 444;
+	const ELYTRA = 444, ELYTRA_WINGS = 444;
 	const SHULKER_SHELL = 445;
-	const BANNER = 446;
+    const BANNER = 446;
 
-	const TOTEM = 450;
+    const TOTEM = 450;
 
-	const IRON_NUGGET = 452;
+    const IRON_NUGGET = 452;
 
 	const BEETROOT = 457;
-	const BEETROOT_SEEDS = 458;
+	const BEETROOT_SEEDS = 458, BEETROOT_SEED = 458;
 	const BEETROOT_SOUP = 459;
-	const RAW_SALMON = 460, SALMON = 460;
-	const CLOWNFISH = 461;
-	const PUFFERFISH = 462;
+	const RAW_SALMON = 460;
+	const CLOWN_FISH = 461, CLOWNFISH = 461;
+	const PUFFER_FISH = 462, PUFFERFISH = 462;
 	const COOKED_SALMON = 463;
 
-	const APPLEENCHANTED = 466, APPLE_ENCHANTED = 466, ENCHANTED_GOLDEN_APPLE = 466;
+	const ENCHANTED_GOLDEN_APPLE = 466;
 
-	const RECORD_13 = 500;
-	const RECORD_CAT = 501;
-	const RECORD_BLOCKS = 502;
-	const RECORD_CHIRP = 503;
-	const RECORD_FAR = 504;
-	const RECORD_MALL = 505;
-	const RECORD_MELLOHI = 506;
-	const RECORD_STAL = 507;
-	const RECORD_STRAD = 508;
-	const RECORD_WARD = 509;
-	const RECORD_11 = 510;
-	const RECORD_WAIT = 511;
-
+	const CAMERA = 498; #blamemojang
+	
+	const MUSIC_DISC_13 = 500;
+	const MUSIC_DISC_CAT = 501;
+	const MUSIC_DISC_BLOCKS = 502;
+	const MUSIC_DISC_CHIRP = 503;
+	const MUSIC_DISC_FAR = 504;
+	const MUSIC_DISC_MALL = 505;
+	const MUSIC_DISC_MELLOHI = 506;
+	const MUSIC_DISC_STAL = 507;
+	const MUSIC_DISC_STRAD = 508;
+	const MUSIC_DISC_WARD = 509;
+	const MUSIC_DISC_11 = 510;
+	const MUSIC_DISC_WAIT = 511;
 }

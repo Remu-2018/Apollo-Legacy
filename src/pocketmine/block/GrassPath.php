@@ -2,32 +2,33 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *    _______                    _
+ *   |__   __|                  (_)
+ *      | |_   _ _ __ __ _ _ __  _  ___
+ *      | | | | | '__/ _` | '_ \| |/ __|
+ *      | | |_| | | | (_| | | | | | (__
+ *      |_|\__,_|_|  \__,_|_| |_|_|\___|
+ *
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Turanic
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
-use pocketmine\item\Tool;
+use pocketmine\level\Level;
 use pocketmine\math\AxisAlignedBB;
 
-class GrassPath extends Transparent{
+class GrassPath extends Transparent {
 
 	protected $id = self::GRASS_PATH;
 
@@ -40,7 +41,7 @@ class GrassPath extends Transparent{
 	}
 
 	public function getToolType() : int{
-		return Tool::TYPE_SHOVEL;
+		return BlockToolType::TYPE_SHOVEL;
 	}
 
 	protected function recalculateBoundingBox(){
@@ -49,18 +50,29 @@ class GrassPath extends Transparent{
 			$this->y,
 			$this->z,
 			$this->x + 1,
-			$this->y + 1, //TODO: this should be 0.9375, but MCPE currently treats them as a full block (https://bugs.mojang.com/browse/MCPE-12109)
+			$this->y + 0.9375,
 			$this->z + 1
 		);
+	}
+
+	public function onUpdate(int $type){
+		if($type == Level::BLOCK_UPDATE_NORMAL){
+			$block = $this->getSide(self::SIDE_UP);
+			if($block->getId() != self::AIR){
+				$this->getLevel()->setBlock($this, new Dirt(), true);
+			}
+			return Level::BLOCK_UPDATE_NORMAL;
+		}
+		return false;
 	}
 
 	public function getHardness() : float{
 		return 0.6;
 	}
 
-	public function getDrops(Item $item) : array{
-		return [
-			Item::get(Item::DIRT, 0, 1)
-		];
+	public function getDropsForCompatibleTool(Item $item) : array{
+        return [
+            Item::get(Item::DIRT)
+        ];
 	}
 }

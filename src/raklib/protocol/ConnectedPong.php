@@ -22,18 +22,18 @@ namespace raklib\protocol;
 class ConnectedPong extends Packet{
 	public static $ID = MessageIdentifiers::ID_CONNECTED_PONG;
 
-	/** @var int */
-	public $sendPingTime;
-	/** @var int */
-	public $sendPongTime;
+    /** @var int */
+    public $sendPingTime;
+    /** @var int */
+    public $sendPongTime;
 
-	protected function encodePayload() : void{
-		$this->putLong($this->sendPingTime);
-		$this->putLong($this->sendPongTime);
-	}
+    protected function decodePayload(){
+        $this->sendPingTime = $this->getLong();
+        $this->sendPongTime = $this->getLong();
+    }
 
-	protected function decodePayload() : void{
-		$this->sendPingTime = $this->getLong();
-		$this->sendPongTime = $this->getLong();
-	}
+    protected function encodePayload(){
+        $this->putLong($this->sendPingTime);
+        $this->putLong($this->sendPongTime);
+    }
 }

@@ -2,59 +2,79 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *
+ *    _______                    _
+ *   |__   __|                  (_)
+ *      | |_   _ _ __ __ _ _ __  _  ___
+ *      | | | | | '__/ _` | '_ \| |/ __|
+ *      | | |_| | | | (_| | | | | | (__
+ *      |_|\__,_|_|  \__,_|_| |_|_|\___|
+ *
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Turanic
  *
  *
 */
-
-declare(strict_types=1);
 
 namespace pocketmine\command\defaults;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\command\utils\InvalidCommandSyntaxException;
 use pocketmine\event\TranslationContainer;
-use pocketmine\item\ItemFactory;
+use pocketmine\item\Item;
 use pocketmine\nbt\JsonNBTParser;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
+use pocketmine\command\overload\CommandParameter;
 
-class GiveCommand extends VanillaCommand{
+class GiveCommand extends VanillaCommand {
 
-	public function __construct(string $name){
+	/**
+	 * GiveCommand constructor.
+	 *
+	 * @param $name
+	 */
+	public function __construct($name){
 		parent::__construct(
 			$name,
 			"%pocketmine.command.give.description",
 			"%pocketmine.command.give.usage"
 		);
 		$this->setPermission("pocketmine.command.give");
+		
+		$this->getOverload("default")->setParameter(0, new CommandParameter("player", CommandParameter::TYPE_TARGET, false));
+		$this->getOverload("default")->setParameter(1, new CommandParameter("item", CommandParameter::TYPE_STRING, false));
+		$this->getOverload("default")->setParameter(2, new CommandParameter("amount", CommandParameter::TYPE_INT, true));
+		$this->getOverload("default")->setParameter(3, new CommandParameter("tags", CommandParameter::TYPE_STRING, true));
 	}
 
-	public function execute(CommandSender $sender, string $commandLabel, array $args){
+	/**
+	 * @param CommandSender $sender
+	 * @param string        $currentAlias
+	 * @param array         $args
+	 *
+	 * @return bool
+	 */
+	public function execute(CommandSender $sender, string $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
 			return true;
 		}
 
 		if(count($args) < 2){
-			throw new InvalidCommandSyntaxException();
+            $sender->sendMessage($sender->getServer()->getLanguage()->translateString("commands.generic.usage", [$this->usageMessage]));
+
+			return true;
 		}
 
 		$player = $sender->getServer()->getPlayer($args[0]);
-		$item = ItemFactory::fromString($args[1]);
+		$item = Item::fromString($args[1]);
 
 		if(!isset($args[2])){
 			$item->setCount($item->getMaxStackSize());

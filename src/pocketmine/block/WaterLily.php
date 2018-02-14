@@ -2,22 +2,23 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *    _______                    _
+ *   |__   __|                  (_)
+ *      | |_   _ _ __ __ _ _ __  _  ___
+ *      | | | | | '__/ _` | '_ \| |/ __|
+ *      | | |_| | | | (_| | | | | | (__
+ *      |_|\__,_|_|  \__,_|_| |_|_|\___|
+ *
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Turanic
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
@@ -29,7 +30,7 @@ use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 
-class WaterLily extends Flowable{
+class WaterLily extends Flowable {
 
 	protected $id = self::WATER_LILY;
 
@@ -37,29 +38,36 @@ class WaterLily extends Flowable{
 		$this->meta = $meta;
 	}
 
+	public function isSolid() : bool{
+		return false;
+	}
+
 	public function getName() : string{
 		return "Lily Pad";
 	}
 
 	public function getHardness() : float{
-		return 0.6;
+		return 0;
+	}
+
+	public function canPassThrough() : bool{
+		return true;
 	}
 
 	protected function recalculateBoundingBox(){
 		return new AxisAlignedBB(
-			$this->x + 0.0625,
+			$this->x,
 			$this->y,
-			$this->z + 0.0625,
-			$this->x + 0.9375,
-			$this->y + 0.015625,
-			$this->z + 0.9375
+			$this->z,
+			$this->x,
+			$this->y + 0.0625,
+			$this->z
 		);
 	}
 
-
-	public function place(Item $item, Block $block, Block $target, int $face, Vector3 $facePos, Player $player = null) : bool{
-		if($target instanceof Water){
-			$up = $target->getSide(Vector3::SIDE_UP);
+	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
+		if($blockClicked instanceof Water){
+			$up = $blockClicked->getSide(Vector3::SIDE_UP);
 			if($up->getId() === Block::AIR){
 				$this->getLevel()->setBlock($up, $this, true, true);
 				return true;
@@ -71,7 +79,7 @@ class WaterLily extends Flowable{
 
 	public function onUpdate(int $type){
 		if($type === Level::BLOCK_UPDATE_NORMAL){
-			if(!($this->getSide(Vector3::SIDE_DOWN) instanceof Water)){
+			if(!($this->getSide(0) instanceof Water)){
 				$this->getLevel()->useBreakOn($this);
 				return Level::BLOCK_UPDATE_NORMAL;
 			}
@@ -80,7 +88,4 @@ class WaterLily extends Flowable{
 		return false;
 	}
 
-	public function getVariantBitmask() : int{
-		return 0;
-	}
 }

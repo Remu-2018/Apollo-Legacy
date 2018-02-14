@@ -19,56 +19,60 @@
  *
 */
 
-declare(strict_types=1);
-
 namespace pocketmine\scheduler;
 
-use pocketmine\utils\MainLogger;
 use pocketmine\Worker;
 
-class AsyncWorker extends Worker{
+class AsyncWorker extends Worker {
 
 	private $logger;
 	private $id;
-
 	/** @var int */
 	private $memoryLimit;
 
-	public function __construct(MainLogger $logger, int $id, int $memoryLimit){
+	/**
+	 * AsyncWorker constructor.
+	 *
+	 * @param \ThreadedLogger $logger
+	 * @param                 $id
+	 */
+	public function __construct(\ThreadedLogger $logger, $id, $memoryLimit){
 		$this->logger = $logger;
 		$this->id = $id;
 		$this->memoryLimit = $memoryLimit;
 	}
 
 	public function run(){
-		error_reporting(-1);
-		set_error_handler('\pocketmine\error_handler');
-
 		$this->registerClassLoader();
-		$this->logger->registerStatic();
 		gc_enable();
 
-		if($this->memoryLimit > 0){
-			ini_set('memory_limit', $this->memoryLimit . 'M');
-			$this->logger->debug("Set memory limit to " . $this->memoryLimit . " MB");
-		}else{
-			ini_set('memory_limit', '-1');
-			$this->logger->debug("No memory limit set");
-		}
+        if($this->memoryLimit > 0){
+            ini_set('memory_limit', $this->memoryLimit . 'M');
+            $this->logger->debug("Set memory limit to " . $this->memoryLimit . " MB");
+        }else{
+            ini_set('memory_limit', '-1');
+            $this->logger->debug("No memory limit set");
+        }
 
 		global $store;
 		$store = [];
 	}
 
+	/**
+	 * @param \Throwable $e
+	 */
 	public function handleException(\Throwable $e){
 		$this->logger->logException($e);
 	}
 
-	public function getThreadName() : string{
+	/**
+	 * @return string
+	 */
+	public function getThreadName(){
 		return "Asynchronous Worker #" . $this->id;
 	}
 
-	public function getAsyncWorkerId() : int{
-		return $this->id;
-	}
+    public function getAsyncWorkerId() : int{
+        return $this->id;
+    }
 }

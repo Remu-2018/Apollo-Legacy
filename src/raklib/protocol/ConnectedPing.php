@@ -22,14 +22,14 @@ namespace raklib\protocol;
 class ConnectedPing extends Packet{
 	public static $ID = MessageIdentifiers::ID_CONNECTED_PING;
 
-	/** @var int */
-	public $sendPingTime;
+    /** @var int */
+    public $sendPingTime;
 
-	protected function encodePayload() : void{
-		$this->putLong($this->sendPingTime);
-	}
+    protected function encodePayload(){
+        $this->putLong($this->sendPingTime);
+    }
 
-	protected function decodePayload() : void{
-		$this->sendPingTime = $this->getLong();
-	}
+    protected function decodePayload(){
+        $this->sendPingTime = $this->getLong();
+    }
 }

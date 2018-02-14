@@ -19,83 +19,107 @@
  *
 */
 
-declare(strict_types=1);
-
 namespace pocketmine\permission;
 
 use pocketmine\utils\MainLogger;
 
-class BanEntry{
-	/**
-	 * @var string
-	 */
+class BanEntry {
 	public static $format = "Y-m-d H:i:s O";
 
-	/** @var string */
 	private $name;
 	/** @var \DateTime */
 	private $creationDate = null;
-	/** @var string */
 	private $source = "(Unknown)";
-	/** @var \DateTime|null */
+	/** @var \DateTime */
 	private $expirationDate = null;
-	/** @var string */
 	private $reason = "Banned by an operator.";
 
-	public function __construct(string $name){
+	/**
+	 * BanEntry constructor.
+	 *
+	 * @param $name
+	 */
+	public function __construct($name){
 		$this->name = strtolower($name);
 		$this->creationDate = new \DateTime();
 	}
 
+	/**
+	 * @return string
+	 */
 	public function getName() : string{
 		return $this->name;
 	}
 
-	public function getCreated() : \DateTime{
+	/**
+	 * @return \DateTime
+	 */
+	public function getCreated(){
 		return $this->creationDate;
 	}
 
+	/**
+	 * @param \DateTime $date
+	 */
 	public function setCreated(\DateTime $date){
 		$this->creationDate = $date;
 	}
 
-	public function getSource() : string{
+	/**
+	 * @return string
+	 */
+	public function getSource(){
 		return $this->source;
 	}
 
-	public function setSource(string $source){
+	/**
+	 * @param $source
+	 */
+	public function setSource($source){
 		$this->source = $source;
 	}
 
 	/**
-	 * @return \DateTime|null
+	 * @return \DateTime
 	 */
 	public function getExpires(){
 		return $this->expirationDate;
 	}
 
 	/**
-	 * @param \DateTime|null $date
+	 * @param \DateTime $date
 	 */
-	public function setExpires(\DateTime $date = null){
+	public function setExpires($date){
 		$this->expirationDate = $date;
 	}
 
-	public function hasExpired() : bool{
+	/**
+	 * @return bool
+	 */
+	public function hasExpired(){
 		$now = new \DateTime();
 
 		return $this->expirationDate === null ? false : $this->expirationDate < $now;
 	}
 
-	public function getReason() : string{
+	/**
+	 * @return string
+	 */
+	public function getReason(){
 		return $this->reason;
 	}
 
-	public function setReason(string $reason){
+	/**
+	 * @param $reason
+	 */
+	public function setReason($reason){
 		$this->reason = $reason;
 	}
 
-	public function getString() : string{
+	/**
+	 * @return string
+	 */
+	public function getString(){
 		$str = "";
 		$str .= $this->getName();
 		$str .= "|";
@@ -113,9 +137,9 @@ class BanEntry{
 	/**
 	 * @param string $str
 	 *
-	 * @return BanEntry|null
+	 * @return BanEntry
 	 */
-	public static function fromString(string $str){
+	public static function fromString($str){
 		if(strlen($str) < 2){
 			return null;
 		}else{

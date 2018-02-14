@@ -19,14 +19,12 @@
  *
 */
 
-declare(strict_types=1);
-
 namespace pocketmine\event;
 
 use pocketmine\plugin\Plugin;
 use pocketmine\plugin\RegisteredListener;
 
-class HandlerList{
+class HandlerList {
 
 	/**
 	 * @var RegisteredListener[]
@@ -70,6 +68,9 @@ class HandlerList{
 		}
 	}
 
+	/**
+	 * HandlerList constructor.
+	 */
 	public function __construct(){
 		$this->handlerSlots = [
 			EventPriority::LOWEST => [],
@@ -85,7 +86,7 @@ class HandlerList{
 	/**
 	 * @param RegisteredListener $listener
 	 *
-	 * @throws \Exception
+	 * @throws \Throwable
 	 */
 	public function register(RegisteredListener $listener){
 		if($listener->getPriority() < EventPriority::MONITOR or $listener->getPriority() > EventPriority::LOWEST){
@@ -98,9 +99,10 @@ class HandlerList{
 		$this->handlerSlots[$listener->getPriority()][spl_object_hash($listener)] = $listener;
 	}
 
-	/**
-	 * @param RegisteredListener[] $listeners
-	 */
+    /**
+     * @param RegisteredListener[] $listeners
+     * @throws \Throwable
+     */
 	public function registerAll(array $listeners){
 		foreach($listeners as $listener){
 			$this->register($listener);
@@ -152,7 +154,7 @@ class HandlerList{
 	 *
 	 * @return RegisteredListener[]
 	 */
-	public function getRegisteredListeners($plugin = null) : array{
+	public function getRegisteredListeners($plugin = null){
 		if($plugin !== null){
 			$listeners = [];
 			foreach($this->getRegisteredListeners(null) as $hash => $listener){
@@ -174,7 +176,7 @@ class HandlerList{
 	/**
 	 * @return HandlerList[]
 	 */
-	public static function getHandlerLists() : array{
+	public static function getHandlerLists(){
 		return self::$allLists;
 	}
 

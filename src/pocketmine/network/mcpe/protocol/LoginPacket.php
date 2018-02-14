@@ -25,127 +25,105 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
-
-use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\utils\BinaryStream;
+use pocketmine\utils\MainLogger;
+use pocketmine\utils\Utils;
 
 class LoginPacket extends DataPacket{
 	const NETWORK_ID = ProtocolInfo::LOGIN_PACKET;
 
-	const MOJANG_PUBKEY = "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8ELkixyLcwlZryUQcu1TvPOmI2B7vX83ndnWRUaXm74wFfa5f/lwQNTfrLVHa2PmenpGI6JhIMUJaWZrjmMj90NoKNFSNBuKdm8rYiXsfaz3K36x/1U26HpG0ZxK/V1V";
-
 	const EDITION_POCKET = 0;
 
-	public $username;
-	public $protocol;
-	public $clientUUID;
-	public $clientId;
-	public $identityPublicKey;
-	public $serverAddress;
+    /** @var string */
+    public $username;
+    /** @var int */
+    public $protocol;
+    /** @var string */
+    public $clientUUID;
+    /** @var int */
+    public $clientId;
+    /** @var string */
+    public $xuid;
+    /** @var string */
+    public $identityPublicKey;
+    /** @var string */
+    public $serverAddress;
+    /** @var string */
+    public $locale;
 
-	public $chainData;
-	public $clientData;
-	public $clientDataJwt;
-	public $decoded;
-
-	public $languageCode;
-
-	public $xuid = "";
+    /** @var array (the "chain" index contains one or more JWTs) */
+    public $chainData = [];
+    /** @var string */
+    public $clientDataJwt;
+    /** @var array decoded payload of the clientData JWT */
+    public $clientData = [];
 
 	public function canBeSentBeforeLogin() : bool{
 		return true;
 	}
 
-	public function decodePayload(){
-		$this->protocol = $this->getInt();
+	protected function decodePayload(){
+        $this->protocol = $this->getInt();
 
-		if($this->protocol !== ProtocolInfo::CURRENT_PROTOCOL){
-			if($this->protocol > 0xffff){
-				$this->offset -= 6;
-				$this->protocol = $this->getInt();
-			}
-			return; //Do not attempt to decode for non-accepted protocols
-		}
+        if($this->protocol !== ProtocolInfo::CURRENT_PROTOCOL){
+            if($this->protocol > 0xffff){ //guess MCPE <= 1.1
+                $this->offset -= 6;
+                $this->protocol = $this->getInt();
+            }
+        }
 
-		$this->setBuffer($this->getString(), 0);
+        try{
+            $this->decodeConnectionRequest();
+        }catch(\Throwable $e){
+            if(!in_array($this->protocol, ProtocolInfo::ACCEPTED_PROTOCOLS)){
+                throw $e;
+            }
 
-		$this->chainData = json_decode($this->get($this->getLInt()));
-		$chainKey = self::MOJANG_PUBKEY;
-		foreach($this->chainData->{"chain"} as $chain){
-			list($verified, $webtoken) = $this->decodeToken($chain, $chainKey);
-			if(isset($webtoken["extraData"])){
-				if(isset($webtoken["extraData"]["displayName"])){
-					$this->username = $webtoken["extraData"]["displayName"];
-				}
-				if(isset($webtoken["extraData"]["identity"])){
-					$this->clientUUID = $webtoken["extraData"]["identity"];
-				}
-				if(isset($webtoken["extraData"]["XUID"])){
-					$this->xuid = $webtoken["extraData"]["XUID"];
-				}
-			}
-			if($verified and isset($webtoken["identityPublicKey"])){
-				if($webtoken["identityPublicKey"] != self::MOJANG_PUBKEY){
-					$this->identityPublicKey = $webtoken["identityPublicKey"];
-				}
-			}
-		}
+            $logger = MainLogger::getLogger();
+            $logger->debug(get_class($e)  . " was thrown while decoding connection request in login (protocol version " . ($this->protocol ?? "unknown") . "): " . $e->getMessage());
+            foreach(\pocketmine\getTrace(0, $e->getTrace()) as $line){
+                $logger->debug($line);
+            }
+        }
+	}
 
-		$this->clientDataJwt = $this->get($this->getLInt());
-		$this->decoded = $this->decodeToken($this->clientDataJwt, $this->identityPublicKey);
-		$this->clientData = $this->decoded[1];
+    protected function decodeConnectionRequest(){
+        $buffer = new BinaryStream($this->getString());
 
-		$this->clientId = $this->clientData["ClientRandomId"] ?? null;
-		$this->serverAddress = $this->clientData["ServerAddress"] ?? null;
+        $this->chainData = json_decode($buffer->get($buffer->getLInt()), true);
+        foreach($this->chainData["chain"] as $chain){
+            $webtoken = Utils::decodeJWT($chain);
+            if(isset($webtoken["extraData"])){
+                if(isset($webtoken["extraData"]["displayName"])){
+                    $this->username = $webtoken["extraData"]["displayName"];
+                }
+                if(isset($webtoken["extraData"]["identity"])){
+                    $this->clientUUID = $webtoken["extraData"]["identity"];
+                }
+                if(isset($webtoken["extraData"]["XUID"])){
+                    $this->xuid = $webtoken["extraData"]["XUID"];
+                }
+            }
 
-		if(isset($this->clientData["LanguageCode"])){
-			$this->languageCode = $this->clientData["LanguageCode"];
-		}
- 	}
+            if(isset($webtoken["identityPublicKey"])){
+                $this->identityPublicKey = $webtoken["identityPublicKey"];
+            }
+        }
 
-	public function encodePayload(){
+        $this->clientDataJwt = $buffer->get($buffer->getLInt());
+        $this->clientData = Utils::decodeJWT($this->clientDataJwt);
+
+        $this->clientId = $this->clientData["ClientRandomId"] ?? null;
+        $this->serverAddress = $this->clientData["ServerAddress"] ?? null;
+
+        $this->locale = $this->clientData["LanguageCode"] ?? null;
+    }
+
+	protected function encodePayload(){
 		//TODO
 	}
 
-	public function decodeToken($token, $key = null){
-		if($key === null){
-			$tokens = explode(".", $token);
-			list($headB64, $payloadB64, $sigB64) = $tokens;
-
-			return array(false, json_decode(base64_decode($payloadB64), true));
-		}else{
-			if(extension_loaded("openssl")){
-				$tokens = explode(".", $token);
-				list($headB64, $payloadB64, $sigB64) = $tokens;
-				$sig = base64_decode(strtr($sigB64, '-_', '+/'), true);
-				$rawLen = 48; // ES384
-				for ($i = $rawLen; $i > 0 and $sig[$rawLen - $i] == chr(0); $i--) {
-				}
-				$j = $i + (ord($sig[$rawLen - $i]) >= 128 ? 1 : 0);
-				for ($k = $rawLen; $k > 0 and $sig[2 * $rawLen - $k] == chr(0); $k--) {
-				}
-				$l = $k + (ord($sig[2 * $rawLen - $k]) >= 128 ? 1 : 0);
-				$len = 2 + $j + 2 + $l;
-				$derSig = chr(48);
-				if ($len > 255) {
-					throw new \RuntimeException("Invalid signature format");
-				} elseif ($len >= 128) {
-					$derSig .= chr(81);
-				}
-				$derSig .= chr($len) . chr(2) . chr($j);
-				$derSig .= str_repeat(chr(0), $j - $i) . substr($sig, $rawLen - $i, $i);
-				$derSig .= chr(2) . chr($l);
-				$derSig .= str_repeat(chr(0), $l - $k) . substr($sig, 2 * $rawLen - $k, $k);
-				$verified = openssl_verify($headB64 . "." . $payloadB64, $derSig, "-----BEGIN PUBLIC KEY-----\n" . wordwrap($key, 64, "\n", true) . "\n-----END PUBLIC KEY-----\n", OPENSSL_ALGO_SHA384) === 1;
-			}else{
-				$tokens = explode(".", $token);
-				list($headB64, $payloadB64, $sigB64) = $tokens;
-				$verified = false;
-			}
-			return array($verified, json_decode(base64_decode($payloadB64), true));
-		}
-	}
-
-	public function handle(NetworkSession $session) : bool{
-		return $session->handleLogin($this);
-	}
+    public function mayHaveUnreadBytes() : bool{
+        return $this->protocol !== null and !in_array($this->protocol, ProtocolInfo::ACCEPTED_PROTOCOLS);
+    }
 }

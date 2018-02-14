@@ -27,7 +27,7 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\entity\Attribute;
 use pocketmine\math\Vector3;
-use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\protocol\types\EntityLink;
 
 class AddEntityPacket extends DataPacket{
 	const NETWORK_ID = ProtocolInfo::ADD_ENTITY_PACKET;
@@ -51,15 +51,15 @@ class AddEntityPacket extends DataPacket{
 	public $attributes = [];
 	/** @var array */
 	public $metadata = [];
-	/** @var array */
+	/** @var EntityLink[] */
 	public $links = [];
 
 	protected function decodePayload(){
 		$this->entityUniqueId = $this->getEntityUniqueId();
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		$this->type = $this->getUnsignedVarInt();
-		$this->position = $this->getVector3Obj();
-		$this->motion = $this->getVector3Obj();
+		$this->position = $this->getVector3();
+		$this->motion = $this->getVector3();
 		$this->pitch = $this->getLFloat();
 		$this->yaw = $this->getLFloat();
 
@@ -92,8 +92,8 @@ class AddEntityPacket extends DataPacket{
 		$this->putEntityUniqueId($this->entityUniqueId ?? $this->entityRuntimeId);
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		$this->putUnsignedVarInt($this->type);
-		$this->putVector3Obj($this->position);
-		$this->putVector3ObjNullable($this->motion);
+		$this->putVector3($this->position);
+		$this->putVector3Nullable($this->motion);
 		$this->putLFloat($this->pitch);
 		$this->putLFloat($this->yaw);
 
@@ -111,9 +111,4 @@ class AddEntityPacket extends DataPacket{
 			$this->putEntityLink($link);
 		}
 	}
-
-	public function handle(NetworkSession $session) : bool{
-		return $session->handleAddEntity($this);
-	}
-
 }

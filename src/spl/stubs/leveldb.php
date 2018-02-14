@@ -14,8 +14,6 @@ define("LEVELDB_SNAPPY_COMPRESSION", 1);
 
 define("LEVELDB_ZLIB_COMPRESSION", 2);
 
-define("LEVELDB_ZLIB_RAW_COMPRESSION", 4);
-
 
 class LevelDB{
 

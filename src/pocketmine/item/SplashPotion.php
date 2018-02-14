@@ -1,21 +1,22 @@
 <?php
 
-/**
+/*
  *
- *  ____       _                          _
- * |  _ \ _ __(_)___ _ __ ___   __ _ _ __(_)_ __   ___
- * | |_) | '__| / __| '_ ` _ \ / _` | '__| | '_ \ / _ \
- * |  __/| |  | \__ \ | | | | | (_| | |  | | | | |  __/
- * |_|   |_|  |_|___/_| |_| |_|\__,_|_|  |_|_| |_|\___|
+ *    _______                    _
+ *   |__   __|                  (_)
+ *      | |_   _ _ __ __ _ _ __  _  ___
+ *      | | | | | '__/ _` | '_ \| |/ __|
+ *      | | |_| | | | (_| | | | | | (__
+ *      |_|\__,_|_|  \__,_|_| |_|_|\___|
  *
- * Prismarine is free software: you can redistribute it and/or modify
+ *
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author Prismarine Team
- * @link   https://github.com/PrismarineMC/Prismarine
- *
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Turanic
  *
  */
 
@@ -24,15 +25,53 @@ declare(strict_types=1);
 namespace pocketmine\item;
 
 use pocketmine\entity\Entity;
+use pocketmine\math\Vector3;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\Player;
 
-class SplashPotion extends Item{
+class SplashPotion extends ProjectileItem {
 
-	public function __construct(int $meta = 0, int $count = 1){
-		parent::__construct(self::SPLASH_POTION, $meta, $count, $this->getNameByMeta($meta));
+	/**
+	 * SplashPotion constructor.
+	 *
+	 * @param int $meta
+	 */
+	public function __construct(int $meta = 0){
+		parent::__construct(self::SPLASH_POTION, $meta, $this->getNameByMeta($meta));
 	}
 
-	public function getNameByMeta(int $meta) : string{
+	/**
+	 * @return int
+	 */
+	public function getMaxStackSize() : int{
+		return 1;
+	}
+
+	/**
+	 * @param int $meta
+	 *
+	 * @return string
+	 */
+	public function getNameByMeta(int $meta){
 		return "Splash " . Potion::getNameByMeta($meta);
 	}
 
+    public function getProjectileEntityType() : string{
+        return "ThrownPotion";
+    }
+
+    public function getThrowForce() : float{
+        return 1.1;
+    }
+
+    public function onClickAir(Player $player, Vector3 $directionVector, CompoundTag $nbt = null): bool{
+        if($player->server->allowSplashPotion) {
+            if($nbt == null){
+                $nbt = Entity::createBaseNBT($player->add(0,$player->getEyeHeight(),0), $directionVector, $player->yaw, $player->pitch);
+                $nbt->setShort("PotionId", $this->getDamage());
+            }
+            return parent::onClickAir($player, $directionVector, $nbt);
+        }
+        return true;
+    }
 }

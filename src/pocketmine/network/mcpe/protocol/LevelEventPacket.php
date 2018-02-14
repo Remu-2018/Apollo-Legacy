@@ -26,7 +26,6 @@ namespace pocketmine\network\mcpe\protocol;
 #include <rules/DataPacket.h>
 
 use pocketmine\math\Vector3;
-use pocketmine\network\mcpe\NetworkSession;
 
 class LevelEventPacket extends DataPacket{
 	const NETWORK_ID = ProtocolInfo::LEVEL_EVENT_PACKET;
@@ -118,18 +117,13 @@ class LevelEventPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->evid = $this->getVarInt();
-		$this->position = $this->getVector3Obj();
+		$this->position = $this->getVector3();
 		$this->data = $this->getVarInt();
 	}
 
 	protected function encodePayload(){
 		$this->putVarInt($this->evid);
-		$this->putVector3ObjNullable($this->position);
+		$this->putVector3Nullable($this->position);
 		$this->putVarInt($this->data);
 	}
-
-	public function handle(NetworkSession $session) : bool{
-		return $session->handleLevelEvent($this);
-	}
-
 }

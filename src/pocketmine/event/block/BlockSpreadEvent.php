@@ -14,26 +14,29 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @link   http://www.pocketmine.net/
  *
  *
-*/
-
-declare(strict_types=1);
+ */
 
 namespace pocketmine\event\block;
 
 use pocketmine\block\Block;
+use pocketmine\event\Cancellable;
 
-/**
- * Called when a block spreads to another block, such as grass spreading to nearby dirt blocks.
- */
-class BlockSpreadEvent extends BlockFormEvent{
+class BlockSpreadEvent extends BlockFormEvent implements Cancellable {
 	public static $handlerList = null;
 
 	/** @var Block */
 	private $source;
 
+	/**
+	 * BlockSpreadEvent constructor.
+	 *
+	 * @param Block $block
+	 * @param Block $source
+	 * @param Block $newState
+	 */
 	public function __construct(Block $block, Block $source, Block $newState){
 		parent::__construct($block, $newState);
 		$this->source = $source;
@@ -42,7 +45,7 @@ class BlockSpreadEvent extends BlockFormEvent{
 	/**
 	 * @return Block
 	 */
-	public function getSource() : Block{
+	public function getSource(){
 		return $this->source;
 	}
 

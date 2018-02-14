@@ -19,26 +19,41 @@
  *
 */
 
-declare(strict_types=1);
-
 namespace pocketmine\utils;
 
-class UUID{
+class UUID {
 
 	private $parts = [0, 0, 0, 0];
 	private $version = null;
 
+    /**
+     * UUID constructor.
+     *
+     * @param int $part1
+     * @param int $part2
+     * @param int $part3
+     * @param int $part4
+     * @param int|null $version
+     */
 	public function __construct(int $part1 = 0, int $part2 = 0, int $part3 = 0, int $part4 = 0, int $version = null){
-		$this->parts = [$part1, $part2, $part3, $part4];
+        $this->parts = [$part1, $part2, $part3, $part4];
 
 		$this->version = $version ?? ($this->parts[1] & 0xf000) >> 12;
 	}
 
-	public function getVersion() : int{
+	/**
+	 * @return int|null
+	 */
+	public function getVersion(){
 		return $this->version;
 	}
 
-	public function equals(UUID $uuid) : bool{
+	/**
+	 * @param UUID $uuid
+	 *
+	 * @return bool
+	 */
+	public function equals(UUID $uuid):bool{
 		return $uuid->parts === $this->parts;
 	}
 
@@ -47,9 +62,10 @@ class UUID{
 	 *
 	 * @param string $uuid
 	 * @param int    $version
+	 *
 	 * @return UUID
 	 */
-	public static function fromString(string $uuid, int $version = null) : UUID{
+	public static function fromString($uuid, $version = null){
 		return self::fromBinary(hex2bin(str_replace("-", "", trim($uuid))), $version);
 	}
 
@@ -58,11 +74,10 @@ class UUID{
 	 *
 	 * @param string $uuid
 	 * @param int    $version
-	 * @return UUID
 	 *
-	 * @throws \InvalidArgumentException
+	 * @return UUID
 	 */
-	public static function fromBinary(string $uuid, int $version = null) : UUID{
+	public static function fromBinary($uuid, $version = null){
 		if(strlen($uuid) !== 16){
 			throw new \InvalidArgumentException("Must have exactly 16 bytes");
 		}
@@ -73,34 +88,50 @@ class UUID{
 	/**
 	 * Creates an UUIDv3 from binary data or list of binary data
 	 *
-	 * @param string[] ...$data
+	 * @param array|string ...$data
+	 *
 	 * @return UUID
 	 */
-	public static function fromData(string ...$data) : UUID{
+	public static function fromData(...$data){
 		$hash = hash("md5", implode($data), true);
 
 		return self::fromBinary($hash, 3);
 	}
 
-	public static function fromRandom() : UUID{
+	/**
+	 * @return UUID
+	 */
+	public static function fromRandom(){
 		return self::fromData(Binary::writeInt(time()), Binary::writeShort(getmypid()), Binary::writeShort(getmyuid()), Binary::writeInt(mt_rand(-0x7fffffff, 0x7fffffff)), Binary::writeInt(mt_rand(-0x7fffffff, 0x7fffffff)));
 	}
 
-	public function toBinary() : string{
+	/**
+	 * @return string
+	 */
+	public function toBinary(){
 		return Binary::writeInt($this->parts[0]) . Binary::writeInt($this->parts[1]) . Binary::writeInt($this->parts[2]) . Binary::writeInt($this->parts[3]);
 	}
 
-	public function toString() : string{
-		$hex = bin2hex($this->toBinary());
-
-		//xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx 8-4-4-4-12
+	/**
+	 * @return string
+	 */
+	public function toString(){
+		$hex = bin2hex(self::toBinary());
 		return substr($hex, 0, 8) . "-" . substr($hex, 8, 4) . "-" . substr($hex, 12, 4) . "-" . substr($hex, 16, 4) . "-" . substr($hex, 20, 12);
 	}
 
-	public function __toString() : string{
+	/**
+	 * @return string
+	 */
+	public function __toString(){
 		return $this->toString();
 	}
 
+	/**
+	 * @param int $partNumber
+	 *
+	 * @return mixed
+	 */
 	public function getPart(int $partNumber){
 		if($partNumber < 0 or $partNumber > 3){
 			throw new \InvalidArgumentException("Invalid UUID part index $partNumber");
@@ -108,6 +139,9 @@ class UUID{
 		return $this->parts[$partNumber];
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getParts() : array{
 		return $this->parts;
 	}

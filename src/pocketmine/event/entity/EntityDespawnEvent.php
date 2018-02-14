@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  *
  *  ____            _        _   __  __ _                  __  __ ____
  * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
@@ -14,29 +14,26 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @link   http://www.pocketmine.net/
  *
  *
-*/
-
-declare(strict_types=1);
+ */
 
 namespace pocketmine\event\entity;
 
 use pocketmine\entity\Creature;
 use pocketmine\entity\Entity;
 use pocketmine\entity\Human;
-use pocketmine\entity\Item;
+use pocketmine\entity\object\Item;
 use pocketmine\entity\Projectile;
 use pocketmine\entity\Vehicle;
 
 /**
  * Called when a entity is despawned
  */
-class EntityDespawnEvent extends EntityEvent{
+class EntityDespawnEvent extends EntityEvent {
 	public static $handlerList = null;
 
-	/** @var int */
 	private $entityType;
 
 	/**

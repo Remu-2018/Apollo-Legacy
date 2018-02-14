@@ -2,81 +2,76 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *
+ *    _______                    _
+ *   |__   __|                  (_)
+ *      | |_   _ _ __ __ _ _ __  _  ___
+ *      | | | | | '__/ _` | '_ \| |/ __|
+ *      | | |_| | | | (_| | | | | | (__
+ *      |_|\__,_|_|  \__,_|_| |_|_|\___|
+ *
+ *
+ *
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Turanic
  *
  *
 */
-
-declare(strict_types=1);
 
 namespace pocketmine;
 
 use pocketmine\event\server\LowMemoryEvent;
 use pocketmine\event\Timings;
-use pocketmine\scheduler\DumpWorkerMemoryTask;
 use pocketmine\scheduler\GarbageCollectionTask;
-use pocketmine\utils\MainLogger;
 use pocketmine\utils\Utils;
 
-class MemoryManager{
+
+class MemoryManager {
 
 	/** @var Server */
 	private $server;
 
-	/** @var int */
 	private $memoryLimit;
-	/** @var int */
 	private $globalMemoryLimit;
-	/** @var int */
 	private $checkRate;
-	/** @var int */
 	private $checkTicker = 0;
-	/** @var bool */
 	private $lowMemory = false;
 
-	/** @var bool */
 	private $continuousTrigger = true;
-	/** @var int */
 	private $continuousTriggerRate;
-	/** @var int */
 	private $continuousTriggerCount = 0;
-	/** @var int */
 	private $continuousTriggerTicker = 0;
 
-	/** @var int */
 	private $garbageCollectionPeriod;
-	/** @var int */
 	private $garbageCollectionTicker = 0;
-	/** @var bool */
 	private $garbageCollectionTrigger;
-	/** @var bool */
 	private $garbageCollectionAsync;
 
-	/** @var int */
-	private $lowMemChunkRadiusOverride;
-	/** @var bool */
-	private $lowMemChunkGC;
+	private $chunkRadiusOverride;
+	private $chunkCollect;
+	private $chunkTrigger;
 
-	/** @var bool */
-	private $lowMemDisableChunkCache;
-	/** @var bool */
-	private $lowMemClearWorldCache;
+	private $chunkCache;
+	private $cacheTrigger;
 
-	/** @var bool */
-	private $dumpWorkers = true;
+	/** @var \WeakRef[] */
+	private $leakWatch = [];
 
+	private $leakInfo = [];
+
+	private $leakSeed = 0;
+
+	/**
+	 * MemoryManager constructor.
+	 *
+	 * @param Server $server
+	 */
 	public function __construct(Server $server){
 		$this->server = $server;
 
@@ -113,7 +108,7 @@ class MemoryManager{
 		$hardLimit = ((int) $this->server->getProperty("memory.main-hard-limit", $defaultMemory));
 
 		if($hardLimit <= 0){
-			ini_set("memory_limit", '-1');
+			ini_set("memory_limit", -1);
 		}else{
 			ini_set("memory_limit", $hardLimit . "M");
 		}
@@ -127,28 +122,28 @@ class MemoryManager{
 		$this->garbageCollectionTrigger = (bool) $this->server->getProperty("memory.garbage-collection.low-memory-trigger", true);
 		$this->garbageCollectionAsync = (bool) $this->server->getProperty("memory.garbage-collection.collect-async-worker", true);
 
-		$this->lowMemChunkRadiusOverride = (int) $this->server->getProperty("memory.max-chunks.chunk-radius", 4);
-		$this->lowMemChunkGC = (bool) $this->server->getProperty("memory.max-chunks.trigger-chunk-collect", true);
+		$this->chunkRadiusOverride = (int) $this->server->getProperty("memory.max-chunks.chunk-radius", 4);
+		$this->chunkCollect = (bool) $this->server->getProperty("memory.max-chunks.trigger-chunk-collect", true);
+		$this->chunkTrigger = (bool) $this->server->getProperty("memory.max-chunks.low-memory-trigger", true);
 
-		$this->lowMemDisableChunkCache = (bool) $this->server->getProperty("memory.world-caches.disable-chunk-cache", true);
-		$this->lowMemClearWorldCache = (bool) $this->server->getProperty("memory.world-caches.low-memory-trigger", true);
+		$this->chunkCache = (bool) $this->server->getProperty("memory.world-caches.disable-chunk-cache", true);
+		$this->cacheTrigger = (bool) $this->server->getProperty("memory.world-caches.low-memory-trigger", true);
 
-		$this->dumpWorkers = (bool) $this->server->getProperty("memory.memory-dump.dump-async-worker", true);
 		gc_enable();
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function isLowMemory() : bool{
+	public function isLowMemory(){
 		return $this->lowMemory;
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function canUseChunkCache() : bool{
-		return !$this->lowMemory or !$this->lowMemDisableChunkCache;
+	public function canUseChunkCache(){
+		return !($this->lowMemory and $this->chunkTrigger);
 	}
 
 	/**
@@ -159,27 +154,25 @@ class MemoryManager{
 	 * @return int
 	 */
 	public function getViewDistance(int $distance) : int{
-		return ($this->lowMemory and $this->lowMemChunkRadiusOverride > 0) ? (int) min($this->lowMemChunkRadiusOverride, $distance) : $distance;
+		return $this->lowMemory ? min($this->chunkRadiusOverride, $distance) : $distance;
 	}
 
 	/**
-	 * Triggers garbage collection and cache cleanup to try and free memory.
-	 *
-	 * @param int  $memory
-	 * @param int  $limit
+	 * @param      $memory
+	 * @param      $limit
 	 * @param bool $global
 	 * @param int  $triggerCount
 	 */
-	public function trigger(int $memory, int $limit, bool $global = false, int $triggerCount = 0){
-		$this->server->getLogger()->debug(sprintf("[Memory Manager] %sLow memory triggered, limit %gMB, using %gMB",
-			$global ? "Global " : "", round(($limit / 1024) / 1024, 2), round(($memory / 1024) / 1024, 2)));
-		if($this->lowMemClearWorldCache){
+	public function trigger($memory, $limit, $global = false, $triggerCount = 0){
+		$this->server->getLogger()->debug("[Memory Manager] " . ($global ? "Global " : "") . "Low memory triggered, limit " . round(($limit / 1024) / 1024, 2) . "MB, using " . round(($memory / 1024) / 1024, 2) . "MB");
+
+		if($this->cacheTrigger){
 			foreach($this->server->getLevels() as $level){
 				$level->clearCache(true);
 			}
 		}
 
-		if($this->lowMemChunkGC){
+		if($this->chunkTrigger and $this->chunkCollect){
 			foreach($this->server->getLevels() as $level){
 				$level->doChunkGarbageCollection();
 			}
@@ -193,12 +186,9 @@ class MemoryManager{
 			$cycles = $this->triggerGarbageCollector();
 		}
 
-		$this->server->getLogger()->debug(sprintf("[Memory Manager] Freed %gMB, $cycles cycles", round(($ev->getMemoryFreed() / 1024) / 1024, 2)));
+		$this->server->getLogger()->debug("[Memory Manager] Freed " . round(($ev->getMemoryFreed() / 1024) / 1024, 2) . "MB, $cycles cycles");
 	}
 
-	/**
-	 * Called every tick to update the memory manager state.
-	 */
 	public function check(){
 		Timings::$memoryManagerTimer->startTiming();
 
@@ -239,7 +229,7 @@ class MemoryManager{
 	/**
 	 * @return int
 	 */
-	public function triggerGarbageCollector() : int{
+	public function triggerGarbageCollector(){
 		Timings::$garbageCollectorTimer->startTiming();
 
 		if($this->garbageCollectionAsync){
@@ -251,49 +241,126 @@ class MemoryManager{
 
 		$cycles = gc_collect_cycles();
 
+		foreach($this->server->getLevels() as $level){
+			$level->doChunkGarbageCollection();
+		}
+
 		Timings::$garbageCollectorTimer->stopTiming();
 
 		return $cycles;
 	}
 
 	/**
-	 * Dumps the server memory into the specified output folder.
+	 * @param object $object
 	 *
-	 * @param string $outputFolder
-	 * @param int    $maxNesting
-	 * @param int    $maxStringSize
+	 * @return string Object identifier for future checks
 	 */
-	public function dumpServerMemory(string $outputFolder, int $maxNesting, int $maxStringSize){
-		MainLogger::getLogger()->notice("[Dump] After the memory dump is done, the server might crash");
-		self::dumpMemory($this->server, $this->server->getLoader(), $outputFolder, $maxNesting, $maxStringSize);
+	public function addObjectWatcher($object){
+		if(!is_object($object)){
+			throw new \InvalidArgumentException("Not an object!");
+		}
 
-		if($this->dumpWorkers){
-			$scheduler = $this->server->getScheduler();
-			for($i = 0, $size = $scheduler->getAsyncTaskPoolSize(); $i < $size; ++$i){
-				$scheduler->scheduleAsyncTaskToWorker(new DumpWorkerMemoryTask($outputFolder, $maxNesting, $maxStringSize), $i);
+
+		$identifier = spl_object_hash($object) . ":" . get_class($object);
+
+		if(isset($this->leakInfo[$identifier])){
+			return $this->leakInfo["id"];
+		}
+
+		$this->leakInfo[$identifier] = [
+			"id" => $id = md5($identifier . ":" . $this->leakSeed++),
+			"class" => get_class($object),
+			"hash" => $identifier
+		];
+		$this->leakInfo[$id] = $this->leakInfo[$identifier];
+
+		$this->leakWatch[$id] = new \WeakRef($object);
+
+		return $id;
+	}
+
+	/**
+	 * @param $id
+	 *
+	 * @return bool
+	 */
+	public function isObjectAlive($id){
+		if(isset($this->leakWatch[$id])){
+			return $this->leakWatch[$id]->valid();
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param $id
+	 */
+	public function removeObjectWatch($id){
+		if(!isset($this->leakWatch[$id])){
+			return;
+		}
+		unset($this->leakInfo[$this->leakInfo[$id]["hash"]]);
+		unset($this->leakInfo[$id]);
+		unset($this->leakWatch[$id]);
+	}
+
+	public function doObjectCleanup(){
+		foreach($this->leakWatch as $id => $w){
+			if(!$w->valid()){
+				$this->removeObjectWatch($id);
 			}
 		}
 	}
 
 	/**
-	 * Static memory dumper accessible from any thread.
+	 * @param      $id
+	 * @param bool $includeObject
 	 *
-	 * @param mixed        $startingObject
-	 * @param \ClassLoader $loader
-	 * @param string       $outputFolder
-	 * @param int          $maxNesting
-	 * @param int          $maxStringSize
+	 * @return array|null
 	 */
-	public static function dumpMemory($startingObject, \ClassLoader $loader, string $outputFolder, int $maxNesting, int $maxStringSize){
-		$hardLimit = ini_get('memory_limit');
-		ini_set('memory_limit', '-1');
-		gc_disable();
+	public function getObjectInformation($id, $includeObject = false){
+		if(!isset($this->leakWatch[$id])){
+			return null;
+		}
 
+		$valid = false;
+		$references = 0;
+		$object = null;
+
+		if($this->leakWatch[$id]->acquire()){
+			$object = $this->leakWatch[$id]->get();
+			$this->leakWatch[$id]->release();
+
+			$valid = true;
+			$references = getReferenceCount($object, false);
+		}
+
+		return [
+			"id" => $id,
+			"class" => $this->leakInfo[$id]["class"],
+			"hash" => $this->leakInfo[$id]["hash"],
+			"valid" => $valid,
+			"references" => $references,
+			"object" => $includeObject ? $object : null
+		];
+	}
+
+	/**
+	 * @param $outputFolder
+	 * @param $maxNesting
+	 * @param $maxStringSize
+	 */
+	public function dumpServerMemory($outputFolder, $maxNesting, $maxStringSize){
+		gc_disable();
+		ini_set("memory_limit", -1);
 		if(!file_exists($outputFolder)){
 			mkdir($outputFolder, 0777, true);
 		}
+		$this->server->getLogger()->notice("[Dump] After the memory dump is done, the server will shut down");
 
 		$obData = fopen($outputFolder . "/objects.js", "wb+");
+
+		$staticProperties = [];
 
 		$data = [];
 
@@ -301,65 +368,7 @@ class MemoryManager{
 
 		$refCounts = [];
 
-		$instanceCounts = [];
-
-		$staticProperties = [];
-		$staticCount = 0;
-
-		foreach($loader->getClasses() as $className){
-			$reflection = new \ReflectionClass($className);
-			$staticProperties[$className] = [];
-			foreach($reflection->getProperties() as $property){
-				if(!$property->isStatic() or $property->getDeclaringClass()->getName() !== $className){
-					continue;
-				}
-
-				if(!$property->isPublic()){
-					$property->setAccessible(true);
-				}
-
-				$staticCount++;
-				self::continueDump($property->getValue(), $staticProperties[$className][$property->getName()], $objects, $refCounts, 0, $maxNesting, $maxStringSize);
-			}
-
-			if(count($staticProperties[$className]) === 0){
-				unset($staticProperties[$className]);
-			}
-		}
-
-		file_put_contents($outputFolder . "/staticProperties.js", json_encode($staticProperties, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
-		MainLogger::getLogger()->info("[Dump] Wrote $staticCount static properties");
-
-		if($GLOBALS !== null){ //This might be null if we're on a different thread
-			$globalVariables = [];
-			$globalCount = 0;
-
-			$ignoredGlobals = [
-				'GLOBALS' => true,
-				'_SERVER' => true,
-				'_REQUEST' => true,
-				'_POST' => true,
-				'_GET' => true,
-				'_FILES' => true,
-				'_ENV' => true,
-				'_COOKIE' => true,
-				'_SESSION' => true
-			];
-
-			foreach($GLOBALS as $varName => $value){
-				if(isset($ignoredGlobals[$varName])){
-					continue;
-				}
-
-				$globalCount++;
-				self::continueDump($value, $globalVariables[$varName], $objects, $refCounts, 0, $maxNesting, $maxStringSize);
-			}
-
-			file_put_contents($outputFolder . "/globalVariables.js", json_encode($globalVariables, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
-			MainLogger::getLogger()->info("[Dump] Wrote $globalCount global variables");
-		}
-
-		self::continueDump($startingObject, $data, $objects, $refCounts, 0, $maxNesting, $maxStringSize);
+		$this->continueDump($this->server, $data, $objects, $refCounts, 0, $maxNesting, $maxStringSize);
 
 		do{
 			$continue = false;
@@ -370,11 +379,6 @@ class MemoryManager{
 				$continue = true;
 
 				$className = get_class($object);
-				if(!isset($instanceCounts[$className])){
-					$instanceCounts[$className] = 1;
-				}else{
-					$instanceCounts[$className]++;
-				}
 
 				$objects[$hash] = true;
 
@@ -401,41 +405,50 @@ class MemoryManager{
 					if(!$property->isPublic()){
 						$property->setAccessible(true);
 					}
-					self::continueDump($property->getValue($object), $info["properties"][$property->getName()], $objects, $refCounts, 0, $maxNesting, $maxStringSize);
+					$this->continueDump($property->getValue($object), $info["properties"][$property->getName()], $objects, $refCounts, 0, $maxNesting, $maxStringSize);
 				}
 
 				fwrite($obData, "$hash@$className: " . json_encode($info, JSON_UNESCAPED_SLASHES) . "\n");
+
+				if(!isset($objects["staticProperties"][$className])){
+					$staticProperties[$className] = [];
+					foreach($reflection->getProperties() as $property){
+						if(!$property->isStatic() or $property->getDeclaringClass()->getName() !== $className){
+							continue;
+						}
+
+						if(!$property->isPublic()){
+							$property->setAccessible(true);
+						}
+						$this->continueDump($property->getValue($object), $staticProperties[$className][$property->getName()], $objects, $refCounts, 0, $maxNesting, $maxStringSize);
+					}
+				}
 			}
 
-
+			echo "[Dump] Wrote " . count($objects) . " objects\n";
 		}while($continue);
-
-		MainLogger::getLogger()->info("[Dump] Wrote " . count($objects) . " objects");
 
 		fclose($obData);
 
+		file_put_contents($outputFolder . "/staticProperties.js", json_encode($staticProperties, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
 		file_put_contents($outputFolder . "/serverEntry.js", json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
 		file_put_contents($outputFolder . "/referenceCounts.js", json_encode($refCounts, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
 
-		arsort($instanceCounts, SORT_NUMERIC);
-		file_put_contents($outputFolder . "/instanceCounts.js", json_encode($instanceCounts, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+		echo "[Dump] Finished!\n";
 
-		MainLogger::getLogger()->info("[Dump] Finished!");
-
-		ini_set('memory_limit', $hardLimit);
 		gc_enable();
 	}
 
 	/**
-	 * @param mixed    $from
-	 * @param mixed    &$data
-	 * @param object[] &$objects
-	 * @param int[]    &$refCounts
-	 * @param int      $recursion
-	 * @param int      $maxNesting
-	 * @param int      $maxStringSize
+	 * @param $from
+	 * @param $data
+	 * @param $objects
+	 * @param $refCounts
+	 * @param $recursion
+	 * @param $maxNesting
+	 * @param $maxStringSize
 	 */
-	private static function continueDump($from, &$data, array &$objects, array &$refCounts, int $recursion, int $maxNesting, int $maxStringSize){
+	private function continueDump($from, &$data, &$objects, &$refCounts, $recursion, $maxNesting, $maxStringSize){
 		if($maxNesting <= 0){
 			$data = "(error) NESTING LIMIT REACHED";
 			return;
@@ -459,10 +472,10 @@ class MemoryManager{
 			}
 			$data = [];
 			foreach($from as $key => $value){
-				self::continueDump($value, $data[$key], $objects, $refCounts, $recursion + 1, $maxNesting, $maxStringSize);
+				$this->continueDump($value, $data[$key], $objects, $refCounts, $recursion + 1, $maxNesting, $maxStringSize);
 			}
 		}elseif(is_string($from)){
-			$data = "(string) len(". strlen($from) .") " . substr(Utils::printable($from), 0, $maxStringSize);
+			$data = "(string) len(" . strlen($from) . ") " . substr(Utils::printable($from), 0, $maxStringSize);
 		}elseif(is_resource($from)){
 			$data = "(resource) " . print_r($from, true);
 		}else{

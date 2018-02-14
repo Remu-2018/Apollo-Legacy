@@ -2,19 +2,22 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *
+ *    _______                    _
+ *   |__   __|                  (_)
+ *      | |_   _ _ __ __ _ _ __  _  ___
+ *      | | | | | '__/ _` | '_ \| |/ __|
+ *      | | |_| | | | (_| | | | | | (__
+ *      |_|\__,_|_|  \__,_|_| |_|_|\___|
+ *
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Turanic
  *
  *
 */
@@ -23,10 +26,10 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\item\TieredTool;
 use pocketmine\item\Item;
-use pocketmine\item\Tool;
 
-class Stone extends Solid{
+class Stone extends Solid {
 	const NORMAL = 0;
 	const GRANITE = 1;
 	const POLISHED_GRANITE = 2;
@@ -46,8 +49,12 @@ class Stone extends Solid{
 	}
 
 	public function getToolType() : int{
-		return Tool::TYPE_PICKAXE;
+		return BlockToolType::TYPE_PICKAXE;
 	}
+
+    public function getToolHarvestLevel() : int{
+        return TieredTool::TIER_WOODEN;
+    }
 
 	public function getName() : string{
 		static $names = [
@@ -59,21 +66,16 @@ class Stone extends Solid{
 			self::ANDESITE => "Andesite",
 			self::POLISHED_ANDESITE => "Polished Andesite"
 		];
-		return $names[$this->meta & 0x07] ?? "Unknown";
+		return $names[$this->getVariant()] ?? "Unknown";
 	}
 
-	public function getDrops(Item $item) : array{
-		if($item->isPickaxe() >= Tool::TIER_WOODEN){
-			if($this->getDamage() === self::NORMAL){
-				return [
-					Item::get(Item::COBBLESTONE, $this->getDamage(), 1)
-				];
-			}
+    public function getDropsForCompatibleTool(Item $item) : array{
+        if($this->getDamage() === self::NORMAL){
+            return [
+                Item::get(Item::COBBLESTONE, $this->getDamage())
+            ];
+        }
 
-			return parent::getDrops($item);
-		}
-
-		return [];
-	}
-
+        return parent::getDropsForCompatibleTool($item);
+    }
 }

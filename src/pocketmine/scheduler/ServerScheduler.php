@@ -19,8 +19,6 @@
  *
 */
 
-declare(strict_types=1);
-
 /**
  * Task scheduling related classes
  */
@@ -32,7 +30,7 @@ use pocketmine\plugin\PluginException;
 use pocketmine\Server;
 use pocketmine\utils\ReversePriorityQueue;
 
-class ServerScheduler{
+class ServerScheduler {
 	public static $WORKERS = 2;
 	/**
 	 * @var ReversePriorityQueue<Task>
@@ -53,13 +51,12 @@ class ServerScheduler{
 	/** @var int */
 	protected $currentTick = 0;
 
-	/** @var \SplObjectStorage<AsyncTask, object|array> */
-	protected $objectStore;
-
+	/**
+	 * ServerScheduler constructor.
+	 */
 	public function __construct(){
 		$this->queue = new ReversePriorityQueue();
 		$this->asyncPool = new AsyncPool(Server::getInstance(), self::$WORKERS);
-		$this->objectStore = new \SplObjectStorage();
 	}
 
 	/**
@@ -76,16 +73,12 @@ class ServerScheduler{
 	 *
 	 * @param AsyncTask $task
 	 *
-	 * @return int
+	 * @return void
 	 */
-	public function scheduleAsyncTask(AsyncTask $task) : int{
-		if($task->getTaskId() !== null){
-			throw new \UnexpectedValueException("Attempt to schedule the same AsyncTask instance twice");
-		}
+	public function scheduleAsyncTask(AsyncTask $task){
 		$id = $this->nextId();
 		$task->setTaskId($id);
-		$task->progressUpdates = new \Threaded;
-		return $this->asyncPool->submitTask($task);
+		$this->asyncPool->submitTask($task);
 	}
 
 	/**
@@ -96,96 +89,23 @@ class ServerScheduler{
 	 *
 	 * @return void
 	 */
-	public function scheduleAsyncTaskToWorker(AsyncTask $task, int $worker){
-		if($task->getTaskId() !== null){
-			throw new \UnexpectedValueException("Attempt to schedule the same AsyncTask instance twice");
-		}
+	public function scheduleAsyncTaskToWorker(AsyncTask $task, $worker){
 		$id = $this->nextId();
 		$task->setTaskId($id);
-		$task->progressUpdates = new \Threaded;
 		$this->asyncPool->submitTaskToWorker($task, $worker);
 	}
 
 	/**
-	 * Stores any data that must not be passed to other threads or be serialized
-	 *
-	 * @internal Only call from AsyncTask.php
-	 *
-	 * @param AsyncTask    $for
-	 * @param object|array $cmplx
-	 *
-	 * @throws \RuntimeException if this method is called twice for the same instance of AsyncTask
+	 * @return int
 	 */
-	public function storeLocalComplex(AsyncTask $for, $cmplx){
-		if(isset($this->objectStore[$for])){
-			throw new \RuntimeException("Already storing a complex for this AsyncTask");
-		}
-		$this->objectStore[$for] = $cmplx;
-	}
-
-	/**
-	 * Fetches data that must not be passed to other threads or be serialized, previously stored with
-	 * {@link ServerScheduler#storeLocalComplex}, without deletion of the data.
-	 *
-	 * @internal Only call from AsyncTask.php
-	 *
-	 * @param AsyncTask $for
-	 *
-	 * @return object|array
-	 *
-	 * @throws \RuntimeException if no data associated with this AsyncTask can be found
-	 */
-	public function peekLocalComplex(AsyncTask $for){
-		if(!isset($this->objectStore[$for])){
-			throw new \RuntimeException("No local complex stored for this AsyncTask");
-		}
-		return $this->objectStore[$for];
-	}
-
-	/**
-	 * Fetches data that must not be passed to other threads or be serialized, previously stored with
-	 * {@link ServerScheduler#storeLocalComplex}, and delete the data from the storage.
-	 *
-	 * @internal Only call from AsyncTask.php
-	 *
-	 * @param AsyncTask $for
-	 *
-	 * @return object|array
-	 *
-	 * @throws \RuntimeException if no data associated with this AsyncTask can be found
-	 */
-	public function fetchLocalComplex(AsyncTask $for){
-		if(!isset($this->objectStore[$for])){
-			throw new \RuntimeException("No local complex stored for this AsyncTask");
-		}
-		$cmplx = $this->objectStore[$for];
-		unset($this->objectStore[$for]);
-		return $cmplx;
-	}
-
-	/**
-	 * Makes sure no data stored from {@link #storeLocalComplex} is left for a specific AsyncTask
-	 *
-	 * @internal Only call from AsyncTask.php
-	 *
-	 * @param AsyncTask $for
-	 *
-	 * @return bool returns false if any data are removed from this call, true otherwise
-	 */
-	public function removeLocalComplex(AsyncTask $for) : bool{
-		if(isset($this->objectStore[$for])){
-			Server::getInstance()->getLogger()->notice("AsyncTask " . get_class($for) . " stored local complex data but did not remove them after completion");
-			unset($this->objectStore[$for]);
-			return false;
-		}
-		return true;
-	}
-
-	public function getAsyncTaskPoolSize() : int{
+	public function getAsyncTaskPoolSize(){
 		return $this->asyncPool->getSize();
 	}
 
-	public function increaseAsyncTaskPoolSize(int $newSize){
+	/**
+	 * @param $newSize
+	 */
+	public function increaseAsyncTaskPoolSize($newSize){
 		$this->asyncPool->increaseSize($newSize);
 	}
 
@@ -195,8 +115,8 @@ class ServerScheduler{
 	 *
 	 * @return null|TaskHandler
 	 */
-	public function scheduleDelayedTask(Task $task, int $delay){
-		return $this->addTask($task, $delay, -1);
+	public function scheduleDelayedTask(Task $task, $delay){
+		return $this->addTask($task, (int) $delay, -1);
 	}
 
 	/**
@@ -205,8 +125,8 @@ class ServerScheduler{
 	 *
 	 * @return null|TaskHandler
 	 */
-	public function scheduleRepeatingTask(Task $task, int $period){
-		return $this->addTask($task, -1, $period);
+	public function scheduleRepeatingTask(Task $task, $period){
+		return $this->addTask($task, -1, (int) $period);
 	}
 
 	/**
@@ -216,14 +136,14 @@ class ServerScheduler{
 	 *
 	 * @return null|TaskHandler
 	 */
-	public function scheduleDelayedRepeatingTask(Task $task, int $delay, int $period){
-		return $this->addTask($task, $delay, $period);
+	public function scheduleDelayedRepeatingTask(Task $task, $delay, $period){
+		return $this->addTask($task, (int) $delay, (int) $period);
 	}
 
 	/**
 	 * @param int $taskId
 	 */
-	public function cancelTask(int $taskId){
+	public function cancelTask($taskId){
 		if($taskId !== null and isset($this->tasks[$taskId])){
 			$this->tasks[$taskId]->cancel();
 			unset($this->tasks[$taskId]);
@@ -260,20 +180,20 @@ class ServerScheduler{
 	 *
 	 * @return bool
 	 */
-	public function isQueued(int $taskId) : bool{
+	public function isQueued($taskId){
 		return isset($this->tasks[$taskId]);
 	}
 
 	/**
 	 * @param Task $task
-	 * @param int  $delay
-	 * @param int  $period
+	 * @param      $delay
+	 * @param      $period
 	 *
 	 * @return null|TaskHandler
 	 *
 	 * @throws PluginException
 	 */
-	private function addTask(Task $task, int $delay, int $period){
+	private function addTask(Task $task, $delay, $period){
 		if($task instanceof PluginTask){
 			if(!($task->getOwner() instanceof Plugin)){
 				throw new PluginException("Invalid owner of PluginTask " . get_class($task));
@@ -295,7 +215,12 @@ class ServerScheduler{
 		return $this->handle(new TaskHandler(get_class($task), $task, $this->nextId(), $delay, $period));
 	}
 
-	private function handle(TaskHandler $handler) : TaskHandler{
+	/**
+	 * @param TaskHandler $handler
+	 *
+	 * @return TaskHandler
+	 */
+	private function handle(TaskHandler $handler){
 		if($handler->isDelayed()){
 			$nextRun = $this->currentTick + $handler->getDelay();
 		}else{
@@ -312,7 +237,7 @@ class ServerScheduler{
 	/**
 	 * @param int $currentTick
 	 */
-	public function mainThreadHeartbeat(int $currentTick){
+	public function mainThreadHeartbeat($currentTick){
 		$this->currentTick = $currentTick;
 		while($this->isReady($this->currentTick)){
 			/** @var TaskHandler $task */
@@ -342,14 +267,19 @@ class ServerScheduler{
 		$this->asyncPool->collectTasks();
 	}
 
-	private function isReady(int $currentTicks) : bool{
+	/**
+	 * @param $currentTicks
+	 *
+	 * @return bool
+	 */
+	private function isReady($currentTicks){
 		return count($this->tasks) > 0 and $this->queue->current()->getNextRun() <= $currentTicks;
 	}
 
 	/**
 	 * @return int
 	 */
-	private function nextId() : int{
+	private function nextId(){
 		return $this->ids++;
 	}
 

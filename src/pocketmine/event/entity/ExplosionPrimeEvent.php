@@ -2,22 +2,23 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *    _______                    _
+ *   |__   __|                  (_)
+ *      | |_   _ _ __ __ _ _ __  _  ___
+ *      | | | | | '__/ _` | '_ \| |/ __|
+ *      | | |_| | | | (_| | | | | | (__
+ *      |_|\__,_|_|  \__,_|_| |_|_|\___|
+ *
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Turanic
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
@@ -29,45 +30,67 @@ use pocketmine\event\Cancellable;
 /**
  * Called when a entity decides to explode
  */
-class ExplosionPrimeEvent extends EntityEvent implements Cancellable{
+class ExplosionPrimeEvent extends EntityEvent implements Cancellable {
 	public static $handlerList = null;
 
+	/** @var float */
 	protected $force;
-	private $blockBreaking;
+	/** @var bool */
+	private $blockBreaking = true;
+	/** @var bool */
+	private $dropItem;
 
 	/**
 	 * @param Entity $entity
 	 * @param float  $force
+	 * @param bool   $dropItem
 	 */
-	public function __construct(Entity $entity, $force){
+	public function __construct(Entity $entity, float $force, bool $dropItem = true){
 		$this->entity = $entity;
 		$this->force = $force;
-		$this->blockBreaking = true;
+		$this->dropItem = $dropItem;
 	}
 
 	/**
-	 * @return float
+	 * @param bool $dropItem
 	 */
-	public function getForce(){
-		return $this->force;
-	}
-
-	public function setForce($force){
-		$this->force = (float) $force;
+	public function setDropItem(bool $dropItem){
+		$this->dropItem = $dropItem;
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function isBlockBreaking(){
+	public function dropItem() : bool{
+		return $this->dropItem;
+	}
+
+	/**
+	 * @return float
+	 */
+	public function getForce() : float{
+		return $this->force;
+	}
+
+	/**
+	 * @param $force
+	 */
+	public function setForce(float $force){
+		$this->force = $force;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isBlockBreaking() : bool{
 		return $this->blockBreaking;
 	}
 
 	/**
 	 * @param bool $affectsBlocks
 	 */
-	public function setBlockBreaking($affectsBlocks){
-		$this->blockBreaking = (bool) $affectsBlocks;
+	public function setBlockBreaking(bool $affectsBlocks){
+		$this->blockBreaking = $affectsBlocks;
 	}
 
 }

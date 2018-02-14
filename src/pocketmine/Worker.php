@@ -2,41 +2,50 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *
+ *    _______                    _
+ *   |__   __|                  (_)
+ *      | |_   _ _ __ __ _ _ __  _  ___
+ *      | | | | | '__/ _` | '_ \| |/ __|
+ *      | | |_| | | | (_| | | | | | (__
+ *      |_|\__,_|_|  \__,_|_| |_|_|\___|
+ *
+ *
+ *
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Turanic
  *
  *
 */
-
-declare(strict_types=1);
 
 namespace pocketmine;
 
 /**
  * This class must be extended by all custom threading classes
  */
-abstract class Worker extends \Worker{
+abstract class Worker extends \Worker {
 
 	/** @var \ClassLoader */
 	protected $classLoader;
 
 	protected $isKilled = false;
 
+	/**
+	 * @return \ClassLoader
+	 */
 	public function getClassLoader(){
 		return $this->classLoader;
 	}
 
+	/**
+	 * @param \ClassLoader|null $loader
+	 */
 	public function setClassLoader(\ClassLoader $loader = null){
 		if($loader === null){
 			$loader = Server::getInstance()->getLoader();
@@ -44,25 +53,18 @@ abstract class Worker extends \Worker{
 		$this->classLoader = $loader;
 	}
 
-	/**
-	 * Registers the class loader for this thread.
-	 *
-	 * WARNING: This method MUST be called from any descendent threads' run() method to make autoloading usable.
-	 * If you do not do this, you will not be able to use new classes that were not loaded when the thread was started
-	 * (unless you are using a custom autoloader).
-	 */
 	public function registerClassLoader(){
-		//require(\pocketmine\PATH . "vendor/autoload.php");
-		if(!interface_exists("ClassLoader", true)){
-			require(\pocketmine\PATH . "src/spl/ClassLoader.php");
-			require(\pocketmine\PATH . "src/spl/BaseClassLoader.php");
-		}
 		if($this->classLoader !== null){
-			$this->classLoader->register(false);
+			$this->classLoader->register(true);
 		}
 	}
 
-	public function start(?int $options = \PTHREADS_INHERIT_ALL){
+	/**
+	 * @param int $options
+	 *
+	 * @return bool
+	 */
+	public function start(int $options = \PTHREADS_INHERIT_ALL){
 		ThreadManager::getInstance()->add($this);
 
 		if(!$this->isRunning() and !$this->isJoined() and !$this->isTerminated()){
@@ -96,7 +98,10 @@ abstract class Worker extends \Worker{
 		ThreadManager::getInstance()->remove($this);
 	}
 
-	public function getThreadName() : string{
+	/**
+	 * @return string
+	 */
+	public function getThreadName(){
 		return (new \ReflectionClass($this))->getShortName();
 	}
 }

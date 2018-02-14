@@ -2,22 +2,23 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *    _______                    _
+ *   |__   __|                  (_)
+ *      | |_   _ _ __ __ _ _ __  _  ___
+ *      | | | | | '__/ _` | '_ \| |/ __|
+ *      | | |_| | | | (_| | | | | | (__
+ *      |_|\__,_|_|  \__,_|_| |_|_|\___|
+ *
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Turanic
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
@@ -33,19 +34,19 @@ use pocketmine\entity\Living;
 class EntityDamageByEntityEvent extends EntityDamageEvent{
 
 	/** @var int */
-	private $damagerEid;
+	private $damagerEntityId;
 	/** @var float */
 	private $knockBack;
 
 	/**
-	 * @param Entity    $damager
-	 * @param Entity    $entity
-	 * @param int       $cause
-	 * @param int|int[] $damage
-	 * @param float     $knockBack
+	 * @param Entity        $damager
+	 * @param Entity        $entity
+	 * @param int           $cause
+	 * @param float|float[] $damage
+	 * @param float         $knockBack
 	 */
-	public function __construct(Entity $damager, Entity $entity, $cause, $damage, $knockBack = 0.4){
-		$this->damagerEid = $damager->getId();
+	public function __construct(Entity $damager, Entity $entity, int $cause, $damage, float $knockBack = 0.4){
+		$this->damagerEntityId = $damager->getId();
 		$this->knockBack = $knockBack;
 		parent::__construct($entity, $cause, $damage);
 		$this->addAttackerModifiers($damager);
@@ -69,20 +70,20 @@ class EntityDamageByEntityEvent extends EntityDamageEvent{
 	 * @return Entity|null
 	 */
 	public function getDamager(){
-		return $this->getEntity()->getLevel()->getServer()->findEntity($this->damagerEid, $this->getEntity()->getLevel());
+		return $this->getEntity()->getLevel()->getServer()->findEntity($this->damagerEntityId, $this->getEntity()->getLevel());
 	}
 
 	/**
 	 * @return float
 	 */
-	public function getKnockBack(){
+	public function getKnockBack() : float{
 		return $this->knockBack;
 	}
 
 	/**
 	 * @param float $knockBack
 	 */
-	public function setKnockBack($knockBack){
+	public function setKnockBack(float $knockBack){
 		$this->knockBack = $knockBack;
 	}
 }

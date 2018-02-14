@@ -2,28 +2,29 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *    _______                    _
+ *   |__   __|                  (_)
+ *      | |_   _ _ __ __ _ _ __  _  ___
+ *      | | | | | '__/ _` | '_ \| |/ __|
+ *      | | |_| | | | (_| | | | | | (__
+ *      |_|\__,_|_|  \__,_|_| |_|_|\___|
+ *
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Turanic
  *
- *
-*/
-
-declare(strict_types=1);
+ */
 
 namespace pocketmine\entity;
 
-class Attribute{
+use pocketmine\Server;
+
+class Attribute {
 
 	const ABSORPTION = 0;
 	const SATURATION = 1;
@@ -53,8 +54,8 @@ class Attribute{
 
 	public static function init(){
 		self::addAttribute(self::ABSORPTION, "minecraft:absorption", 0.00, 340282346638528859811704183484516925440.00, 0.00);
-		self::addAttribute(self::SATURATION, "minecraft:player.saturation", 0.00, 20.00, 20.00);
-		self::addAttribute(self::EXHAUSTION, "minecraft:player.exhaustion", 0.00, 5.00, 0.0);
+		self::addAttribute(self::SATURATION, "minecraft:player.saturation", 0.00, 20.00, 5.00);
+		self::addAttribute(self::EXHAUSTION, "minecraft:player.exhaustion", 0.00, 5.00, 0.41);
 		self::addAttribute(self::KNOCKBACK_RESISTANCE, "minecraft:knockback_resistance", 0.00, 1.00, 0.00);
 		self::addAttribute(self::HEALTH, "minecraft:health", 0.00, 20.00, 20.00);
 		self::addAttribute(self::MOVEMENT_SPEED, "minecraft:movement", 0.00, 340282346638528859811704183484516925440.00, 0.10);
@@ -64,7 +65,6 @@ class Attribute{
 		self::addAttribute(self::EXPERIENCE_LEVEL, "minecraft:player.level", 0.00, 24791.00, 0.00);
 		self::addAttribute(self::EXPERIENCE, "minecraft:player.experience", 0.00, 1.00, 0.00);
 		//TODO: minecraft:luck (for fishing?)
-		//TODO: minecraft:fall_damage
 	}
 
 	/**
@@ -76,33 +76,31 @@ class Attribute{
 	 * @param bool   $shouldSend
 	 *
 	 * @return Attribute
-	 *
-	 * @throws \InvalidArgumentException
 	 */
-	public static function addAttribute(int $id, string $name, float $minValue, float $maxValue, float $defaultValue, bool $shouldSend = true) : Attribute{
+	public static function addAttribute($id, $name, $minValue, $maxValue, $defaultValue, $shouldSend = true){
 		if($minValue > $maxValue or $defaultValue > $maxValue or $defaultValue < $minValue){
 			throw new \InvalidArgumentException("Invalid ranges: min value: $minValue, max value: $maxValue, $defaultValue: $defaultValue");
 		}
 
-		return self::$attributes[$id] = new Attribute($id, $name, $minValue, $maxValue, $defaultValue, $shouldSend);
+		return self::$attributes[(int) $id] = new Attribute($id, $name, $minValue, $maxValue, $defaultValue, $shouldSend);
 	}
 
 	/**
-	 * @param int $id
+	 * @param $id
 	 *
-	 * @return Attribute|null
+	 * @return null|Attribute
 	 */
-	public static function getAttribute(int $id){
-		return isset(self::$attributes[$id]) ? clone self::$attributes[$id] : null;
+	public static function getAttribute($id){
+        return isset(self::$attributes[$id]) ? clone self::$attributes[$id] : null;
 	}
 
 	/**
-	 * @param string $name
+	 * @param $name
 	 *
-	 * @return Attribute|null
+	 * @return null|Attribute
 	 */
-	public static function getAttributeByName(string $name){
-		foreach(self::$attributes as $a){
+	public static function getAttributeByName($name){
+        foreach(self::$attributes as $a){
 			if($a->getName() === $name){
 				return clone $a;
 			}
@@ -111,22 +109,40 @@ class Attribute{
 		return null;
 	}
 
-	private function __construct(int $id, string $name, float $minValue, float $maxValue, float $defaultValue, bool $shouldSend = true){
-		$this->id = $id;
-		$this->name = $name;
-		$this->minValue = $minValue;
-		$this->maxValue = $maxValue;
-		$this->defaultValue = $defaultValue;
-		$this->shouldSend = $shouldSend;
+	/**
+	 * Attribute constructor.
+	 *
+	 * @param      $id
+	 * @param      $name
+	 * @param      $minValue
+	 * @param      $maxValue
+	 * @param      $defaultValue
+	 * @param bool $shouldSend
+	 */
+	public function __construct($id, $name, $minValue, $maxValue, $defaultValue, $shouldSend = true){
+		$this->id = (int) $id;
+		$this->name = (string) $name;
+		$this->minValue = (float) $minValue;
+		$this->maxValue = (float) $maxValue;
+		$this->defaultValue = (float) $defaultValue;
+		$this->shouldSend = (bool) $shouldSend;
 
 		$this->currentValue = $this->defaultValue;
 	}
 
-	public function getMinValue() : float{
+	/**
+	 * @return float
+	 */
+	public function getMinValue(){
 		return $this->minValue;
 	}
 
-	public function setMinValue(float $minValue){
+	/**
+	 * @param $minValue
+	 *
+	 * @return $this
+	 */
+	public function setMinValue($minValue){
 		if($minValue > $this->getMaxValue()){
 			throw new \InvalidArgumentException("Value $minValue is bigger than the maxValue!");
 		}
@@ -138,11 +154,19 @@ class Attribute{
 		return $this;
 	}
 
-	public function getMaxValue() : float{
+	/**
+	 * @return float
+	 */
+	public function getMaxValue(){
 		return $this->maxValue;
 	}
 
-	public function setMaxValue(float $maxValue){
+	/**
+	 * @param $maxValue
+	 *
+	 * @return $this
+	 */
+	public function setMaxValue($maxValue){
 		if($maxValue < $this->getMinValue()){
 			throw new \InvalidArgumentException("Value $maxValue is bigger than the minValue!");
 		}
@@ -154,11 +178,19 @@ class Attribute{
 		return $this;
 	}
 
-	public function getDefaultValue() : float{
+	/**
+	 * @return float
+	 */
+	public function getDefaultValue(){
 		return $this->defaultValue;
 	}
 
-	public function setDefaultValue(float $defaultValue){
+	/**
+	 * @param $defaultValue
+	 *
+	 * @return $this
+	 */
+	public function setDefaultValue($defaultValue){
 		if($defaultValue > $this->getMaxValue() or $defaultValue < $this->getMinValue()){
 			throw new \InvalidArgumentException("Value $defaultValue exceeds the range!");
 		}
@@ -170,25 +202,28 @@ class Attribute{
 		return $this;
 	}
 
-	public function resetToDefault(){
-		$this->setValue($this->getDefaultValue());
-	}
+    public function resetToDefault(){
+        $this->setValue($this->getDefaultValue());
+    }
 
-	public function getValue() : float{
+	/**
+	 * @return float
+	 */
+	public function getValue(){
 		return $this->currentValue;
 	}
 
 	/**
-	 * @param float $value
-	 * @param bool  $fit
-	 * @param bool  $forceSend
+	 * @param      $value
+	 * @param bool $fit
+	 * @param bool $shouldSend
 	 *
 	 * @return $this
 	 */
-	public function setValue(float $value, bool $fit = false, bool $forceSend = false){
+	public function setValue($value, bool $fit = true, bool $shouldSend = false){
 		if($value > $this->getMaxValue() or $value < $this->getMinValue()){
 			if(!$fit){
-				throw new \InvalidArgumentException("Value $value exceeds the range!");
+				Server::getInstance()->getLogger()->error("[Attribute / {$this->getName()}] Value $value exceeds the range!");
 			}
 			$value = min(max($value, $this->getMinValue()), $this->getMaxValue());
 		}
@@ -196,29 +231,45 @@ class Attribute{
 		if($this->currentValue != $value){
 			$this->desynchronized = true;
 			$this->currentValue = $value;
-		}elseif($forceSend){
-			$this->desynchronized = true;
 		}
 
+		if($shouldSend){
+			$this->desynchronized = true;
+		}
 		return $this;
 	}
 
-	public function getName() : string{
+	/**
+	 * @return string
+	 */
+	public function getName(){
 		return $this->name;
 	}
 
-	public function getId() : int{
+	/**
+	 * @return int
+	 */
+	public function getId(){
 		return $this->id;
 	}
 
-	public function isSyncable() : bool{
+	/**
+	 * @return bool
+	 */
+	public function isSyncable(){
 		return $this->shouldSend;
 	}
 
+	/**
+	 * @return bool
+	 */
 	public function isDesynchronized() : bool{
 		return $this->shouldSend and $this->desynchronized;
 	}
 
+	/**
+	 * @param bool $synced
+	 */
 	public function markSynchronized(bool $synced = true){
 		$this->desynchronized = !$synced;
 	}

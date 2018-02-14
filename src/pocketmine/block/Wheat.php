@@ -2,30 +2,32 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *    _______                    _
+ *   |__   __|                  (_)
+ *      | |_   _ _ __ __ _ _ __  _  ___
+ *      | | | | | '__/ _` | '_ \| |/ __|
+ *      | | |_| | | | (_| | | | | | (__
+ *      |_|\__,_|_|  \__,_|_| |_|_|\___|
+ *
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Turanic
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Item;
 
-class Wheat extends Crops{
+class Wheat extends Crops {
 
 	protected $id = self::WHEAT_BLOCK;
 
@@ -37,16 +39,24 @@ class Wheat extends Crops{
 		return "Wheat Block";
 	}
 
-	public function getDrops(Item $item) : array{
-		if($this->meta >= 0x07){
-			return [
-				Item::get(Item::WHEAT, 0, 1),
-				Item::get(Item::WHEAT_SEEDS, 0, mt_rand(0, 3))
-			];
-		}else{
-			return [
-				Item::get(Item::WHEAT_SEEDS, 0, 1)
-			];
-		}
-	}
+    public function getDropsForCompatibleTool(Item $item) : array{
+        if($this->meta >= 0x07){
+            return [
+                Item::get(Item::WHEAT),
+                Item::get(Item::WHEAT_SEEDS, 0, mt_rand(0, 3))
+            ];
+        }else{
+            return [
+                Item::get(Item::WHEAT_SEEDS)
+            ];
+        }
+    }
+
+    public function getPickedItem(): Item{
+        return Item::get(Item::WHEAT_SEEDS);
+    }
+
+    public function ticksRandomly(): bool{
+        return true;
+    }
 }

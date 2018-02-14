@@ -2,40 +2,43 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *
+ *    _______                    _
+ *   |__   __|                  (_)
+ *      | |_   _ _ __ __ _ _ __  _  ___
+ *      | | | | | '__/ _` | '_ \| |/ __|
+ *      | | |_| | | | (_| | | | | | (__
+ *      |_|\__,_|_|  \__,_|_| |_|_|\___|
+ *
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Turanic
  *
  *
 */
 
-declare(strict_types=1);
-
 namespace pocketmine\command\defaults;
 
 use pocketmine\command\CommandSender;
-use pocketmine\command\utils\InvalidCommandSyntaxException;
 use pocketmine\event\TimingsHandler;
 use pocketmine\event\TranslationContainer;
-use pocketmine\Player;
-use pocketmine\scheduler\BulkCurlTask;
-use pocketmine\Server;
 
-class TimingsCommand extends VanillaCommand{
+
+class TimingsCommand extends VanillaCommand {
 
 	public static $timingStart = 0;
 
-	public function __construct(string $name){
+	/**
+	 * TimingsCommand constructor.
+	 *
+	 * @param $name
+	 */
+	public function __construct($name){
 		parent::__construct(
 			$name,
 			"%pocketmine.command.timings.description",
@@ -44,13 +47,22 @@ class TimingsCommand extends VanillaCommand{
 		$this->setPermission("pocketmine.command.timings");
 	}
 
-	public function execute(CommandSender $sender, string $commandLabel, array $args){
+	/**
+	 * @param CommandSender $sender
+	 * @param string        $currentAlias
+	 * @param array         $args
+	 *
+	 * @return bool
+	 */
+	public function execute(CommandSender $sender, string $currentAlias, array $args){
 		if(!$this->testPermission($sender)){
 			return true;
 		}
 
 		if(count($args) !== 1){
-			throw new InvalidCommandSyntaxException();
+            $sender->sendMessage($sender->getServer()->getLanguage()->translateString("commands.generic.usage", [$this->usageMessage]));
+
+			return true;
 		}
 
 		$mode = strtolower($args[0]);
@@ -105,42 +117,31 @@ class TimingsCommand extends VanillaCommand{
 					"poster" => $sender->getServer()->getName(),
 					"content" => stream_get_contents($fileTimings)
 				];
+
+				$ch = curl_init("http://paste.ubuntu.com/");
+				curl_setopt($ch, CURLOPT_POST, 1);
+				curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+				curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+				curl_setopt($ch, CURLOPT_FORBID_REUSE, 1);
+				curl_setopt($ch, CURLOPT_FRESH_CONNECT, 1);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+				curl_setopt($ch, CURLOPT_AUTOREFERER, false);
+				curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+				curl_setopt($ch, CURLOPT_HEADER, true);
+				curl_setopt($ch, CURLOPT_HTTPHEADER, ["User-Agent: " . $this->getName() . " " . $sender->getServer()->getPocketMineVersion()]);
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+				$data = curl_exec($ch);
+				curl_close($ch);
+				if(preg_match('#^Location: http://paste\\.ubuntu\\.com/([0-9]{1,})/#m', $data, $matches) == 0){
+					$sender->sendMessage(new TranslationContainer("pocketmine.command.timings.pasteError"));
+
+					return true;
+				}
+
+
+				$sender->sendMessage(new TranslationContainer("pocketmine.command.timings.timingsUpload", ["http://paste.ubuntu.com/" . $matches[1] . "/"]));
+				$sender->sendMessage(new TranslationContainer("pocketmine.command.timings.timingsRead", ["http://" . $sender->getServer()->getProperty("timings.host", "timings.pmmp.io") . "/?url=" . $matches[1]]));
 				fclose($fileTimings);
-
-				$sender->getServer()->getScheduler()->scheduleAsyncTask(new class([
-					["page" => "http://paste.ubuntu.com", "extraOpts" => [
-						CURLOPT_HTTPHEADER => ["User-Agent: " . $sender->getServer()->getName() . " " . $sender->getServer()->getPocketMineVersion()],
-						CURLOPT_POST => 1,
-						CURLOPT_POSTFIELDS => $data
-					]]
-				], $sender) extends BulkCurlTask{
-					public function onCompletion(Server $server){
-						$sender = $this->fetchLocal($server);
-						if($sender instanceof Player and !$sender->isOnline()){ // TODO replace with a more generic API method for checking availability of CommandSender
-							return;
-						}
-						$result = $this->getResult()[0];
-						if($result instanceof \RuntimeException){
-							$server->getLogger()->logException($result);
-							return;
-						}
-						list(, $headers) = $result;
-						foreach($headers as $headerGroup){
-							if(isset($headerGroup["location"]) and preg_match('#^http://paste\\.ubuntu\\.com/([0-9]{1,})/#', trim($headerGroup["location"]), $match)){
-								$pasteId = $match[1];
-								break;
-							}
-						}
-						if(isset($pasteId)){
-							$sender->sendMessage(new TranslationContainer("pocketmine.command.timings.timingsUpload", ["http://paste.ubuntu.com/" . $pasteId . "/"]));
-							$sender->sendMessage(new TranslationContainer("pocketmine.command.timings.timingsRead",
-								["http://" . $sender->getServer()->getProperty("timings.host", "timings.pmmp.io") . "/?url=$pasteId"]));
-						}else{
-							$sender->sendMessage(new TranslationContainer("pocketmine.command.timings.pasteError"));
-						}
-					}
-				});
-
 			}else{
 				fclose($fileTimings);
 				$sender->sendMessage(new TranslationContainer("pocketmine.command.timings.timingsWrite", [$timings]));

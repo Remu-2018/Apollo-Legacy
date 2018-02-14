@@ -25,8 +25,6 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
-use pocketmine\network\mcpe\NetworkSession;
-
 class AddHangingEntityPacket extends DataPacket{
 	const NETWORK_ID = ProtocolInfo::ADD_HANGING_ENTITY_PACKET;
 
@@ -56,9 +54,4 @@ class AddHangingEntityPacket extends DataPacket{
 		$this->putBlockPosition($this->x, $this->y, $this->z);
 		$this->putVarInt($this->unknown);
 	}
-
-	public function handle(NetworkSession $session) : bool{
-		return $session->handleAddHangingEntity($this);
-	}
-
 }

@@ -25,9 +25,6 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
-
-use pocketmine\network\mcpe\NetworkSession;
-
 class DisconnectPacket extends DataPacket{
 	const NETWORK_ID = ProtocolInfo::DISCONNECT_PACKET;
 
@@ -35,8 +32,6 @@ class DisconnectPacket extends DataPacket{
 	public $hideDisconnectionScreen = false;
 	/** @var string */
 	public $message;
-	/** @var int */
-	public $protocol;
 
 	public function canBeSentBeforeLogin() : bool{
 		return true;
@@ -52,18 +47,6 @@ class DisconnectPacket extends DataPacket{
 		if(!$this->hideDisconnectionScreen){
 			$this->putString($this->message);
 		}
-	}
-
-	protected function encodeHeader(){
-		if($this->protocol < 130){
-			$this->putByte(static::NETWORK_ID);
-		}else{
-			parent::encodeHeader();
-		}
-	}
-
-	public function handle(NetworkSession $session) : bool{
-		return $session->handleDisconnect($this);
 	}
 
 }

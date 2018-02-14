@@ -19,18 +19,22 @@
  *
 */
 
-declare(strict_types=1);
-
 namespace pocketmine\level\particle;
 
 use pocketmine\entity\Entity;
+use pocketmine\entity\Skin;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
-use pocketmine\utils\UUID;
 use pocketmine\network\mcpe\protocol\AddPlayerPacket;
+use pocketmine\network\mcpe\protocol\PlayerSkinPacket;
 use pocketmine\network\mcpe\protocol\RemoveEntityPacket;
+use pocketmine\utils\TextUtils;
+use pocketmine\utils\UUID;
 
-class FloatingTextParticle extends Particle{
+/**
+ * @deprecated
+ */
+class FloatingTextParticle extends Particle {
 	//TODO: HACK!
 
 	protected $text;
@@ -38,33 +42,67 @@ class FloatingTextParticle extends Particle{
 	protected $entityId;
 	protected $invisible = false;
 
-	/**
-	 * @param Vector3 $pos
-	 * @param int     $text
-	 * @param string  $title
-	 */
-	public function __construct(Vector3 $pos, $text, $title = ""){
+    /**
+     * @param Vector3 $pos
+     * @param int $text
+     * @param string $title
+     * @param bool $center
+     */
+	public function __construct(Vector3 $pos, $text, $title = "", bool $center = false){
 		parent::__construct($pos->x, $pos->y, $pos->z);
+		if($center){
+			$text = TextUtils::center($text);
+			$title = TextUtils::center($title);
+		}
 		$this->text = $text;
 		$this->title = $title;
 	}
 
+	/**
+	 * @return int
+	 */
+	public function getText(){
+		return $this->text;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getTitle(){
+		return $this->title;
+	}
+
+	/**
+	 * @param $text
+	 */
 	public function setText($text){
 		$this->text = $text;
 	}
 
+	/**
+	 * @param $title
+	 */
 	public function setTitle($title){
 		$this->title = $title;
 	}
 
+	/**
+	 * @return bool
+	 */
 	public function isInvisible(){
 		return $this->invisible;
 	}
 
+	/**
+	 * @param bool $value
+	 */
 	public function setInvisible($value = true){
 		$this->invisible = (bool) $value;
 	}
 
+	/**
+	 * @return array
+	 */
 	public function encode(){
 		$p = [];
 
@@ -80,10 +118,10 @@ class FloatingTextParticle extends Particle{
 		if(!$this->invisible){
 
 			$pk = new AddPlayerPacket();
-			$pk->uuid = UUID::fromRandom();
+			$pk->uuid = $uuid = UUID::fromRandom();
 			$pk->username = $this->title;
 			$pk->entityRuntimeId = $this->entityId;
-			$pk->position = new Vector3($this->x, $this->y - 0.50, $this->z);
+			$pk->position = $this->subtract(0,0.50,0);
 			$pk->item = Item::get(Item::AIR);
 			$flags = (
 				(1 << Entity::DATA_FLAG_CAN_SHOW_NAMETAG) |
@@ -93,10 +131,15 @@ class FloatingTextParticle extends Particle{
 			$pk->metadata = [
 				Entity::DATA_FLAGS => [Entity::DATA_TYPE_LONG, $flags],
 				Entity::DATA_NAMETAG => [Entity::DATA_TYPE_STRING, $this->title . ($this->text !== "" ? "\n" . $this->text : "")],
-				Entity::DATA_SCALE => [Entity::DATA_TYPE_FLOAT, 0],
+				Entity::DATA_SCALE => [Entity::DATA_TYPE_FLOAT, 0.01],
 			];
 
 			$p[] = $pk;
+
+            $skinPk = new PlayerSkinPacket();
+            $skinPk->uuid = $uuid;
+            $skinPk->skin = new Skin("Standard_Custom", str_repeat("\x00", 8192));
+            $p[] = $skinPk;
 		}
 
 		return $p;

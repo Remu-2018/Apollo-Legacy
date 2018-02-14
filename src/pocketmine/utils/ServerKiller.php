@@ -19,22 +19,25 @@
  *
 */
 
-declare(strict_types=1);
-
 namespace pocketmine\utils;
 
 use pocketmine\Thread;
 
-class ServerKiller extends Thread{
+class ServerKiller extends Thread {
 
 	public $time;
 
+	/**
+	 * ServerKiller constructor.
+	 *
+	 * @param int $time
+	 */
 	public function __construct($time = 15){
 		$this->time = $time;
 	}
 
 	public function run(){
-		$start = time();
+		$start = time() + 1;
 		$this->synchronized(function(){
 			$this->wait($this->time * 1000000);
 		});
@@ -44,7 +47,10 @@ class ServerKiller extends Thread{
 		}
 	}
 
-	public function getThreadName() : string{
+	/**
+	 * @return string
+	 */
+	public function getThreadName(){
 		return "Server Killer";
 	}
 }

@@ -19,13 +19,11 @@
  *
 */
 
-declare(strict_types=1);
-
 namespace pocketmine\event;
 
 use pocketmine\level\Level;
 
-class LevelTimings{
+class LevelTimings {
 
 	/** @var TimingsHandler */
 	public $setBlock;
@@ -33,7 +31,6 @@ class LevelTimings{
 	public $doBlockLightUpdates;
 	/** @var TimingsHandler */
 	public $doBlockSkyLightUpdates;
-
 	/** @var TimingsHandler */
 	public $mobSpawn;
 	/** @var TimingsHandler */
@@ -85,6 +82,11 @@ class LevelTimings{
 	/** @var TimingsHandler */
 	public $syncChunkLoadPostTimer;
 
+	/**
+	 * LevelTimings constructor.
+	 *
+	 * @param Level $level
+	 */
 	public function __construct(Level $level){
 		$name = $level->getFolderName() . " - ";
 

@@ -2,40 +2,38 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *    _______                    _
+ *   |__   __|                  (_)
+ *      | |_   _ _ __ __ _ _ __  _  ___
+ *      | | | | | '__/ _` | '_ \| |/ __|
+ *      | | |_| | | | (_| | | | | | (__
+ *      |_|\__,_|_|  \__,_|_| |_|_|\___|
+ *
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Turanic
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
-use pocketmine\nbt\tag\ByteTag;
-use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\IntTag;
-use pocketmine\nbt\tag\StringTag;
 use pocketmine\Player;
-use pocketmine\tile\Skull as SkullTile;
-use pocketmine\tile\Spawnable;
+use pocketmine\tile\Skull as TileSkull;
+
 use pocketmine\tile\Tile;
 
-class Skull extends Flowable{
+class Skull extends Flowable {
 
 	protected $id = self::SKULL_BLOCK;
 
@@ -48,56 +46,74 @@ class Skull extends Flowable{
 	}
 
 	public function getName() : string{
-		return "Mob Head Block";
+		return "Mob Head";
 	}
 
 	protected function recalculateBoundingBox(){
-		//TODO: different bounds depending on attached face (meta)
+		$x1 = $x2 = $z1 = $z2 = 0;
+		switch($this->meta){
+            case 0:
+            case 1:
+                return new AxisAlignedBB(
+                    $this->x + 0.25,
+                    $this->y,
+                    $this->z + 0.25,
+                    $this->x + 0.75,
+                    $this->y + 0.5,
+                    $this->z + 0.75
+                );
+            case 2:
+                $x1 = 0.25;
+                $x2 = 0.75;
+                $z1 = 0;
+                $z2 = 0.5;
+                break;
+            case 3:
+                $x1 = 0.5;
+                $x2 = 1;
+                $z1 = 0.25;
+                $z2 = 0.75;
+                break;
+            case 4:
+                $x1 = 0.25;
+                $x2 = 0.75;
+                $z1 = 0.5;
+                $z2 = 1;
+                break;
+            case 5:
+                $x1 = 0;
+                $x2 = 0.5;
+                $z1 = 0.25;
+                $z2 = 0.75;
+                break;
+        }
 		return new AxisAlignedBB(
-			$this->x + 0.25,
-			$this->y,
-			$this->z + 0.25,
-			$this->x + 0.75,
-			$this->y + 0.5,
-			$this->z + 0.75
+			$this->x + $x1,
+			$this->y + 0.25,
+			$this->z + $z1,
+			$this->x + $x2,
+			$this->y + 0.75,
+			$this->z + $z2
 		);
 	}
 
-	public function place(Item $item, Block $block, Block $target, int $face, Vector3 $facePos, Player $player = null) : bool{
-		if($face !== Vector3::SIDE_DOWN){
-			$this->meta = $face;
-			if($face === Vector3::SIDE_UP){
-				$rot = floor(($player->yaw * 16 / 360) + 0.5) & 0x0F;
-			}else{
-				$rot = $face;
-			}
-			$this->getLevel()->setBlock($block, $this, true);
-			$nbt = new CompoundTag("", [
-				new StringTag("id", Tile::SKULL),
-				new ByteTag("SkullType", $item->getDamage()),
-				new ByteTag("Rot", $rot),
-				new IntTag("x", (int) $this->x),
-				new IntTag("y", (int) $this->y),
-				new IntTag("z", (int) $this->z)
-			]);
-			if($item->hasCustomName()){
-				$nbt->CustomName = new StringTag("CustomName", $item->getCustomName());
-			}
-			/** @var Spawnable $tile */
-			Tile::createTile("Skull", $this->getLevel(), $nbt);
-			return true;
-		}
-		return false;
+	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
+        if($face === Vector3::SIDE_DOWN){
+            return false;
+        }
+        $this->meta = $face;
+        $this->getLevel()->setBlock($blockReplace, $this, true);
+        Tile::createTile(Tile::SKULL, $this->getLevel(), TileSkull::createNBT($this, $face, $item, $player));
+        return true;
 	}
 
-	public function getDrops(Item $item) : array{
+	public function getDropsForCompatibleTool(Item $item) : array{
 		$tile = $this->level->getTile($this);
-		if($tile instanceof SkullTile){
+		if($tile instanceof TileSkull){
 			return [
-				Item::get(Item::SKULL, $tile->getType(), 1)
+				Item::get(Item::SKULL, $tile->getType())
 			];
 		}
-
 		return [];
 	}
 }

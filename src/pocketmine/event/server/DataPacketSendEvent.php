@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  *
  *  ____            _        _   __  __ _                  __  __ ____
  * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
@@ -14,12 +14,10 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @link   http://www.pocketmine.net/
  *
  *
-*/
-
-declare(strict_types=1);
+ */
 
 namespace pocketmine\event\server;
 
@@ -27,16 +25,16 @@ use pocketmine\event\Cancellable;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\Player;
 
-class DataPacketSendEvent extends ServerEvent implements Cancellable{
+class DataPacketSendEvent extends ServerEvent implements Cancellable {
 	public static $handlerList = null;
 
-	/** @var DataPacket */
 	private $packet;
-	/** @var Player */
 	private $player;
 
 	/**
-	 * @param Player $player
+	 * DataPacketSendEvent constructor.
+	 *
+	 * @param Player     $player
 	 * @param DataPacket $packet
 	 */
 	public function __construct(Player $player, DataPacket $packet){
@@ -47,14 +45,14 @@ class DataPacketSendEvent extends ServerEvent implements Cancellable{
 	/**
 	 * @return DataPacket
 	 */
-	public function getPacket() : DataPacket{
+	public function getPacket(){
 		return $this->packet;
 	}
 
 	/**
 	 * @return Player
 	 */
-	public function getPlayer() : Player{
+	public function getPlayer(){
 		return $this->player;
 	}
 }

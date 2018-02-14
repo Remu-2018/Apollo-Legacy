@@ -2,27 +2,29 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *    _______                    _
+ *   |__   __|                  (_)
+ *      | |_   _ _ __ __ _ _ __  _  ___
+ *      | | | | | '__/ _` | '_ \| |/ __|
+ *      | | |_| | | | (_| | | | | | (__
+ *      |_|\__,_|_|  \__,_|_| |_|_|\___|
+ *
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Turanic
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
 namespace pocketmine\inventory\transaction\action;
 
+use pocketmine\inventory\transaction\InventoryTransaction;
 use pocketmine\item\Item;
 use pocketmine\Player;
 
@@ -31,81 +33,93 @@ use pocketmine\Player;
  */
 abstract class InventoryAction{
 
-	/** @var float */
-	private $creationTime;
-	/** @var Item */
-	protected $sourceItem;
-	/** @var Item */
-	protected $targetItem;
+    /** @var float */
+    private $creationTime;
+    /** @var Item */
+    protected $sourceItem;
+    /** @var Item */
+    protected $targetItem;
 
-	public function __construct(Item $sourceItem, Item $targetItem){
-		$this->sourceItem = $sourceItem;
-		$this->targetItem = $targetItem;
+    public function __construct(Item $sourceItem, Item $targetItem){
+        $this->sourceItem = $sourceItem;
+        $this->targetItem = $targetItem;
 
-		$this->creationTime = microtime(true);
-	}
+        $this->creationTime = microtime(true);
+    }
 
-	public function getCreationTime() : float{
-		return $this->creationTime;
-	}
+    public function getCreationTime() : float{
+        return $this->creationTime;
+    }
 
-	/**
-	 * Returns the item that was present before the action took place.
-	 * @return Item
-	 */
-	public function getSourceItem() : Item{
-		return clone $this->sourceItem;
-	}
+    /**
+     * Returns the item that was present before the action took place.
+     * @return Item
+     */
+    public function getSourceItem() : Item{
+        return clone $this->sourceItem;
+    }
 
-	/**
-	 * Returns the item that the action attempted to replace the source item with.
-	 * @return Item
-	 */
-	public function getTargetItem() : Item{
-		return clone $this->targetItem;
-	}
+    /**
+     * Returns the item that the action attempted to replace the source item with.
+     * @return Item
+     */
+    public function getTargetItem() : Item{
+        return clone $this->targetItem;
+    }
 
-	/**
-	 * Returns whether this action is currently valid. This should perform any necessary sanity checks.
-	 *
-	 * @param Player $source
-	 *
-	 * @return bool
-	 */
-	abstract public function isValid(Player $source) : bool;
+    /**
+     * Returns whether this action is currently valid. This should perform any necessary sanity checks.
+     *
+     * @param Player $source
+     *
+     * @return bool
+     */
+    abstract public function isValid(Player $source) : bool;
 
-	/**
-	 * @param Player $source
-	 *
-	 * @return bool
-	 */
-	public function isAlreadyDone(Player $source) : bool{
-		return false;
-	}
+    /**
+     * Called when the action is added to the specified InventoryTransaction.
+     *
+     * @param InventoryTransaction $transaction
+     */
+    public function onAddToTransaction(InventoryTransaction $transaction){
 
-	/**
-	 * Performs actions needed to complete the inventory-action server-side. Returns if it was successful. Will return
-	 * false if plugins cancelled events. This will only be called if the transaction which it is part of is considered
-	 * valid.
-	 *
-	 * @param Player $source
-	 *
-	 * @return bool
-	 */
-	abstract public function execute(Player $source) : bool;
+    }
 
-	/**
-	 * Performs additional actions when this inventory-action completed successfully.
-	 *
-	 * @param Player $source
-	 */
-	abstract public function onExecuteSuccess(Player $source);
+    /**
+     * Called by inventory transactions before any actions are processed. If this returns false, the transaction will
+     * be cancelled.
+     *
+     * @param Player $source
+     *
+     * @return bool
+     */
+    public function onPreExecute(Player $source) : bool{
+        return true;
+    }
 
-	/**
-	 * Performs additional actions when this inventory-action did not complete successfully.
-	 *
-	 * @param Player $source
-	 */
-	abstract public function onExecuteFail(Player $source);
+    /**
+     * Performs actions needed to complete the inventory-action server-side. Returns if it was successful. Will return
+     * false if plugins cancelled events. This will only be called if the transaction which it is part of is considered
+     * valid.
+     *
+     * @param Player $source
+     *
+     * @return bool
+     */
+    abstract public function execute(Player $source) : bool;
+
+    /**
+     * Performs additional actions when this inventory-action completed successfully.
+     *
+     * @param Player $source
+     */
+    abstract public function onExecuteSuccess(Player $source);
+
+    /**
+     * Performs additional actions when this inventory-action did not complete successfully.
+     *
+     * @param Player $source
+     */
+    abstract public function onExecuteFail(Player $source);
 
 }
