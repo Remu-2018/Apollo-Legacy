@@ -374,8 +374,8 @@ class Server{
 	/**
 	 * @return string
 	 */
-	public function getApolloApiVersion(){
-		return \pocketmine\Apollo_API_VERSION;
+	public function getTuranicApiVersion(){
+		return \pocketmine\TURANIC_API_VERSION;
 	}
 
 	/**
@@ -1889,7 +1889,7 @@ OS: §6' . PHP_OS .'§f
 			$this->properties->save(true);
 
 			if(!($this->getDefaultLevel() instanceof Level)){
-				$this->getLogger()->emergency($this->getLanguage()->translateString("pocketmine.level.defaultError"));
+				$this->getLogger()->emergency($this->getLanguage()->translateString("pocketmine.level.defaultError")); //apollo
 				$this->forceShutdown();
 
 				return;
