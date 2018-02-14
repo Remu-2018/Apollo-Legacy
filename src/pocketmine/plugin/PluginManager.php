@@ -250,7 +250,7 @@ class PluginManager {
 							}
 
 							$compatibleturanicapi = false;
-							foreach($description->getTuranicApiVersion() as $version){
+							foreach($description->CompatibleTuranicApi() as $version){
 								//Format: majorVersion.minorVersion.patch
 								$version = array_map("intval", explode(".", $version));
 								$apiVersion = array_map("intval", explode(".", $this->server->getTuranicApiVersion()));
