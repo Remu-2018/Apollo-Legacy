@@ -250,7 +250,7 @@ class PluginManager {
 							}
 
 							$compatibleturanicapi = false;
-							foreach($description->getCompatibleGeniApis() as $version){
+							foreach($description->getTuranicApiVersion() as $version){
 								//Format: majorVersion.minorVersion.patch
 								$version = array_map("intval", explode(".", $version));
 								$apiVersion = array_map("intval", explode(".", $this->server->getTuranicApiVersion()));
@@ -278,7 +278,7 @@ class PluginManager {
 
 							if($compatible === false){
 								if($this->server->loadIncompatibleAPI === true){
-									$this->server->getLogger()->debug("{$name} uses an older API, but Turanic will load it.");
+									$this->server->getLogger()->debug("{$name} uses an older API, but Apollo will load it.");
 								}else{
 									$this->server->getLogger()->error($this->server->getLanguage()->translateString("pocketmine.plugin.loadError", [$name, "%pocketmine.plugin.incompatibleAPI"]));
 									continue;
@@ -489,7 +489,7 @@ class PluginManager {
 
 	/**
 	 * @param string      $permission
-	 * @param Permissible $permissible
+	 * @param Permissible $permissible getCompatibleGeniApis
 	 */
 	public function unsubscribeFromPermission($permission, Permissible $permissible){
 		if(isset($this->permSubs[$permission])){
