@@ -20,14 +20,6 @@ Apollo is for all. Anyone can copy-paste generator and other features.
 
 - right now none
 
-## Credits
-
-[DarkSystem](https://github.com/DarkSystem-PE/DarkSystem)
-
-[https://github.com/pmmp/PocketMine-MP](PocketMine-MP)
-
-[https://github.com/GenisysPro/GenisysPro](GenisysPro)
-
 ## Information
 
 - Need to communicate with us? Join our [discord](https://discord.gg/xBN3WR6) group!
@@ -48,15 +40,15 @@ Apollo is for all. Anyone can copy-paste generator and other features.
 
 - [ ] translate all
 
-- [X] update generator
+- [ ] update generator
 
-- [X] add enchanting (not fully work but it works)
+- [ ] add enchanting (not fully work but it works)
 
-- [X] more blocks and items off the latest version of mcpe (30% done)
+- [ ] more blocks and items off the latest version of mcpe (30% done)
 
-- [X] more features with items and block (10% done)
+- [ ] more features with items and block (10% done)
 
-- [X] improve the generator
+- [ ] improve the generator
 
 - [ ] fix any bugs that are left
 
