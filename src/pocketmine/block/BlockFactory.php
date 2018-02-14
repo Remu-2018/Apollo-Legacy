@@ -91,7 +91,7 @@ class BlockFactory extends Block {
             self::registerBlock(new Lapis());
             self::registerBlock(new Sandstone());
             self::registerBlock(new Dispenser());
-            self::registerBlock(new Noteblock());
+      //      self::registerBlock(new Noteblock());
             self::registerBlock(new Bed());
             self::registerBlock(new PoweredRail());
             self::registerBlock(new DetectorRail());
@@ -171,7 +171,7 @@ class BlockFactory extends Block {
             self::registerBlock(new PumpkinStem());
             self::registerBlock(new MelonStem());
             self::registerBlock(new Vine());
-            self::registerBlock(new FenceGate(Block::OAK_FENCE_GATE, 0, "Oak Fence Gate"));
+            self::registerBlock(new FenceGate(Block::OAK_FENCE_GATE, 0, "Oak Fence Gate")); //noteblock
             self::registerBlock(new BrickStairs());
             self::registerBlock(new StoneBrickStairs());
             self::registerBlock(new Mycelium());
