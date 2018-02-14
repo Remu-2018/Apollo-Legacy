@@ -86,7 +86,7 @@ namespace pocketmine {
     const VERSION = "1.0dev";
     const API_VERSION = "3.0.1";
     const CODENAME = "Shiny";
-    const Apollo_API_VERSION = '2.0.0';
+    const TURANIC_API_VERSION = '2.0.0';
 
 	/*
 	 * Startup code. Do not look at it, it may harm you.
