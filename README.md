@@ -1,12 +1,10 @@
 ![Apollo](http://i.imgur.com/KBlbnkp.png)
 
 
+![Apollo](http://i.imgur.com/KBlbnkp.png)
 
-Apollo is a Minecraft: PE Server Software with an improved Generator and a lot more features. 
 
-Note: 
-
-Apollo is for all. Anyone can copy-paste generator and other features. 
+Apollo is a Minecraft: PE Server Software with an improved Generator and a lot more features.  
 
 **CircleCI Build Status** [![CircleCI](https://circleci.com/gh/Apollo-SoftwareTeam/Apollo-Legacy.svg?style=svg)](https://circleci.com/gh/Apollo-SoftwareTeam/Apollo-Legacy)
 
@@ -16,25 +14,12 @@ Apollo is for all. Anyone can copy-paste generator and other features.
 
 **CircleCI** [![CircleCI](https://circleci.com/gh/Apollo-SoftwareTeam/Apollo-Legacy.svg?style=svg)](https://circleci.com/gh/Apollo-SoftwareTeam/Apollo-Legacy)
 
-## Known Bugs
-
-- right now none
-
 ## Information
 
 - Need to communicate with us? Join our [discord](https://discord.gg/xBN3WR6) group!
 - we have a web site [Apollope.ml](https://apollope.ml)
 - We are a edited version of PmmP. We have edited their generators to our version and have improved the performance
 - You can download .phar from Circle CI. Tab to latest build,tap to artifacts selection, tap to DevTools and download Apollo1.0dev.phar
-
-## Features
-
-- Worlds: Generator has been improved and more biomes!
-- Little to no lag at all!
-- all pmmp features and some other tweaks
-- more features with items and block
-- more blocks and items off the latest version of mcpe
-- and enchanting
  
 ## TODO :
 
