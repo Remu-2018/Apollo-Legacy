@@ -21,21 +21,21 @@ Apollo is a Minecraft: PE Server Software with an improved Generator and a lot m
 
 - [ ] translate all
 
-- [ ] update generator
+- [X] update generator
 
-- [ ] add enchanting (not fully work but it works)
+- [X] add enchanting (not fully work but it works)
 
-- [ ] more blocks and items off the latest version of mcpe (30% done)
+- [X] more blocks and items off the latest version of mcpe (30% done)
 
-- [ ] more features with items and block (10% done)
+- [X] more features with items and block (10% done)
 
 - [ ] improve the generator
 
 - [ ] fix any bugs that are left
 
-- [ ] implement xp and more xp things
+- [X] implement xp and more xp things
 
-- [ ] inplement mob ai and riding entitys
+- [X] inplement mob ai and riding entitys
 
 - [ ] importing stuff of the old Apollo from Nycuro (%10 done)
 
