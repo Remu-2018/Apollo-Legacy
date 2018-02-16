@@ -630,7 +630,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder {
 
     protected function doAirSupplyTick(int $tickDiff){
         //TODO: allow this to apply to other mobs
-        if(($respirationLevel = $this->inventory->getHelmet()->getEnchantmentLevel(Enchantment::RESPIRATION)) <= 0 or
+        if(($respirationLevel = $this->armorInventory->getHelmet()->getEnchantmentLevel(Enchantment::RESPIRATION)) <= 0 or
             lcg_value() <= (1 / ($respirationLevel + 1))){
             parent::doAirSupplyTick($tickDiff);
         }
@@ -640,8 +640,8 @@ class Human extends Creature implements ProjectileSource, InventoryHolder {
 		return $this->getNameTag();
 	}
 
-	public function getDrops(){
-        array_merge(
+	public function getDrops() : array{
+        return array_merge(
             $this->inventory !== null ? array_values($this->inventory->getContents()) : [],
             $this->armorInventory !== null ? array_values($this->armorInventory->getContents()) : []
         );
@@ -719,7 +719,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder {
 	}
 
 	protected function sendSpawnPacket(Player $player){
-        if(!$this->skin->isValid()){
+        if($this->skin === null or !$this->skin->isValid()){
             throw new \InvalidStateException((new \ReflectionClass($this))->getShortName() . " must have a valid skin set");
         }
 
