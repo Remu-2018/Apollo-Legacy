@@ -85,12 +85,12 @@ use pocketmine\inventory\BigCraftingGrid;
 use pocketmine\inventory\CraftingGrid;
 use pocketmine\inventory\EnchantInventory;
 use pocketmine\inventory\PlayerCursorInventory;
-use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\transaction\action\InventoryAction;
 use pocketmine\inventory\transaction\AnvilTransaction;
 use pocketmine\inventory\transaction\CraftingTransaction;
 use pocketmine\inventory\transaction\EnchantTransaction;
 use pocketmine\inventory\transaction\InventoryTransaction;
+use pocketmine\inventory\VillagerTradeInventory;
 use pocketmine\inventory\Inventory;
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\item\{
@@ -2095,7 +2095,7 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
             $this->level->getName(),
             round($this->x, 4),
             round($this->y, 4),
-            round($this->z, 4   )
+            round($this->z, 4)
         ]));
 
         if($this->isOp()){
@@ -2360,7 +2360,7 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
                         $this->inventory->sendContents($this);
                         $this->inventory->sendHeldItem($this);
 
-                        $target = $this->level->getBlockAt($blockVector->x, $blockVector->y, $blockVector->z);
+                        $target = $this->level->getBlockAt(...$blockVector->toArray());
                         /** @var Block[] $blocks */
                         $blocks = $target->getAllSides();
                         $blocks[] = $target;
@@ -2618,7 +2618,7 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
                 if ($pos->distanceSquared($this) > 10000) {
                     break;
                 }
-                $target = $this->level->getBlockAt($pos->x, $pos->y, $pos->z);
+                $target = $this->level->getBlockAt(...$pos->toArray());
                 $ev = new PlayerInteractEvent($this, $this->inventory->getItemInHand(), $target, null, $packet->face, $target->getId() === 0 ? PlayerInteractEvent::LEFT_CLICK_AIR : PlayerInteractEvent::LEFT_CLICK_BLOCK);
                 if ($this->level->checkSpawnProtection($this, $target)) {
                     $ev->setCancelled();
@@ -2650,22 +2650,22 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
                 $this->stopSleep();
                 break;
             case PlayerActionPacket::ACTION_RESPAWN:
-                if ($this->spawned === false or $this->isAlive() or !$this->isOnline()) {
+                if($this->spawned === false or $this->isAlive() or !$this->isOnline()){
                     break;
                 }
 
-                if ($this->server->isHardcore()) {
+                if($this->server->isHardcore()){
                     $this->setBanned(true);
                     break;
                 }
 
                 $this->server->getPluginManager()->callEvent($ev = new PlayerRespawnEvent($this, $this->getSpawn()));
 
-                $realSpawn = $ev->getRespawnPosition()->add(0.5, 0, 0.5);
+                $realSpawn = Position::fromObject($ev->getRespawnPosition()->add(0.5, 0, 0.5), $ev->getRespawnPosition()->getLevel());
 
-                if ($realSpawn->distanceSquared($this->getSpawn()->add(0.5, 0, 0.5)) > 0.01) {
+                if($realSpawn->distanceSquared($this->getSpawn()->add(0.5, 0, 0.5)) > 0.01){
                     $this->teleport($realSpawn); //If the destination was modified by plugins
-                } else {
+                }else{
                     $this->setPosition($realSpawn); //The client will move to the position of its own accord once chunks are sent
                     $this->nextChunkOrderRun = 0;
                     $this->isTeleporting = true;
@@ -2686,8 +2686,7 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
                 $this->removeAllEffects();
                 $this->setHealth($this->getMaxHealth());
 
-                /** @var Attribute $attr */
-                foreach ($this->attributeMap->getAll() as $attr) {
+                foreach($this->attributeMap->getAll() as $attr){
                     $attr->resetToDefault();
                 }
 
@@ -2742,14 +2741,15 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
             case PlayerActionPacket::ACTION_START_GLIDE:
             case PlayerActionPacket::ACTION_STOP_GLIDE:
                 $glide = $packet->action == PlayerActionPacket::ACTION_START_GLIDE;
-                if ($glide && $this->isHaveElytra()) {
+                if($glide && $this->isHaveElytra()){
                     $this->elytraIsActivated = true;
-                } else {
+                }else{
                     $this->elytraIsActivated = false;
                 }
+                $this->setGliding($this->elytraIsActivated);
                 break;
             case PlayerActionPacket::ACTION_CONTINUE_BREAK:
-                $block = $this->level->getBlockAt($pos->x, $pos->y, $pos->z);
+                $block = $this->level->getBlockAt(...$pos->toArray());
                 $this->level->broadcastLevelEvent($pos, LevelEventPacket::EVENT_PARTICLE_PUNCH_BLOCK, $block->getId() | ($block->getDamage() << 8) | ($packet->face << 16));
                 break;
             case PlayerActionPacket::ACTION_SET_ENCHANTMENT_SEED:
@@ -3879,17 +3879,16 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
      * @throws \BadMethodCallException if trying to remove a fixed inventory window without the `force` parameter as true
      */
     public function removeWindow(Inventory $inventory, bool $force = false){
-        if(isset($this->windows[$hash = spl_object_hash($inventory)])){
-            /** @var int $id */
-            $id = $this->windows[$hash];
-            if(!$force and isset($this->permanentWindows[$id])){
-                throw new \BadMethodCallException("Cannot remove fixed window $id (" . get_class($inventory) . ") from " . $this->getName());
-            }
+        $id = $this->windows[$hash = spl_object_hash($inventory)] ?? null;
 
-            unset($this->windows[$hash], $this->windowIndex[$id], $this->permanentWindows[$id]);
+        if($id !== null and !$force and isset($this->permanentWindows[$id])){
+            throw new \BadMethodCallException("Cannot remove fixed window $id (" . get_class($inventory) . ") from " . $this->getName());
         }
 
         $inventory->close($this);
+        if($id !== null){
+            unset($this->windows[$hash], $this->windowIndex[$id], $this->permanentWindows[$id]);
+        }
     }
 
     /**
@@ -4441,6 +4440,18 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
     public function getAnvilInventory(){
         foreach($this->windowIndex as $inventory){
             if($inventory instanceof AnvilInventory){
+                return $inventory;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @return VillagerTradeInventory|null
+     */
+    public function getTradeInventory(){
+        foreach($this->windowIndex as $inventory){
+            if($inventory instanceof VillagerTradeInventory){
                 return $inventory;
             }
         }
