@@ -68,10 +68,6 @@ use pocketmine\entity\object\Boat;
 use pocketmine\entity\object\FallingSand;
 use pocketmine\entity\object\FloatingText;
 use pocketmine\entity\object\Lightning;
-use pocketmine\entity\object\Minecart;
-use pocketmine\entity\object\MinecartChest;
-use pocketmine\entity\object\MinecartHopper;
-use pocketmine\entity\object\MinecartTNT;
 use pocketmine\entity\object\Painting;
 use pocketmine\entity\object\PrimedTNT;
 use pocketmine\entity\object\ExperienceOrb;
@@ -334,10 +330,6 @@ abstract class Entity extends Location implements Metadatable, EntityIds {
 		Entity::registerEntity(Lightning::class);
 		Entity::registerEntity(LingeringPotion::class);
 		Entity::registerEntity(Llama::class);
-		Entity::registerEntity(Minecart::class);
-		Entity::registerEntity(MinecartChest::class);
-		Entity::registerEntity(MinecartHopper::class);
-		Entity::registerEntity(MinecartTNT::class);
 		Entity::registerEntity(Mooshroom::class);
 		Entity::registerEntity(Mule::class);
 		Entity::registerEntity(Ocelot::class);
@@ -574,16 +566,16 @@ abstract class Entity extends Location implements Metadatable, EntityIds {
 	 * @param CompoundTag $nbt
 	 */
 	public function __construct(Level $level, CompoundTag $nbt){
-	    $this->constructed = true;
-		$this->timings = Timings::getEntityTimings($this);
+        $this->constructed = true;
+        $this->timings = Timings::getEntityTimings($this);
 
-		$this->isPlayer = $this instanceof Player;
+        $this->isPlayer = $this instanceof Player;
 
-		$this->temporalVector = new Vector3();
+        $this->temporalVector = new Vector3();
 
-		if($this->eyeHeight === null){
-			$this->eyeHeight = $this->height / 2 + 0.1;
-		}
+        if($this->eyeHeight === null){
+            $this->eyeHeight = $this->height / 2 + 0.1;
+        }
 
 		$this->id = Entity::$entityCount++;
 		$this->justCreated = true;
@@ -597,10 +589,10 @@ abstract class Entity extends Location implements Metadatable, EntityIds {
             throw new \InvalidStateException("Cannot create entities in unloaded chunks");
         }
 
-		$this->setLevel($level);
-		$this->server = $level->getServer();
+        $this->setLevel($level);
+        $this->server = $level->getServer();
 
-		$this->boundingBox = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+        $this->boundingBox = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
 
         /** @var float[] $rotation */
         $rotation = $this->namedtag->getListTag("Rotation")->getAllValues();
@@ -617,7 +609,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds {
 
         $this->resetLastMovements();
 
-		assert(!is_nan($this->x) and !is_infinite($this->x) and !is_nan($this->y) and !is_infinite($this->y) and !is_nan($this->z) and !is_infinite($this->z));
+        assert(!is_nan($this->x) and !is_infinite($this->x) and !is_nan($this->y) and !is_infinite($this->y) and !is_nan($this->z) and !is_infinite($this->z));
 
         $this->fallDistance = $this->namedtag->getFloat("FallDistance", 0.0);
 
@@ -818,7 +810,6 @@ abstract class Entity extends Location implements Metadatable, EntityIds {
 	 */
 	public function setGliding(bool $value = true){
 		$this->setGenericFlag(self::DATA_FLAG_GLIDING, $value);
-		$this->setGenericFlag(self::DATA_FLAG_IDLING, $value);
 	}
 
     /**
@@ -967,7 +958,12 @@ abstract class Entity extends Location implements Metadatable, EntityIds {
 
         if($this->namedtag->hasTag("CustomName", StringTag::class)){
             $this->setNameTag($this->namedtag->getString("CustomName"));
-            if($this->namedtag->hasTag("CustomNameVisible", ByteTag::class)){
+
+            if($this->namedtag->hasTag("CustomNameVisible", StringTag::class)) {
+                //Older versions incorrectly saved this as a string (see 890f72dbf23a77f294169b79590770470041adc4)
+                $this->setNameTagVisible($this->namedtag->getString("CustomNameVisible") !== "");
+                $this->namedtag->removeTag("CustomNameVisible");
+            }else{
                 $this->setNameTagVisible($this->namedtag->getByte("CustomNameVisible", 1) !== 0);
             }
         }
@@ -2276,7 +2272,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds {
 	 * @return bool
 	 */
 	public function setLinked($type = 0, Entity $entity){
-		if($entity instanceof Boat or $entity instanceof Minecart){
+		if($entity instanceof Boat){
 			$this->propertyManager->setVector3(self::DATA_RIDER_SEAT_POSITION, new Vector3(0,1)); //This is a fast hack for Boat. TODO: Improve it
 		}
 
