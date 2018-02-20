@@ -1,24 +1,5 @@
 <?php
 
-/*
- *
- *  _____   _____   __   _   _   _____  __    __  _____
- * /  ___| | ____| |  \ | | | | /  ___/ \ \  / / /  ___/
- * | |     | |__   |   \| | | | | |___   \ \/ /  | |___
- * | |  _  |  __|  | |\   | | | \___  \   \  /   \___  \
- * | |_| | | |___  | | \  | | |  ___| |   / /     ___| |
- * \_____/ |_____| |_|  \_| |_| /_____/  /_/     /_____/
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * @author iTX Technologies
- * @link https://itxtech.org
- *
- */
-
 namespace pocketmine\level\generator\populator;
 
 use pocketmine\block\Block;
@@ -26,6 +7,7 @@ use pocketmine\level\ChunkManager;
 use pocketmine\utils\Random;
 
 class Sugarcane extends Populator {
+	
 	/** @var ChunkManager */
 	private $level;
 	private $randomAmount;
@@ -53,6 +35,7 @@ class Sugarcane extends Populator {
 	 *
 	 * @return mixed|void
 	 */
+	 
 	public function populate(ChunkManager $level, $chunkX, $chunkZ, Random $random){
 		$this->level = $level;
 		$amount = $random->nextRange(0, $this->randomAmount + 1) + $this->baseAmount;
@@ -81,6 +64,7 @@ class Sugarcane extends Populator {
 	 *
 	 * @return bool
 	 */
+	 
 	private function canSugarcaneStay($x, $y, $z){
 		$b = $this->level->getBlockIdAt($x, $y, $z);
 		$below = $this->level->getBlockIdAt($x, $y - 1, $z);
@@ -100,6 +84,7 @@ class Sugarcane extends Populator {
 	 *
 	 * @return int
 	 */
+	 
 	private function getHighestWorkableBlock($x, $z){
 		for($y = 127; $y >= 0; --$y){
 			$b = $this->level->getBlockIdAt($x, $y, $z);
