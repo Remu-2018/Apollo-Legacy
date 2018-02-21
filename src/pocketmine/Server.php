@@ -1452,29 +1452,15 @@ class Server{
         }, $microseconds);
     }
 
-    public function about(){
-        $version = implode(",",ProtocolInfo::MINECRAFT_VERSION);
-        $string = "
-
-  _____            _               _____
- / ____|          (_)             |  __ \
-| |  __  ___ _ __  _ ___ _   _ ___| |__) | __ ___
-| | |_ |/ _ \ '_ \| / __| | | / __|  ___/ '__/ _ \
-| |__| |  __/ | | | \__ \ |_| \__ \ |   | | | (_) |
- \_____|\___|_| |_|_|___/\__, |___/_|   |_|  \___/
-                          __/ |
-                         |___/
-
-	Version: §6" . $this->getPocketMineVersion() . ' (' . $this->getShortGitCommit() . ')§f
-	Client Version: §b' . $version . '§f
-	PHP Version: §e' . PHP_VERSION . '§f
-	OS: §6' . PHP_OS .'§f
-	This core is maintained by §dGenisysPro§f (https://github.com/GenisysPro)
-	Discord Group chat: §ehttps://discord.gg/WrKzRNn §f
-	Chatroom on QQ: §a559301590 §f
-	Welcome to donate us on QQ: §c1912003473
+public function about(){
+		$string = "	
+§3Apollo §fis a fork of PocketMine-MP, made by §5Apollo-SoftwareTeam§f.
+Version: §6" . $this->getPocketMineVersion() . ' §f
+Client Version: §b' . ProtocolInfo::MINECRAFT_VERSION_NETWORK . '§f
+PHP Version: §e' . PHP_VERSION . '§f
+OS: §6' . PHP_OS .'§f
 	';
-
+	
         $this->getLogger()->info($string);
     }
 
