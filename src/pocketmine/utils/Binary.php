@@ -321,7 +321,7 @@ class Binary{
      * @return string
      */
     public static function writeLFloat(float $value) : string{
-        return pack("g", $value);
+    //    return pack("g", $value);
     }
 
     /**
