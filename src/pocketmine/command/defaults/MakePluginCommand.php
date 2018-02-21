@@ -77,7 +77,7 @@ class MakePluginCommand extends VanillaCommand {
 			return true;
 		}
 
-		$pharPath = Server::getInstance()->getPluginPath() . DIRECTORY_SEPARATOR . "Apollo" . DIRECTORY_SEPARATOR . $description->getName() . "_v" . $description->getVersion() . "_" . date("Y-m-d") . ".phar";
+		$pharPath = Server::getInstance()->getPluginPath() . DIRECTORY_SEPARATOR . "Turanic" . DIRECTORY_SEPARATOR . $description->getName() . "_v" . $description->getVersion() . "_" . date("Y-m-d") . ".phar";
 		if(file_exists($pharPath)){
 			$sender->sendMessage("Phar plugin already exists, overwriting...");
 			@unlink($pharPath);

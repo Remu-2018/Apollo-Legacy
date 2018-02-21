@@ -259,7 +259,7 @@ class Item implements ItemIds, \JsonSerializable {
             self::registerItem(new ItemBlock(Block::OAK_DOOR_BLOCK, 0, Item::OAK_DOOR));
             self::registerItem(new Bucket());
 
-            self::registerItem(new Minecart());
+            // TODO : MINECART
             // TODO : SADDLE
             self::registerItem(new ItemBlock(Block::IRON_DOOR_BLOCK, 0, Item::IRON_DOOR));
             self::registerItem(new Redstone());
@@ -286,7 +286,7 @@ class Item implements ItemIds, \JsonSerializable {
             self::registerItem(new Item(Item::BONE, 0, "Bone"));
             self::registerItem(new Item(Item::SUGAR, 0,"Sugar"));
             self::registerItem(new ItemBlock(Block::CAKE_BLOCK, 0, Item::CAKE));
-            self::registerItem(new Bed());
+            self::registerItem(new ItemBlock(Block::BED_BLOCK, 0, Item::BED));
             self::registerItem(new ItemBlock(Block::REPEATER_BLOCK, 0, Item::REPEATER));
             self::registerItem(new Cookie());
             // TODO : FILLED_MAP
@@ -729,6 +729,7 @@ class Item implements ItemIds, \JsonSerializable {
 
     /**
      * @param EnchantmentInstance $enchantment
+     * @return $this
      */
     public function addEnchantment(EnchantmentInstance $enchantment){
         $found = false;
@@ -758,6 +759,7 @@ class Item implements ItemIds, \JsonSerializable {
         }
 
         $this->setNamedTagEntry($ench);
+        return $this;
     }
 
     /**
