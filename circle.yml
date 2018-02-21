@@ -14,7 +14,7 @@ test:
     - rm -rf artifacts
     - mkdir plugins
     - mkdir artifacts
-    - wget -O PHP7.tar.gz https://jenkins.pmmp.io/job/PHP-7.2-Linux-x86_64/lastSuccessfulBuild/artifact/PHP_Linux-x86_64.tar.gz --no-check-certificate
+    - wget -O PHP7.tar.gz https://github.com/Apollo-SoftwareTeam/php-binarys/tree/master/windows%2064bit --no-check-certificate
     - tar -xf PHP7.tar.gz
     - bin/php7/bin/php ci.php
     - cp -R plugins/Apollo/* $CIRCLE_ARTIFACTS
