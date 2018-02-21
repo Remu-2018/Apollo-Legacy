@@ -91,7 +91,7 @@ class BlockFactory extends Block {
             self::registerBlock(new Lapis());
             self::registerBlock(new Sandstone());
             self::registerBlock(new Dispenser());
-            self::registerBlock(new Noteblock());
+           // self::registerBlock(new Noteblock());
             self::registerBlock(new Bed());
             self::registerBlock(new PoweredRail());
             self::registerBlock(new DetectorRail());
