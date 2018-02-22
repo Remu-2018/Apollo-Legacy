@@ -1643,7 +1643,7 @@ OS: §6' . PHP_OS .'§f
             $lang = $this->getProperty("settings.language", BaseLang::FALLBACK_LANGUAGE);
             if(file_exists($this->filePath . "src/pocketmine/resources/Apollo_$lang.yml")){
                 $content = file_get_contents($file = $this->filePath . "src/pocketmine/resources/Apollo_$lang.yml");
-            }else if $content = file_get_contents($file = $this->filePath . "src/pocketmine/resources/Apollo_eng.yml");
+          //  }else if $content = file_get_contents($file = $this->filePath . "src/pocketmine/resources/Apollo_eng.yml");
             //    $content = file_get_contents($file = $this->filePath . "src/pocketmine/resources/genisys_zho.yml");
            // }else{
            			// $content = file_get_contents($file = $this->filePath . "src/pocketmine/resources/Apollo_eng.yml");
