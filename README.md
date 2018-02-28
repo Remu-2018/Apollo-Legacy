@@ -1,3 +1,5 @@
+wereb gone drob 32bit soon because apollo bugs
+
 ![Apollo](http://i.imgur.com/KBlbnkp.png)
 
 Apollo is a Minecraft: PE Server Software with an improved Generator and a lot more features.  
