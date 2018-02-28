@@ -1,4 +1,4 @@
-wereb gone drob 32bit soon because apollo bugs
+# were gone drob 32bit soon because apollo bugs
 
 ![Apollo](http://i.imgur.com/KBlbnkp.png)
 
