@@ -19,12 +19,14 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\permission;
 
 use pocketmine\Server;
 use pocketmine\utils\MainLogger;
 
-class BanList {
+class BanList{
 
 	/** @var BanEntry[] */
 	private $list = [];
@@ -38,28 +40,39 @@ class BanList {
 	/**
 	 * @param string $file
 	 */
-	public function __construct($file){
+	public function __construct(string $file){
 		$this->file = $file;
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function isEnabled(){
+	public function isEnabled() : bool{
 		return $this->enabled === true;
 	}
 
 	/**
 	 * @param bool $flag
 	 */
-	public function setEnabled($flag){
-		$this->enabled = (bool) $flag;
+	public function setEnabled(bool $flag){
+		$this->enabled = $flag;
+	}
+
+	/**
+	 * @param string $name
+	 *
+	 * @return BanEntry|null
+	 */
+	public function getEntry(string $name) : ?BanEntry{
+		$this->removeExpired();
+
+		return $this->list[strtolower($name)] ?? null;
 	}
 
 	/**
 	 * @return BanEntry[]
 	 */
-	public function getEntries(){
+	public function getEntries() : array{
 		$this->removeExpired();
 
 		return $this->list;
@@ -70,7 +83,7 @@ class BanList {
 	 *
 	 * @return bool
 	 */
-	public function isBanned($name){
+	public function isBanned(string $name) : bool{
 		$name = strtolower($name);
 		if(!$this->isEnabled()){
 			return false;
@@ -97,7 +110,7 @@ class BanList {
 	 *
 	 * @return BanEntry
 	 */
-	public function addBan($target, $reason = null, $expires = null, $source = null){
+	public function addBan(string $target, string $reason = null, \DateTime $expires = null, string $source = null) : BanEntry{
 		$entry = new BanEntry($target);
 		$entry->setSource($source ?? $entry->getSource());
 		$entry->setExpires($expires);
@@ -112,7 +125,7 @@ class BanList {
 	/**
 	 * @param string $name
 	 */
-	public function remove($name){
+	public function remove(string $name){
 		$name = strtolower($name);
 		if(isset($this->list[$name])){
 			unset($this->list[$name]);
@@ -149,7 +162,7 @@ class BanList {
 	/**
 	 * @param bool $flag
 	 */
-	public function save($flag = true){
+	public function save(bool $flag = true){
 		$this->removeExpired();
 		$fp = @fopen($this->file, "w");
 		if(is_resource($fp)){

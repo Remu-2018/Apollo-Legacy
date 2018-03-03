@@ -19,10 +19,11 @@
  *
 */
 
+declare(strict_types=1);
+
 /**
  * Network-related classes
  */
-
 namespace pocketmine\network;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
@@ -31,7 +32,12 @@ use pocketmine\Player;
 /**
  * Classes that implement this interface will be able to be attached to players
  */
-interface SourceInterface {
+interface SourceInterface{
+
+	/**
+	 * Performs actions needed to start the interface after it is registered.
+	 */
+	public function start();
 
 	/**
 	 * Sends a DataPacket to the interface, returns an unique identifier for the packet if $needACK is true
@@ -41,7 +47,7 @@ interface SourceInterface {
 	 * @param bool       $needACK
 	 * @param bool       $immediate
 	 *
-	 * @return int
+	 * @return int|null
 	 */
 	public function putPacket(Player $player, DataPacket $packet, bool $needACK = false, bool $immediate = true);
 
@@ -50,7 +56,6 @@ interface SourceInterface {
 	 *
 	 * @param Player $player
 	 * @param string $reason
-	 *
 	 */
 	public function close(Player $player, string $reason = "unknown reason");
 
@@ -66,7 +71,6 @@ interface SourceInterface {
 
 	public function shutdown();
 
-    public function start();
+	public function emergencyShutdown();
 
-    public function emergencyShutdown();
 }

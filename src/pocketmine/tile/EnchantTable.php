@@ -2,69 +2,51 @@
 
 /*
  *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
- */
+ *
+*/
 
 declare(strict_types=1);
 
 namespace pocketmine\tile;
 
 use pocketmine\item\Item;
-use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\Player;
 
-class EnchantTable extends Spawnable implements Nameable {
-    use NameableTrait;
+class EnchantTable extends Spawnable implements Nameable{
+	use NameableTrait;
 
 	/**
-	 * EnchantTable constructor.
-	 *
-	 * @param Level       $level
-	 * @param CompoundTag $nbt
+	 * @return string
 	 */
-	public function __construct(Level $level, CompoundTag $nbt){
-		parent::__construct($level, $nbt);
+	public function getDefaultName() : string{
+		return "Enchanting Table";
 	}
 
-	public function getDefaultName(): string{
-        return "Enchanting Table";
-    }
+	public function addAdditionalSpawnData(CompoundTag $nbt) : void{
+		if($this->hasName()){
+			$nbt->setTag($this->namedtag->getTag("CustomName"));
+		}
+	}
 
-    /**
-     * @param CompoundTag $nbt
-     */
-    public function addAdditionalSpawnData(CompoundTag $nbt){
-        if($this->hasName()){
-            $nbt->setTag($this->namedtag->getTag("CustomName"));
-        }
-    }
-
-    /**
-     * @param CompoundTag $nbt
-     * @param Vector3 $pos
-     * @param null $face
-     * @param Item|null $item
-     * @param null $player
-     */
-    protected static function createAdditionalNBT(CompoundTag $nbt, Vector3 $pos, $face = null, $item = null, $player = null){
-        if($item !== null and $item->hasCustomName()){
-            $nbt->setString("CustomName", $item->getCustomName());
-        }
-    }
+	protected static function createAdditionalNBT(CompoundTag $nbt, Vector3 $pos, ?int $face = null, ?Item $item = null, ?Player $player = null) : void{
+		if($item !== null and $item->hasCustomName()){
+			$nbt->setString("CustomName", $item->getCustomName());
+		}
+	}
 }

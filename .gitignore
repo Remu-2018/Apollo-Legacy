@@ -1,15 +1,11 @@
 players/*
 worlds/*
-plugins/*
-bin/*
+bin*/*
 timings/*
+crashdumps/*
 *.log
 *.txt
-*.phar
-server.properties
-/pocketmine.yml
 memoryDump_*/*
-resource_packs/
 
 # Common IDEs
 .idea/
@@ -28,4 +24,18 @@ Desktop.ini
 # Sphinx-doc
 /docs/build/
 !/docs/requirements.txt
-.github/ISSUE_TEMPLATE.md
+
+# Composer
+vendor/*
+
+# Travis files
+test_data/*
+
+# Doxygen
+Documentation/*
+
+\.buildpath
+
+\.project
+
+\.settings/

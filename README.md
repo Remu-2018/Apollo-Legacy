@@ -1,5 +1,3 @@
-# were gone drob 32bit soon because apollo bugs
-
 ![Apollo](http://i.imgur.com/KBlbnkp.png)
 
 Apollo is a Minecraft: PE Server Software with an improved Generator and a lot more features.  
@@ -18,28 +16,16 @@ Apollo is a Minecraft: PE Server Software with an improved Generator and a lot m
 - we have a web site [Apollope.ml](https://apollope.ml)
 - We are a edited version of PmmP. We have edited their generators to our version and have improved the performance
 - You can download .phar from Circle CI. Tab to latest build,tap to artifacts selection, tap to DevTools and download Apollo1.0dev.phar
+
+## Cradits 
+
+- DaPorkchop (DaMatrix)
+
+- pmmp
+
+- all other poeple
  
 ## TODO :
-
-- [ ] translate all
-
-- [X] update generator
-
-- [X] add enchanting (not fully work but it works)
-
-- [X] more blocks and items off the latest version of mcpe (30% done)
-
-- [X] more features with items and block (10% done)
-
-- [ ] improve the generator
-
-- [ ] fix any bugs that are left
-
-- [X] implement xp and more xp things
-
-- [X] inplement mob ai and riding entitys
-
-- [ ] importing stuff of the old Apollo from Nycuro (%10 done)
 
  If you have epic ideas, create an issue and tell us the idea!
 

@@ -2,28 +2,28 @@
 
 /*
  *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
- */
+ *
+*/
 
 declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\entity\Effect;
 use pocketmine\entity\Living;
 use pocketmine\item\FoodSource;
 use pocketmine\item\Item;
@@ -32,7 +32,7 @@ use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 
-class Cake extends Transparent implements FoodSource {
+class Cake extends Transparent implements FoodSource{
 
 	protected $id = self::CAKE_BLOCK;
 
@@ -45,27 +45,29 @@ class Cake extends Transparent implements FoodSource {
 	}
 
 	public function getName() : string{
-		return "Cake";
+		return "Cake Block";
 	}
 
-	protected function recalculateBoundingBox(){
+	protected function recalculateBoundingBox() : ?AxisAlignedBB{
 
-        $f = $this->getDamage() * 0.125; //1 slice width
+		$f = $this->getDamage() * 0.125; //1 slice width
 
-        return new AxisAlignedBB(
-            $this->x + 0.0625 + $f,
-            $this->y,
-            $this->z + 0.0625,
-            $this->x + 1 - 0.0625,
-            $this->y + 0.5,
-            $this->z + 1 - 0.0625
-        );
+		return new AxisAlignedBB(
+			$this->x + 0.0625 + $f,
+			$this->y,
+			$this->z + 0.0625,
+			$this->x + 1 - 0.0625,
+			$this->y + 0.5,
+			$this->z + 1 - 0.0625
+		);
 	}
 
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
 		$down = $this->getSide(Vector3::SIDE_DOWN);
 		if($down->getId() !== self::AIR){
-			return $this->getLevel()->setBlock($blockReplace, $this, true, true);
+			$this->getLevel()->setBlock($blockReplace, $this, true, true);
+
+			return true;
 		}
 
 		return false;
@@ -87,33 +89,34 @@ class Cake extends Transparent implements FoodSource {
 		return [];
 	}
 
+	public function isAffectedBySilkTouch() : bool{
+		return false;
+	}
+
 	public function onActivate(Item $item, Player $player = null) : bool{
-        if($player !== null){
-            $player->consumeObject($this);
-            return true;
-  		}
+		if($player !== null){
+			$player->consumeObject($this);
+			return true;
+		}
 
 		return false;
 	}
 
-	public function requiresHunger(): bool{
-        return true;
-    }
-
-    /**
-	 * @return int
-	 */
 	public function getFoodRestore() : int{
 		return 2;
 	}
 
-	/**
-	 * @return float
-	 */
 	public function getSaturationRestore() : float{
 		return 0.4;
 	}
 
+	public function requiresHunger() : bool{
+		return true;
+	}
+
+	/**
+	 * @return Block
+	 */
 	public function getResidue(){
 		$clone = clone $this;
 		$clone->meta++;
@@ -123,11 +126,14 @@ class Cake extends Transparent implements FoodSource {
 		return $clone;
 	}
 
+	/**
+	 * @return Effect[]
+	 */
 	public function getAdditionalEffects() : array{
 		return [];
 	}
 
-	public function onConsume(Living $consumer){
-        $this->level->setBlock($this, $this->getResidue());
-    }
+	public function onConsume(Living $consumer) : void{
+		$this->level->setBlock($this, $this->getResidue());
+	}
 }

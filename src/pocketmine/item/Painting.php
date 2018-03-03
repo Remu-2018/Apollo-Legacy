@@ -2,53 +2,45 @@
 
 /*
  *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
- */
+ *
+*/
 
 declare(strict_types=1);
 
 namespace pocketmine\item;
 
 use pocketmine\block\Block;
-use pocketmine\entity\Entity;
+use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 
-class Painting extends Item {
-
+class Painting extends Item{
 	public function __construct(int $meta = 0){
-		parent::__construct(self::PAINTING, 0, "Painting");
+		parent::__construct(self::PAINTING, $meta, "Painting");
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function canBeActivated() : bool{
-		return true;
-	}
-
-	public function onActivate(Player $player, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickPos) : bool{
+	public function onActivate(Level $level, Player $player, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector) : bool{
 		if($blockClicked->isTransparent() === false and $face > 1 and $blockReplace->isSolid() === false){
 			$faces = [
 				2 => 1,
 				3 => 3,
 				4 => 0,
 				5 => 2,
+
 			];
 			$motives = [
 				// Motive Width Height
@@ -71,7 +63,7 @@ class Painting extends Item {
 				["Stage", 2, 2],
 				["Void", 2, 2],
 				["SkullAndRoses", 2, 2],
-				["Wither", 2, 2],
+				//array("Wither", 2, 2),
 				["Fighters", 4, 2],
 				["Skeleton", 4, 3],
 				["DonkeyKong", 4, 3],
@@ -79,38 +71,20 @@ class Painting extends Item {
 				["Pigscene", 4, 4],
 				["Flaming Skull", 4, 4],
 			];
-
-			$right = [4, 5, 3, 2];
-
-			$validMotives = [];
-			foreach($motives as $motive){
-				$valid = true;
-				for($x = 0; $x < $motive[1] && $valid; $x++){
-					for($z = 0; $z < $motive[2] && $valid; $z++){
-						if($blockClicked->getSide($right[$face - 2], $x)->isTransparent() ||
-							$blockClicked->getSide(Vector3::SIDE_UP, $z)->isTransparent() ||
-                            $blockReplace->getSide($right[$face - 2], $x)->isSolid() ||
-                            $blockReplace->getSide(Vector3::SIDE_UP, $z)->isSolid()
-						){
-							$valid = false;
-						}
-					}
-				}
-
-				if($valid){
-					$validMotives[] = $motive;
-				}
-			}
-
-			$motive = $validMotives[array_rand($validMotives)];
-
-            $nbt = Entity::createBaseNBT($blockClicked, null, $faces[$face] * 90);
-            $nbt->setString("Motive", $motive[0]);
-
-			$painting = Entity::createEntity("Painting", $player->getLevel(), $nbt);
-			if($painting != null) $painting->spawnToAll();
-
-            $this->count--;
+			$motive = $motives[mt_rand(0, count($motives) - 1)];
+			$data = [
+				"x" => $blockClicked->x,
+				"y" => $blockClicked->y,
+				"z" => $blockClicked->z,
+				"yaw" => $faces[$face] * 90,
+				"Motive" => $motive[0],
+			];
+			//TODO
+			//$e = $server->api->entity->add($level, ENTITY_OBJECT, OBJECT_PAINTING, $data);
+			//$e->spawnToAll();
+			/*if(($player->gamemode & 0x01) === 0x00){
+				$player->removeItem(Item::get($this->getId(), $this->getDamage(), 1));
+			}*/
 
 			return true;
 		}

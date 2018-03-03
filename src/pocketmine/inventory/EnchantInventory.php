@@ -29,11 +29,11 @@ use pocketmine\Player;
 
 class EnchantInventory extends ContainerInventory{
 
-	/** @var Position */
+	/** @var FakeBlockMenu */
 	protected $holder;
 
 	public function __construct(Position $pos){
-		parent::__construct($pos->asPosition());
+		parent::__construct(new FakeBlockMenu($this, $pos));
 	}
 
 	public function getNetworkType() : int{
@@ -50,21 +50,15 @@ class EnchantInventory extends ContainerInventory{
 
 	/**
 	 * This override is here for documentation and code completion purposes only.
-	 * @return Position
+	 * @return FakeBlockMenu
 	 */
 	public function getHolder(){
 		return $this->holder;
 	}
 
-	public function onClose(Player $who){
+	public function onClose(Player $who) : void{
 		parent::onClose($who);
 
-		foreach($this->getContents() as $item){
-            if($who->getInventory()->canAddItem($item)){
-                $who->getInventory()->addItem($item);
-            }else{
-                if(!$item->isNull()) $this->getHolder()->getLevel()->dropItem($this->getHolder()->add(0.5,0.5,0.5), $item);
-            }
-        }
+		$this->dropContents($this->holder->getLevel(), $this->holder->add(0.5, 0.5, 0.5));
 	}
 }

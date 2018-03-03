@@ -25,13 +25,14 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
+use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
 #ifndef COMPILE
 use pocketmine\utils\Binary;
 #endif
 
 class PlayerHotbarPacket extends DataPacket{
-	const NETWORK_ID = ProtocolInfo::PLAYER_HOTBAR_PACKET;
+	public const NETWORK_ID = ProtocolInfo::PLAYER_HOTBAR_PACKET;
 
 	/** @var int */
 	public $selectedHotbarSlot;
@@ -60,5 +61,9 @@ class PlayerHotbarPacket extends DataPacket{
 			$this->putUnsignedVarInt($slot);
 		}
 		$this->putBool($this->selectHotbarSlot);
+	}
+
+	public function handle(NetworkSession $session) : bool{
+		return $session->handlePlayerHotbar($this);
 	}
 }

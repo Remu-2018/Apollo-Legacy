@@ -2,23 +2,22 @@
 
 /*
  *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
- */
+ *
+*/
 
 declare(strict_types=1);
 
@@ -28,9 +27,9 @@ use pocketmine\item\TieredTool;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
 
-class CobblestoneWall extends Transparent {
-	const NONE_MOSSY_WALL = 0;
-	const MOSSY_WALL = 1;
+class CobblestoneWall extends Transparent{
+	public const NONE_MOSSY_WALL = 0;
+	public const MOSSY_WALL = 1;
 
 	protected $id = self::COBBLESTONE_WALL;
 
@@ -38,58 +37,58 @@ class CobblestoneWall extends Transparent {
 		$this->meta = $meta;
 	}
 
-    public function getToolType() : int{
-        return BlockToolType::TYPE_PICKAXE;
-    }
+	public function getToolType() : int{
+		return BlockToolType::TYPE_PICKAXE;
+	}
 
-    public function getToolHarvestLevel() : int{
-        return TieredTool::TIER_WOODEN;
-    }
+	public function getToolHarvestLevel() : int{
+		return TieredTool::TIER_WOODEN;
+	}
 
-    public function getHardness() : float{
-        return 2;
-    }
+	public function getHardness() : float{
+		return 2;
+	}
 
-    public function getName() : string{
-        if($this->meta === 0x01){
-            return "Mossy Cobblestone Wall";
-        }
+	public function getName() : string{
+		if($this->meta === 0x01){
+			return "Mossy Cobblestone Wall";
+		}
 
-        return "Cobblestone Wall";
-    }
+		return "Cobblestone Wall";
+	}
 
-	protected function recalculateBoundingBox(){
+	protected function recalculateBoundingBox() : ?AxisAlignedBB{
+		//walls don't have any special collision boxes like fences do
 
 		$north = $this->canConnect($this->getSide(Vector3::SIDE_NORTH));
 		$south = $this->canConnect($this->getSide(Vector3::SIDE_SOUTH));
 		$west = $this->canConnect($this->getSide(Vector3::SIDE_WEST));
 		$east = $this->canConnect($this->getSide(Vector3::SIDE_EAST));
 
-		$n = $north ? 0 : 0.25;
-		$s = $south ? 1 : 0.75;
-		$w = $west ? 0 : 0.25;
-		$e = $east ? 1 : 0.75;
-
-		if($north and $south and !$west and !$east){
-			$w = 0.3125;
-			$e = 0.6875;
-		}elseif(!$north and !$south and $west and $east){
-			$n = 0.3125;
-			$s = 0.6875;
+		$inset = 0.25;
+		if(
+			$this->getSide(Vector3::SIDE_UP)->getId() === Block::AIR and //if there is a block on top, it stays as a post
+			(
+				($north and $south and !$west and !$east) or
+				(!$north and !$south and $west and $east)
+			)
+		){
+			//If connected to two sides on the same axis but not any others, AND there is not a block on top, there is no post and the wall is thinner
+			$inset = 0.3125;
 		}
 
 		return new AxisAlignedBB(
-			$this->x + $w,
+			$this->x + ($west ? 0 : $inset),
 			$this->y,
-			$this->z + $n,
-			$this->x + $e,
+			$this->z + ($north ? 0 : $inset),
+			$this->x + 1 - ($east ? 0 : $inset),
 			$this->y + 1.5,
-			$this->z + $s
+			$this->z + 1 - ($south ? 0 : $inset)
 		);
 	}
 
 	public function canConnect(Block $block){
-		return ($block->getId() !== self::COBBLE_WALL and $block->getId() !== self::FENCE_GATE) ? $block->isSolid() and !$block->isTransparent() : true;
+		return $block instanceof static or $block instanceof FenceGate or ($block->isSolid() and !$block->isTransparent());
 	}
 
 }

@@ -2,45 +2,42 @@
 
 /*
  *
- *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
  *
 */
 
+declare(strict_types=1);
+
 /**
  * Command handling related classes
  */
-
 namespace pocketmine\command;
 
-use pocketmine\command\overload\{
-    CommandEnum, CommandOverload, CommandParameter
-};
 use pocketmine\event\TextContainer;
 use pocketmine\event\TimingsHandler;
 use pocketmine\event\TranslationContainer;
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;
 
-abstract class Command {
+abstract class Command{
 
 	/** @var string */
 	private $name;
+	/** @var array */
+	protected $commandData = null;
 
 	/** @var string */
 	private $nextLabel;
@@ -48,9 +45,7 @@ abstract class Command {
 	/** @var string */
 	private $label;
 
-	/**
-	 * @var string[]
-	 */
+	/** @var string[] */
 	private $aliases = [];
 
 	/**
@@ -67,53 +62,27 @@ abstract class Command {
 	/** @var string */
 	protected $usageMessage;
 
+	/** @var string|null */
+	private $permission = null;
+
 	/** @var string */
 	private $permissionMessage = null;
-	
-	protected $pocketminePermission = null;
-	
-	private $permissionLevel = 0;
 
 	/** @var TimingsHandler */
 	public $timings;
-	
-	/** @var CommandOverload[] */
-	public $overloads = [];
 
-    /**
-     * @param string $name
-     * @param string $description
-     * @param string $usageMessage
-     * @param string[] $aliases
-     * @param array $overloads
-     */
-	public function __construct($name, $description = "", $usageMessage = null, array $aliases = [], array $overloads = []){
-		$this->name = $this->nextLabel = $this->label = $name;
-		$this->setDescription($description);
-		$this->usageMessage = $usageMessage === null ? "/" . $name : $usageMessage;
-		$this->setAliases($aliases);
-		$this->timings = new TimingsHandler("** Command: " . $name);
-		
-		if(count($overloads) == 0){
-			self::applyDefaultSettings($this);
-		}else{
-			$this->overloads = $overloads;
-		}
-	}
-	
 	/**
-	 * @return array
+	 * @param string   $name
+	 * @param string   $description
+	 * @param string   $usageMessage
+	 * @param string[] $aliases
 	 */
-	public function getOverloads() : array{
-		return $this->overloads;
-	}
-	
-	public function addOverload(CommandOverload $overload){
-		$this->overloads[$overload->getName()] = $overload;
-	}
-	
-	public function getOverload(string $name){
-		return $this->overloads[$name] ?? null;
+	public function __construct(string $name, string $description = "", string $usageMessage = null, array $aliases = []){
+		$this->name = $name;
+		$this->setLabel($name);
+		$this->setDescription($description);
+		$this->usageMessage = $usageMessage ?? ("/" . $name);
+		$this->setAliases($aliases);
 	}
 
 	/**
@@ -123,7 +92,7 @@ abstract class Command {
 	 *
 	 * @return mixed
 	 */
-	public abstract function execute(CommandSender $sender, string $commandLabel, array $args);
+	abstract public function execute(CommandSender $sender, string $commandLabel, array $args);
 
 	/**
 	 * @return string
@@ -133,30 +102,18 @@ abstract class Command {
 	}
 
 	/**
-	 * @return string
+	 * @return string|null
 	 */
 	public function getPermission(){
-		return $this->pocketminePermission ?? null;
+		return $this->permission;
 	}
 
 
 	/**
 	 * @param string|null $permission
 	 */
-	public function setPermission($permission){
-		if($permission !== null){
-			$this->pocketminePermission = $permission;
-		}else{
-			unset($this->pocketminePermission);
-		}
-	}
-	
-	public function getPermissionLevel() : int{
-		return $this->permissionLevel;
-	}
-	
-	public function setPermissionLevel(int $level){
-		$this->permissionLevel = $level;
+	public function setPermission(string $permission = null){
+		$this->permission = $permission;
 	}
 
 	/**
@@ -164,8 +121,8 @@ abstract class Command {
 	 *
 	 * @return bool
 	 */
-	public function canExecute(CommandSender $target) : bool{
-		if($this->scanPermission($target)){
+	public function testPermission(CommandSender $target) : bool{
+		if($this->testPermissionSilent($target)){
 			return true;
 		}
 
@@ -183,7 +140,7 @@ abstract class Command {
 	 *
 	 * @return bool
 	 */
-	public function scanPermission(CommandSender $target) : bool{
+	public function testPermissionSilent(CommandSender $target) : bool{
 		if(($perm = $this->getPermission()) === null or $perm === ""){
 			return true;
 		}
@@ -197,37 +154,19 @@ abstract class Command {
 		return false;
 	}
 
-    /**
-     * @deprecated
-     * @param CommandSender $sender
-     * @return bool
-     */
-	public function testPermission(CommandSender $sender) : bool{
-		return $this->canExecute($sender);
-	}
-	
-	/**
-	 * @deprecated
-	 */
-	public function testPermissionSilent(CommandSender $sender) : bool{
-		return $this->scanPermission($sender);
-	}
-
 	/**
 	 * @return string
 	 */
-	public function getLabel(){
+	public function getLabel() : string{
 		return $this->label;
 	}
 
-	/**
-	 * @param $name
-	 *
-	 * @return bool
-	 */
-	public function setLabel($name){
+	public function setLabel(string $name) : bool{
 		$this->nextLabel = $name;
 		if(!$this->isRegistered()){
+			if($this->timings instanceof TimingsHandler){
+				$this->timings->remove();
+			}
 			$this->timings = new TimingsHandler("** Command: " . $name);
 			$this->label = $name;
 
@@ -244,7 +183,7 @@ abstract class Command {
 	 *
 	 * @return bool
 	 */
-	public function register(CommandMap $commandMap){
+	public function register(CommandMap $commandMap) : bool{
 		if($this->allowChangesFrom($commandMap)){
 			$this->commandMap = $commandMap;
 
@@ -259,7 +198,7 @@ abstract class Command {
 	 *
 	 * @return bool
 	 */
-	public function unregister(CommandMap $commandMap){
+	public function unregister(CommandMap $commandMap) : bool{
 		if($this->allowChangesFrom($commandMap)){
 			$this->commandMap = null;
 			$this->activeAliases = $this->aliases;
@@ -276,42 +215,42 @@ abstract class Command {
 	 *
 	 * @return bool
 	 */
-	private function allowChangesFrom(CommandMap $commandMap){
+	private function allowChangesFrom(CommandMap $commandMap) : bool{
 		return $this->commandMap === null or $this->commandMap === $commandMap;
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function isRegistered(){
+	public function isRegistered() : bool{
 		return $this->commandMap !== null;
 	}
 
 	/**
 	 * @return string[]
 	 */
-	public function getAliases(){
+	public function getAliases() : array{
 		return $this->activeAliases;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getPermissionMessage(){
+	public function getPermissionMessage() : string{
 		return $this->permissionMessage;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getDescription(){
+	public function getDescription() : string{
 		return $this->description;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getUsage(){
+	public function getUsage() : string{
 		return $this->usageMessage;
 	}
 
@@ -321,57 +260,37 @@ abstract class Command {
 	public function setAliases(array $aliases){
 		$this->aliases = $aliases;
 		if(!$this->isRegistered()){
-			$this->activeAliases = (array) $aliases;
+			$this->activeAliases = $aliases;
 		}
-	}
-	
-	public function getAliasesEnum() : CommandEnum{
-		$enum = new CommandEnum("aliases", $this->aliases);
-		return $enum;
 	}
 
 	/**
 	 * @param string $description
 	 */
-	public function setDescription($description){
-		if(strlen($description) > 0 and $description[0] == '%'){
-			$description = Server::getInstance()->getLanguage()->translateString($description);
-		}
+	public function setDescription(string $description){
 		$this->description = $description;
 	}
 
 	/**
 	 * @param string $permissionMessage
 	 */
-	public function setPermissionMessage($permissionMessage){
-		if(strlen($permissionMessage) > 0 and $permissionMessage[0] == '%'){
-			$permissionMessage = Server::getInstance()->getLanguage()->translateString($permissionMessage);
-		}
+	public function setPermissionMessage(string $permissionMessage){
 		$this->permissionMessage = $permissionMessage;
 	}
 
 	/**
 	 * @param string $usage
 	 */
-	public function setUsage($usage){
-		if(strlen($usage) > 0 and $usage[0] == '%'){
-			$usage = Server::getInstance()->getLanguage()->translateString($usage);
-		}
+	public function setUsage(string $usage){
 		$this->usageMessage = $usage;
 	}
 
-	public static function applyDefaultSettings(Command $cmd){
-		$defParam = new CommandParameter("args");
-		$overload = new CommandOverload("default", [$defParam]);
-		$cmd->addOverload($overload);
-	}
-
 	/**
-	 * @param CommandSender $source
-	 * @param string        $message
-	 * @param bool          $sendToSource
+	 * @param CommandSender        $source
+	 * @param TextContainer|string $message
+	 * @param bool                 $sendToSource
 	 */
-	public static function broadcastCommandMessage(CommandSender $source, $message, $sendToSource = true){
+	public static function broadcastCommandMessage(CommandSender $source, $message, bool $sendToSource = true){
 		if($message instanceof TextContainer){
 			$m = clone $message;
 			$result = "[" . $source->getName() . ": " . ($source->getServer()->getLanguage()->get($m->getText()) !== $m->getText() ? "%" : "") . $m->getText() . "]";
@@ -407,7 +326,7 @@ abstract class Command {
 	/**
 	 * @return string
 	 */
-	public function __toString(){
+	public function __toString() : string{
 		return $this->name;
 	}
 }

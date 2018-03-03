@@ -2,23 +2,22 @@
 
 /*
  *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
- */
+ *
+*/
 
 declare(strict_types=1);
 
@@ -30,7 +29,7 @@ use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 
-class FenceGate extends Transparent implements ElectricalAppliance {
+class FenceGate extends Transparent{
 
 	public function getHardness() : float{
 		return 2;
@@ -40,7 +39,9 @@ class FenceGate extends Transparent implements ElectricalAppliance {
 		return BlockToolType::TYPE_AXE;
 	}
 
-	protected function recalculateBoundingBox(){
+
+	protected function recalculateBoundingBox() : ?AxisAlignedBB{
+
 		if(($this->getDamage() & 0x04) > 0){
 			return null;
 		}
@@ -75,8 +76,8 @@ class FenceGate extends Transparent implements ElectricalAppliance {
 	}
 
 	public function getVariantBitmask() : int{
-	    return 0;
-    }
+		return 0;
+	}
 
 	public function onActivate(Item $item, Player $player = null) : bool{
 		$this->meta = (($this->meta ^ 0x04) & ~0x02);
@@ -91,6 +92,6 @@ class FenceGate extends Transparent implements ElectricalAppliance {
 	}
 
 	public function getFuelTime() : int{
-        return 300;
-    }
+		return 300;
+	}
 }

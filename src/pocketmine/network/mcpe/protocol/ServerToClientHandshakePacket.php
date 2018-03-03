@@ -25,8 +25,11 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
+
+use pocketmine\network\mcpe\NetworkSession;
+
 class ServerToClientHandshakePacket extends DataPacket{
-	const NETWORK_ID = ProtocolInfo::SERVER_TO_CLIENT_HANDSHAKE_PACKET;
+	public const NETWORK_ID = ProtocolInfo::SERVER_TO_CLIENT_HANDSHAKE_PACKET;
 
 	/**
 	 * @var string
@@ -44,5 +47,9 @@ class ServerToClientHandshakePacket extends DataPacket{
 
 	protected function encodePayload(){
 		$this->putString($this->jwt);
+	}
+
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleServerToClientHandshake($this);
 	}
 }

@@ -25,10 +25,12 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
+
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\NetworkSession;
 
 class ExplodePacket extends DataPacket{
-	const NETWORK_ID = ProtocolInfo::EXPLODE_PACKET;
+	public const NETWORK_ID = ProtocolInfo::EXPLODE_PACKET;
 
 	/** @var Vector3 */
 	public $position;
@@ -43,7 +45,7 @@ class ExplodePacket extends DataPacket{
 	}
 
 	protected function decodePayload(){
-		$this->position = $this->getVector3();
+		$this->position = $this->getVector3Obj();
 		$this->radius = (float) ($this->getVarInt() / 32);
 		$count = $this->getUnsignedVarInt();
 		for($i = 0; $i < $count; ++$i){
@@ -54,7 +56,7 @@ class ExplodePacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		$this->putVector3Nullable($this->position);
+		$this->putVector3Obj($this->position);
 		$this->putVarInt((int) ($this->radius * 32));
 		$this->putUnsignedVarInt(count($this->records));
 		if(count($this->records) > 0){
@@ -63,4 +65,9 @@ class ExplodePacket extends DataPacket{
 			}
 		}
 	}
+
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleExplode($this);
+	}
+
 }

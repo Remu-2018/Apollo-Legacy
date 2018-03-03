@@ -25,10 +25,12 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
+
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\NetworkSession;
 
 class SetEntityMotionPacket extends DataPacket{
-	const NETWORK_ID = ProtocolInfo::SET_ENTITY_MOTION_PACKET;
+	public const NETWORK_ID = ProtocolInfo::SET_ENTITY_MOTION_PACKET;
 
 	/** @var int */
 	public $entityRuntimeId;
@@ -37,11 +39,16 @@ class SetEntityMotionPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
-		$this->motion = $this->getVector3();
+		$this->motion = $this->getVector3Obj();
 	}
 
 	protected function encodePayload(){
 		$this->putEntityRuntimeId($this->entityRuntimeId);
-		$this->putVector3($this->motion);
+		$this->putVector3Obj($this->motion);
 	}
+
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleSetEntityMotion($this);
+	}
+
 }

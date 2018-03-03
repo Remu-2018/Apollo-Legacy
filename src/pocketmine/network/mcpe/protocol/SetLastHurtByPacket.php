@@ -25,8 +25,10 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
+use pocketmine\network\mcpe\NetworkSession;
+
 class SetLastHurtByPacket extends DataPacket{
-	const NETWORK_ID = ProtocolInfo::SET_LAST_HURT_BY_PACKET;
+	public const NETWORK_ID = ProtocolInfo::SET_LAST_HURT_BY_PACKET;
 
 	/** @var int */
 	public $entityTypeId;
@@ -37,5 +39,9 @@ class SetLastHurtByPacket extends DataPacket{
 
 	protected function encodePayload(){
 		$this->putVarInt($this->entityTypeId);
+	}
+
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleSetLastHurtBy($this);
 	}
 }

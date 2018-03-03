@@ -26,8 +26,11 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
+
+use pocketmine\network\mcpe\NetworkSession;
+
 class PlaySoundPacket extends DataPacket{
-	const NETWORK_ID = ProtocolInfo::PLAY_SOUND_PACKET;
+	public const NETWORK_ID = ProtocolInfo::PLAY_SOUND_PACKET;
 
 	/** @var string */
 	public $soundName;
@@ -57,5 +60,9 @@ class PlaySoundPacket extends DataPacket{
 		$this->putBlockPosition((int) ($this->x * 8), (int) ($this->y * 8), (int) ($this->z * 8));
 		$this->putLFloat($this->volume);
 		$this->putLFloat($this->pitch);
+	}
+
+	public function handle(NetworkSession $session) : bool{
+		return $session->handlePlaySound($this);
 	}
 }

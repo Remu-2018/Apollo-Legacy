@@ -2,56 +2,43 @@
 
 /*
  *
- *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
  *
 */
+
+declare(strict_types=1);
 
 namespace pocketmine\command\defaults;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 
-abstract class VanillaCommand extends Command {
-	const MAX_COORD = 30000000;
-	const MIN_COORD = -30000000;
-
-	/**
-	 * VanillaCommand constructor.
-	 *
-	 * @param string $name
-	 * @param string $description
-	 * @param null   $usageMessage
-	 * @param array  $aliases
-	 */
-	public function __construct($name, $description = "", $usageMessage = null, array $aliases = []){
-		parent::__construct($name, $description, $usageMessage, $aliases);
-	}
+abstract class VanillaCommand extends Command{
+	public const MAX_COORD = 30000000;
+	public const MIN_COORD = -30000000;
 
 	/**
 	 * @param CommandSender $sender
-	 * @param               $value
+	 * @param mixed         $value
 	 * @param int           $min
 	 * @param int           $max
 	 *
 	 * @return int
 	 */
-	protected function getInteger(CommandSender $sender, $value, $min = self::MIN_COORD, $max = self::MAX_COORD){
+	protected function getInteger(CommandSender $sender, $value, int $min = self::MIN_COORD, int $max = self::MAX_COORD) : int{
 		$i = (int) $value;
 
 		if($i < $min){
@@ -64,15 +51,15 @@ abstract class VanillaCommand extends Command {
 	}
 
 	/**
-	 * @param               $original
+	 * @param float         $original
 	 * @param CommandSender $sender
-	 * @param               $input
-	 * @param int           $min
-	 * @param int           $max
+	 * @param string        $input
+	 * @param float         $min
+	 * @param float         $max
 	 *
-	 * @return float|int
+	 * @return float
 	 */
-	protected function getRelativeDouble($original, CommandSender $sender, $input, $min = self::MIN_COORD, $max = self::MAX_COORD){
+	protected function getRelativeDouble(float $original, CommandSender $sender, string $input, float $min = self::MIN_COORD, float $max = self::MAX_COORD) : float{
 		if($input{0} === "~"){
 			$value = $this->getDouble($sender, substr($input, 1));
 
@@ -84,13 +71,13 @@ abstract class VanillaCommand extends Command {
 
 	/**
 	 * @param CommandSender $sender
-	 * @param               $value
-	 * @param int           $min
-	 * @param int           $max
+	 * @param mixed         $value
+	 * @param float         $min
+	 * @param float         $max
 	 *
-	 * @return float|int
+	 * @return float
 	 */
-	protected function getDouble(CommandSender $sender, $value, $min = self::MIN_COORD, $max = self::MAX_COORD){
+	protected function getDouble(CommandSender $sender, $value, float $min = self::MIN_COORD, float $max = self::MAX_COORD) : float{
 		$i = (double) $value;
 
 		if($i < $min){

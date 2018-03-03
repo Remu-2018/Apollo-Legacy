@@ -25,8 +25,10 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
+use pocketmine\network\mcpe\NetworkSession;
+
 class PurchaseReceiptPacket extends DataPacket{
-	const NETWORK_ID = ProtocolInfo::PURCHASE_RECEIPT_PACKET;
+	public const NETWORK_ID = ProtocolInfo::PURCHASE_RECEIPT_PACKET;
 
 	/** @var string[] */
 	public $entries = [];
@@ -43,5 +45,9 @@ class PurchaseReceiptPacket extends DataPacket{
 		foreach($this->entries as $entry){
 			$this->putString($entry);
 		}
+	}
+
+	public function handle(NetworkSession $session) : bool{
+		return $session->handlePurchaseReceipt($this);
 	}
 }

@@ -2,23 +2,22 @@
 
 /*
  *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
- */
+ *
+*/
 
 declare(strict_types=1);
 
@@ -27,27 +26,16 @@ namespace pocketmine\item;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 
-class Carrot extends Food {
-	/**
-	 * Carrot constructor.
-	 *
-	 * @param int $meta
-	 */
+class Carrot extends Food{
 	public function __construct(int $meta = 0){
-		$this->block = BlockFactory::get(Item::CARROT_BLOCK);
-		parent::__construct(self::CARROT, 0, "Carrot");
+		$this->block = BlockFactory::get(Block::CARROT_BLOCK);
+		parent::__construct(self::CARROT, $meta, "Carrot");
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getFoodRestore() : int{
 		return 3;
 	}
 
-	/**
-	 * @return float
-	 */
 	public function getSaturationRestore() : float{
 		return 4.8;
 	}

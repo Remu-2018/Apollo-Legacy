@@ -19,19 +19,19 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\metadata;
 
 use pocketmine\plugin\Plugin;
 
-interface Metadatable {
+interface Metadatable{
 
 	/**
 	 * Sets a metadata value in the implementing object's metadata store.
 	 *
 	 * @param string        $metadataKey
 	 * @param MetadataValue $newMetadataValue
-	 *
-	 * @return void
 	 */
 	public function setMetadata(string $metadataKey, MetadataValue $newMetadataValue);
 
@@ -61,8 +61,6 @@ interface Metadatable {
 	 *
 	 * @param string $metadataKey
 	 * @param Plugin $owningPlugin
-	 *
-	 * @return void
 	 */
 	public function removeMetadata(string $metadataKey, Plugin $owningPlugin);
 

@@ -2,23 +2,22 @@
 
 /*
  *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
- */
+ *
+*/
 
 declare(strict_types=1);
 
@@ -26,47 +25,47 @@ namespace pocketmine\event\entity;
 
 use pocketmine\entity\Effect;
 use pocketmine\entity\Entity;
-use pocketmine\event\Cancellable;
 
-class EntityEffectAddEvent extends EntityEvent implements Cancellable {
-
+/**
+ * Called when an effect is added to an Entity.
+ */
+class EntityEffectAddEvent extends EntityEffectEvent{
 	public static $handlerList = null;
 
-	/** @var Effect */
-	protected $effect;
-    protected $oldEffect;
+	/** @var Effect|null */
+	private $oldEffect;
 
-    /**
-     * EntityEffectAddEvent constructor.
-     *
-     * @param Entity $entity
-     * @param Effect $effect
-     * @param Effect $oldEffect
-     */
-	public function __construct(Entity $entity, Effect $effect, $oldEffect){
-		$this->entity = $entity;
-		$this->effect = $effect;
+	/**
+	 * @param Entity      $entity
+	 * @param Effect      $effect
+	 * @param Effect|null $oldEffect
+	 */
+	public function __construct(Entity $entity, Effect $effect, Effect $oldEffect = null){
+		parent::__construct($entity, $effect);
 		$this->oldEffect = $oldEffect;
 	}
 
 	/**
-	 * @return Effect
+	 * Returns whether the effect addition will replace an existing effect already applied to the entity.
+	 *
+	 * @return bool
 	 */
-	public function getEffect(){
-		return $this->effect;
+	public function willModify() : bool{
+		return $this->hasOldEffect();
 	}
 
-    /**
-     * @return bool
-     */
-    public function hasOldEffect() : bool{
-        return $this->oldEffect instanceof Effect;
-    }
+	/**
+	 * @return bool
+	 */
+	public function hasOldEffect() : bool{
+		return $this->oldEffect instanceof Effect;
+	}
 
-    /**
-     * @return Effect|null
-     */
-    public function getOldEffect(){
-        return $this->oldEffect;
-    }
+	/**
+	 * @return Effect|null
+	 */
+	public function getOldEffect(){
+		return $this->oldEffect;
+	}
+
 }

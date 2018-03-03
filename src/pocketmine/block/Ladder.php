@@ -2,22 +2,19 @@
 
 /*
  *
- *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
  *
 */
@@ -33,7 +30,7 @@ use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 
-class Ladder extends Transparent {
+class Ladder extends Transparent{
 
 	protected $id = self::LADDER;
 
@@ -57,55 +54,41 @@ class Ladder extends Transparent {
 		return 0.4;
 	}
 
-	public function onEntityCollide(Entity $entity){
+	public function canClimb() : bool{
+		return true;
+	}
+
+	public function onEntityCollide(Entity $entity) : void{
 		$entity->resetFallDistance();
 		$entity->onGround = true;
 	}
 
-	protected function recalculateBoundingBox(){
+	protected function recalculateBoundingBox() : ?AxisAlignedBB{
+		$f = 0.1875;
 
-		$f = 0.125;
+		$minX = $minZ = 0;
+		$maxX = $maxZ = 1;
 
 		if($this->meta === 2){
-			return new AxisAlignedBB(
-				$this->x,
-				$this->y,
-				$this->z + 1 - $f,
-				$this->x + 1,
-				$this->y + 1,
-				$this->z + 1
-			);
+			$minZ = 1 - $f;
 		}elseif($this->meta === 3){
-			return new AxisAlignedBB(
-				$this->x,
-				$this->y,
-				$this->z,
-				$this->x + 1,
-				$this->y + 1,
-				$this->z + $f
-			);
+			$maxZ = $f;
 		}elseif($this->meta === 4){
-			return new AxisAlignedBB(
-				$this->x + 1 - $f,
-				$this->y,
-				$this->z,
-				$this->x + 1,
-				$this->y + 1,
-				$this->z + 1
-			);
+			$minX = 1 - $f;
 		}elseif($this->meta === 5){
-			return new AxisAlignedBB(
-				$this->x,
-				$this->y,
-				$this->z,
-				$this->x + $f,
-				$this->y + 1,
-				$this->z + 1
-			);
+			$maxX = $f;
 		}
 
-		return null;
+		return new AxisAlignedBB(
+			$this->x + $minX,
+			$this->y,
+			$this->z + $minZ,
+			$this->x + $maxX,
+			$this->y + 1,
+			$this->z + $maxZ
+		);
 	}
+
 
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
 		if($blockClicked->isTransparent() === false){
@@ -113,11 +96,13 @@ class Ladder extends Transparent {
 				2 => 2,
 				3 => 3,
 				4 => 4,
-				5 => 5,
+				5 => 5
 			];
 			if(isset($faces[$face])){
 				$this->meta = $faces[$face];
-				return $this->getLevel()->setBlock($blockReplace, $this, true, true);
+				$this->getLevel()->setBlock($blockReplace, $this, true, true);
+
+				return true;
 			}
 		}
 
@@ -125,24 +110,21 @@ class Ladder extends Transparent {
 	}
 
 	public function onUpdate(int $type){
-		$faces = [
-			2 => 3,
-			3 => 2,
-			4 => 5,
-			5 => 4,
-		];
 		if($type === Level::BLOCK_UPDATE_NORMAL){
-			if(isset($faces[$this->meta])){
-				if($this->getSide($faces[$this->meta])->getId() === self::AIR){
-					$this->getLevel()->useBreakOn($this);
-				}
+			if(!$this->getSide($this->meta ^ 0x01)->isSolid()){ //Replace with common break method
+				$this->level->useBreakOn($this);
 				return Level::BLOCK_UPDATE_NORMAL;
 			}
 		}
+
 		return false;
 	}
 
 	public function getToolType() : int{
 		return BlockToolType::TYPE_AXE;
+	}
+
+	public function getVariantBitmask() : int{
+		return 0;
 	}
 }

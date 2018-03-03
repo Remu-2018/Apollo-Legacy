@@ -2,22 +2,19 @@
 
 /*
  *
- *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
  *
 */
@@ -28,7 +25,6 @@ namespace pocketmine\command\defaults;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\command\overload\CommandParameter;
 use pocketmine\command\utils\InvalidCommandSyntaxException;
 use pocketmine\event\TranslationContainer;
 use pocketmine\Player;
@@ -37,29 +33,25 @@ use pocketmine\utils\TextFormat;
 
 class GamemodeCommand extends VanillaCommand{
 
-	public function __construct($name){
+	public function __construct(string $name){
 		parent::__construct(
 			$name,
 			"%pocketmine.command.gamemode.description",
-			"%pocketmine.command.gamemode.usage",
-			["gm"]
+			"%commands.gamemode.usage"
 		);
 		$this->setPermission("pocketmine.command.gamemode");
-
-		$this->getOverload("default")->setParameter(0, new CommandParameter("gamemode", CommandParameter::TYPE_STRING, false));
-		$this->getOverload("default")->setParameter(1, new CommandParameter("player", CommandParameter::TYPE_TARGET, true));
 	}
 
-	public function execute(CommandSender $sender, string $currentAlias, array $args){
-		if(!$this->canExecute($sender)){
+	public function execute(CommandSender $sender, string $commandLabel, array $args){
+		if(!$this->testPermission($sender)){
 			return true;
 		}
 
 		if(count($args) === 0){
-            throw new InvalidCommandSyntaxException();
+			throw new InvalidCommandSyntaxException();
 		}
 
-		$gameMode = (int) Server::getGamemodeFromString($args[0]);
+		$gameMode = Server::getGamemodeFromString($args[0]);
 
 		if($gameMode === -1){
 			$sender->sendMessage("Unknown game mode");
@@ -72,22 +64,25 @@ class GamemodeCommand extends VanillaCommand{
 			$target = $sender->getServer()->getPlayer($args[1]);
 			if($target === null){
 				$sender->sendMessage(new TranslationContainer(TextFormat::RED . "%commands.generic.player.notFound"));
+
 				return true;
 			}
 		}elseif(!($sender instanceof Player)){
-            throw new InvalidCommandSyntaxException();
+			throw new InvalidCommandSyntaxException();
 		}
 
-		if($target->setGamemode($gameMode) == false){
-			$sender->sendMessage(TextFormat::RED . "Game mode change for " . $target->getName() . " failed!");
+		$target->setGamemode($gameMode);
+		if($gameMode !== $target->getGamemode()){
+			$sender->sendMessage("Game mode change for " . $target->getName() . " failed!");
 		}else{
 			if($target === $sender){
 				Command::broadcastCommandMessage($sender, new TranslationContainer("commands.gamemode.success.self", [Server::getGamemodeString($gameMode)]));
 			}else{
-				$target->sendMessage(new TranslationContainer("gameMode.changed"));
-				Command::broadcastCommandMessage($sender, new TranslationContainer("commands.gamemode.success.other", [$target->getName(), Server::getGamemodeString($gameMode)]));
+				$target->sendMessage(new TranslationContainer("gameMode.changed", [Server::getGamemodeString($gameMode)]));
+				Command::broadcastCommandMessage($sender, new TranslationContainer("commands.gamemode.success.other", [Server::getGamemodeString($gameMode), $target->getName()]));
 			}
 		}
+
 		return true;
 	}
 }

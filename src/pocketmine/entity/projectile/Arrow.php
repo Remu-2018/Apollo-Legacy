@@ -2,23 +2,22 @@
 
 /*
  *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
- */
+ *
+*/
 
 declare(strict_types=1);
 
@@ -26,127 +25,88 @@ namespace pocketmine\entity\projectile;
 
 use pocketmine\entity\Entity;
 use pocketmine\event\inventory\InventoryPickupArrowEvent;
-use pocketmine\item\Potion;
+use pocketmine\item\ItemFactory;
+use pocketmine\item\Item as ItemItem;
 use pocketmine\level\Level;
-use pocketmine\level\particle\MobSpellParticle;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\TakeItemEntityPacket;
 use pocketmine\Player;
-use pocketmine\item\Item;
-use pocketmine\Server;
 
-class Arrow extends Projectile {
-	const NETWORK_ID = self::ARROW;
+class Arrow extends Projectile{
+	public const NETWORK_ID = self::ARROW;
 
-	public $width = 0.5;
-	public $height = 0.5;
+	public $width = 0.25;
+	public $height = 0.25;
 
 	protected $gravity = 0.05;
 	protected $drag = 0.01;
-	
-	protected $sound = true;
-	protected $potionId = 0;
-    protected $damage = 2;
 
-	/**
-	 * Arrow constructor.
-	 *
-	 * @param Level       $level
-	 * @param CompoundTag $nbt
-	 * @param Entity|null $shootingEntity
-	 * @param bool        $critical
-	 */
+	protected $damage = 2;
+
 	public function __construct(Level $level, CompoundTag $nbt, Entity $shootingEntity = null, bool $critical = false){
-		if(!isset($nbt->Potion)){
-			$nbt->setShort("Potion", 0);
-		}
 		parent::__construct($level, $nbt, $shootingEntity);
-		$this->potionId = $this->namedtag->getShort("Potion", 0);
-        $this->setCritical($critical);
+		$this->setCritical($critical);
 	}
 
-    public function isCritical() : bool{
-        return $this->getGenericFlag(self::DATA_FLAG_CRITICAL);
-    }
-
-    public function setCritical(bool $value = true){
-        $this->setGenericFlag(self::DATA_FLAG_CRITICAL, $value);
-    }
-
-    public function getResultDamage() : int{
-        $base = parent::getResultDamage();
-        if($this->isCritical()){
-            return ($base + mt_rand(0, (int) ($base / 2) + 1));
-        }else{
-            return $base;
-        }
-    }
-
-	/**
-	 * @return int
-	 */
-	public function getPotionId() : int{
-		return $this->potionId;
+	public function isCritical() : bool{
+		return $this->getGenericFlag(self::DATA_FLAG_CRITICAL);
 	}
 
-    public function entityBaseTick(int $tickDiff = 1) : bool{
-        if($this->closed){
-            return false;
-        }
+	public function setCritical(bool $value = true){
+		$this->setGenericFlag(self::DATA_FLAG_CRITICAL, $value);
+	}
 
-        $hasUpdate = parent::entityBaseTick($tickDiff);
+	public function getResultDamage() : int{
+		$base = parent::getResultDamage();
+		if($this->isCritical()){
+			return ($base + mt_rand(0, (int) ($base / 2) + 1));
+		}else{
+			return $base;
+		}
+	}
 
-        if($this->onGround or $this->hadCollision){
-            $this->setCritical(false);
-            if($this->sound === true and $this->level !== null){ //Prevents error of $this->level returning null
-                $this->level->broadcastLevelSoundEvent($this, LevelSoundEventPacket::SOUND_BOW_HIT);
-                $this->sound = false;
-            }
-        }
+	public function entityBaseTick(int $tickDiff = 1) : bool{
+		if($this->closed){
+			return false;
+		}
 
-        if($this->potionId != 0){
-            if(!$this->onGround or ($this->onGround and (Server::getInstance()->getTick() % 4) == 0)){
-                $color = Potion::getColor($this->potionId - 1)->toArray();
-                $this->level->addParticle(new MobSpellParticle($this->add(
-                    $this->width / 2 + mt_rand(-100, 100) / 500,
-                    $this->height / 2 + mt_rand(-100, 100) / 500,
-                    $this->width / 2 + mt_rand(-100, 100) / 500), $color[0], $color[1], $color[2]));
-            }
-            $hasUpdate = true;
-        }
+		$hasUpdate = parent::entityBaseTick($tickDiff);
 
-        if($this->age > 1200){
-            $this->flagForDespawn();
-            $hasUpdate = true;
-        }
+		if($this->onGround or $this->hadCollision){
+			$this->setCritical(false);
+		}
 
-        return $hasUpdate;
-    }
+		if($this->age > 1200){
+			$this->flagForDespawn();
+			$hasUpdate = true;
+		}
+
+		return $hasUpdate;
+	}
 
 	public function onCollideWithPlayer(Player $player){
-        if(!$this->hadCollision){
-            return;
-        }
+		if(!$this->hadCollision){
+			return;
+		}
 
-        $item = Item::get(Item::ARROW);
+		$item = ItemFactory::get(ItemItem::ARROW, 0, 1);
 
-        $playerInventory = $player->getInventory();
-        if($player->isSurvival() and !$playerInventory->canAddItem($item)){
-            return;
-        }
+		$playerInventory = $player->getInventory();
+		if($player->isSurvival() and !$playerInventory->canAddItem($item)){
+			return;
+		}
 
-        $this->server->getPluginManager()->callEvent($ev = new InventoryPickupArrowEvent($playerInventory, $this));
-        if($ev->isCancelled()){
-            return;
-        }
+		$this->server->getPluginManager()->callEvent($ev = new InventoryPickupArrowEvent($playerInventory, $this));
+		if($ev->isCancelled()){
+			return;
+		}
 
-        $pk = new TakeItemEntityPacket();
-        $pk->eid = $player->getId();
-        $pk->target = $this->getId();
-        $this->server->broadcastPacket($this->getViewers(), $pk);
+		$pk = new TakeItemEntityPacket();
+		$pk->eid = $player->getId();
+		$pk->target = $this->getId();
+		$this->server->broadcastPacket($this->getViewers(), $pk);
 
-        $playerInventory->addItem(clone $item);
-        $this->flagForDespawn();
+		$playerInventory->addItem(clone $item);
+		$this->flagForDespawn();
 	}
 }

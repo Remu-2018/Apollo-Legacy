@@ -2,51 +2,45 @@
 
 /*
  *
- *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
  *
 */
+
+declare(strict_types=1);
 
 namespace pocketmine\command;
 
 use pocketmine\Thread;
 
+class CommandReader extends Thread{
 
-class CommandReader extends Thread {
-
-	const TYPE_READLINE = 0;
-	const TYPE_STREAM = 1;
-	const TYPE_PIPED = 2;
+	public const TYPE_READLINE = 0;
+	public const TYPE_STREAM = 1;
+	public const TYPE_PIPED = 2;
 
 	/** @var \Threaded */
 	protected $buffer;
 	private $shutdown = false;
-
 	private $type = self::TYPE_STREAM;
 
-	/**
-	 * CommandReader constructor.
-	 */
 	public function __construct(){
 		$this->buffer = new \Threaded;
-
 		$opts = getopt("", ["disable-readline"]);
-		if((extension_loaded("readline") and !isset($opts["disable-readline"]) and !$this->isPipe(STDIN))){
+
+		if(extension_loaded("readline") and !isset($opts["disable-readline"]) and !$this->isPipe(STDIN)){
 			$this->type = self::TYPE_READLINE;
 		}
 
@@ -95,7 +89,6 @@ class CommandReader extends Thread {
 	 * Checks if the specified stream is a FIFO pipe.
 	 *
 	 * @param resource $stream
-	 *
 	 * @return bool
 	 */
 	private function isPipe($stream) : bool{
@@ -110,7 +103,7 @@ class CommandReader extends Thread {
 	private function readLine() : bool{
 		$line = "";
 		if($this->type === self::TYPE_READLINE){
-            if(($raw = readline("> ")) !== false and ($line = trim($raw)) !== ""){
+			if(($raw = readline("> ")) !== false and ($line = trim($raw)) !== ""){
 				readline_add_history($line);
 			}else{
 				return true;
@@ -122,10 +115,10 @@ class CommandReader extends Thread {
 				$this->initStdin();
 			}
 
-            switch($this->type){
-                /** @noinspection PhpMissingBreakStatementInspection */
+			switch($this->type){
+				/** @noinspection PhpMissingBreakStatementInspection */
 				case self::TYPE_STREAM:
-                    //stream_select doesn't work on piped streams for some reason
+					//stream_select doesn't work on piped streams for some reason
 					$r = [$stdin];
 					if(($count = stream_select($r, $w, $e, 0, 200000)) === 0){ //nothing changed in 200000 microseconds
 						return true;
@@ -142,8 +135,8 @@ class CommandReader extends Thread {
 						return true; //loop back round
 					}
 
-                    $line = trim($raw);
-                    break;
+					$line = trim($raw);
+					break;
 			}
 		}
 
@@ -161,7 +154,7 @@ class CommandReader extends Thread {
 	 */
 	public function getLine(){
 		if($this->buffer->count() !== 0){
-			return $this->buffer->shift();
+			return (string) $this->buffer->shift();
 		}
 
 		return null;
@@ -181,10 +174,7 @@ class CommandReader extends Thread {
 
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getThreadName(){
+	public function getThreadName() : string{
 		return "Console";
 	}
 }

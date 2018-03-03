@@ -2,22 +2,19 @@
 
 /*
  *
- *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
  *
 */
@@ -28,31 +25,28 @@ namespace pocketmine\command\defaults;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\command\overload\CommandParameter;
 use pocketmine\command\utils\InvalidCommandSyntaxException;
 use pocketmine\event\TranslationContainer;
 use pocketmine\level\Level;
 
 class DifficultyCommand extends VanillaCommand{
 
-	public function __construct($name){
+	public function __construct(string $name){
 		parent::__construct(
 			$name,
 			"%pocketmine.command.difficulty.description",
 			"%commands.difficulty.usage"
 		);
 		$this->setPermission("pocketmine.command.difficulty");
-
-        $this->getOverload("default")->setParameter(0, new CommandParameter("1|2|3", CommandParameter::TYPE_INT, false));
 	}
 
-	public function execute(CommandSender $sender, string $currentAlias, array $args){
-		if(!$this->canExecute($sender)){
+	public function execute(CommandSender $sender, string $commandLabel, array $args){
+		if(!$this->testPermission($sender)){
 			return true;
 		}
 
 		if(count($args) !== 1){
-            throw new InvalidCommandSyntaxException();
+			throw new InvalidCommandSyntaxException();
 		}
 
 		$difficulty = Level::getDifficultyFromString($args[0]);
@@ -64,14 +58,14 @@ class DifficultyCommand extends VanillaCommand{
 		if($difficulty !== -1){
 			$sender->getServer()->setConfigInt("difficulty", $difficulty);
 
-            //TODO: add per-world support
-            foreach($sender->getServer()->getLevels() as $level){
-                $level->setDifficulty($difficulty);
-            }
+			//TODO: add per-world support
+			foreach($sender->getServer()->getLevels() as $level){
+				$level->setDifficulty($difficulty);
+			}
 
 			Command::broadcastCommandMessage($sender, new TranslationContainer("commands.difficulty.success", [$difficulty]));
 		}else{
-            throw new InvalidCommandSyntaxException();
+			throw new InvalidCommandSyntaxException();
 		}
 
 		return true;

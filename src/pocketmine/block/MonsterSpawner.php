@@ -2,22 +2,19 @@
 
 /*
  *
- *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
  *
 */
@@ -26,14 +23,10 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\item\TieredTool;
 use pocketmine\item\Item;
-use pocketmine\math\Vector3;
-use pocketmine\Player;
-use pocketmine\tile\MobSpawner;
-use pocketmine\tile\Tile;
+use pocketmine\item\TieredTool;
 
-class MonsterSpawner extends Solid {
+class MonsterSpawner extends Transparent{
 
 	protected $id = self::MONSTER_SPAWNER;
 
@@ -45,44 +38,23 @@ class MonsterSpawner extends Solid {
 		return 5;
 	}
 
-    public function getToolType() : int{
-        return BlockToolType::TYPE_PICKAXE;
-    }
+	public function getToolType() : int{
+		return BlockToolType::TYPE_PICKAXE;
+	}
 
-    public function getToolHarvestLevel() : int{
-        return TieredTool::TIER_WOODEN;
-    }
+	public function getToolHarvestLevel() : int{
+		return TieredTool::TIER_WOODEN;
+	}
 
 	public function getName() : string{
 		return "Monster Spawner";
 	}
 
-	public function onActivate(Item $item, Player $player = null) : bool{
-		if($this->getDamage() == 0){
-			if($item->getId() == Item::SPAWN_EGG){
-				$tile = $this->getLevel()->getTileAt($this->x, $this->y, $this->z);
-				if(!($tile instanceof MobSpawner)){
-                    $tile = Tile::createTile(Tile::MOB_SPAWNER, $this->getLevel(), MobSpawner::createNBT($this));
-				}
-				$this->meta = $item->getDamage();
-				$tile->setEntityId($item->getDamage());
-				return true;
-			}
-		}
+	public function getDropsForCompatibleTool(Item $item) : array{
+		return [];
+	}
+
+	public function isAffectedBySilkTouch() : bool{
 		return false;
 	}
-
-	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
-		$this->getLevel()->setBlock($blockReplace, $this, true, true);
-		Tile::createTile(Tile::MOB_SPAWNER, $this->getLevel(), MobSpawner::createNBT($this, $face, $item, $player));
-		return true;
-	}
-
-	public function getDropsForCompatibleTool(Item $item): array{
-        return [];
-    }
-
-    public function isAffectedBySilkTouch(): bool{
-        return false;
-    }
 }

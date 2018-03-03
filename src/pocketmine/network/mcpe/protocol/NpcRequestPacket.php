@@ -25,8 +25,10 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
+use pocketmine\network\mcpe\NetworkSession;
+
 class NpcRequestPacket extends DataPacket{
-	const NETWORK_ID = ProtocolInfo::NPC_REQUEST_PACKET;
+	public const NETWORK_ID = ProtocolInfo::NPC_REQUEST_PACKET;
 
 	/** @var int */
 	public $entityRuntimeId;
@@ -49,5 +51,9 @@ class NpcRequestPacket extends DataPacket{
 		$this->putByte($this->requestType);
 		$this->putString($this->commandString);
 		$this->putByte($this->actionType);
+	}
+
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleNpcRequest($this);
 	}
 }

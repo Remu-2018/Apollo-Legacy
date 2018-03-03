@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\inventory;
 
 use pocketmine\item\Item;
+use pocketmine\item\ItemFactory;
 use pocketmine\utils\UUID;
 
 class ShapedRecipe implements CraftingRecipe{
@@ -128,7 +129,7 @@ class ShapedRecipe implements CraftingRecipe{
 	/**
 	 * @return UUID|null
 	 */
-	public function getId(){
+	public function getId() : ?UUID{
 		return $this->id;
 	}
 
@@ -180,7 +181,7 @@ class ShapedRecipe implements CraftingRecipe{
 	 */
 	public function getIngredient(int $x, int $y) : Item{
 		$exists = $this->ingredientList[$this->shape[$y]{$x}] ?? null;
-		return $exists !== null ? clone $exists : Item::get(Item::AIR, 0, 0);
+		return $exists !== null ? clone $exists : ItemFactory::get(Item::AIR, 0, 0);
 	}
 
 	/**
@@ -191,7 +192,7 @@ class ShapedRecipe implements CraftingRecipe{
 		return $this->shape;
 	}
 
-	public function registerToCraftingManager(CraftingManager $manager){
+	public function registerToCraftingManager(CraftingManager $manager) : void{
 		$manager->registerShapedRecipe($this);
 	}
 

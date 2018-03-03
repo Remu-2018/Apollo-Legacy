@@ -2,23 +2,22 @@
 
 /*
  *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
- */
+ *
+*/
 
 declare(strict_types=1);
 
@@ -38,133 +37,133 @@ use pocketmine\utils\MainLogger;
 
 class Anvil extends McRegion{
 
-    const REGION_FILE_EXTENSION = "mca";
+	public const REGION_FILE_EXTENSION = "mca";
 
-    public function nbtSerialize(Chunk $chunk) : string{
-        $nbt = new CompoundTag("Level", []);
-        $nbt->setInt("xPos", $chunk->getX());
-        $nbt->setInt("zPos", $chunk->getZ());
+	public function nbtSerialize(Chunk $chunk) : string{
+		$nbt = new CompoundTag("Level", []);
+		$nbt->setInt("xPos", $chunk->getX());
+		$nbt->setInt("zPos", $chunk->getZ());
 
-        $nbt->setByte("V", 1);
-        $nbt->setLong("LastUpdate", 0); //TODO
-        $nbt->setLong("InhabitedTime", 0); //TODO
-        $nbt->setByte("TerrainPopulated", $chunk->isPopulated() ? 1 : 0);
-        $nbt->setByte("LightPopulated", $chunk->isLightPopulated() ? 1 : 0);
+		$nbt->setByte("V", 1);
+		$nbt->setLong("LastUpdate", 0); //TODO
+		$nbt->setLong("InhabitedTime", 0); //TODO
+		$nbt->setByte("TerrainPopulated", $chunk->isPopulated() ? 1 : 0);
+		$nbt->setByte("LightPopulated", $chunk->isLightPopulated() ? 1 : 0);
 
-        $subChunks = [];
-        foreach($chunk->getSubChunks() as $y => $subChunk){
-            if($subChunk->isEmpty()){
-                continue;
-            }
+		$subChunks = [];
+		foreach($chunk->getSubChunks() as $y => $subChunk){
+			if($subChunk->isEmpty()){
+				continue;
+			}
 
-            $tag = $this->serializeSubChunk($subChunk);
-            $tag->setByte("Y", $y);
-            $subChunks[] = $tag;
-        }
-        $nbt->setTag(new ListTag("Sections", $subChunks, NBT::TAG_Compound));
+			$tag = $this->serializeSubChunk($subChunk);
+			$tag->setByte("Y", $y);
+			$subChunks[] = $tag;
+		}
+		$nbt->setTag(new ListTag("Sections", $subChunks, NBT::TAG_Compound));
 
-        $nbt->setByteArray("Biomes", $chunk->getBiomeIdArray());
-        $nbt->setIntArray("HeightMap", $chunk->getHeightMapArray());
+		$nbt->setByteArray("Biomes", $chunk->getBiomeIdArray());
+		$nbt->setIntArray("HeightMap", $chunk->getHeightMapArray());
 
-        $entities = [];
+		$entities = [];
 
-        foreach($chunk->getSavableEntities() as $entity){
-            $entity->saveNBT();
-            $entities[] = $entity->namedtag;
-        }
+		foreach($chunk->getSavableEntities() as $entity){
+			$entity->saveNBT();
+			$entities[] = $entity->namedtag;
+		}
 
-        $nbt->setTag(new ListTag("Entities", $entities, NBT::TAG_Compound));
+		$nbt->setTag(new ListTag("Entities", $entities, NBT::TAG_Compound));
 
-        $tiles = [];
-        foreach($chunk->getTiles() as $tile){
-            $tile->saveNBT();
-            $tiles[] = $tile->namedtag;
-        }
+		$tiles = [];
+		foreach($chunk->getTiles() as $tile){
+			$tile->saveNBT();
+			$tiles[] = $tile->namedtag;
+		}
 
-        $nbt->setTag(new ListTag("TileEntities", $tiles, NBT::TAG_Compound));
+		$nbt->setTag(new ListTag("TileEntities", $tiles, NBT::TAG_Compound));
 
-        //TODO: TileTicks
+		//TODO: TileTicks
 
-        $writer = new BigEndianNBTStream();
-        $nbt->setName("Level");
-        $writer->setData(new CompoundTag("", [$nbt]));
+		$writer = new BigEndianNBTStream();
+		$nbt->setName("Level");
+		$writer->setData(new CompoundTag("", [$nbt]));
 
-        return $writer->writeCompressed(ZLIB_ENCODING_DEFLATE, RegionLoader::$COMPRESSION_LEVEL);
-    }
+		return $writer->writeCompressed(ZLIB_ENCODING_DEFLATE, RegionLoader::$COMPRESSION_LEVEL);
+	}
 
-    protected function serializeSubChunk(SubChunk $subChunk) : CompoundTag{
-        return new CompoundTag("", [
-            new ByteArrayTag("Blocks", ChunkUtils::reorderByteArray($subChunk->getBlockIdArray())), //Generic in-memory chunks are currently always XZY
-            new ByteArrayTag("Data", ChunkUtils::reorderNibbleArray($subChunk->getBlockDataArray())),
-            new ByteArrayTag("SkyLight", ChunkUtils::reorderNibbleArray($subChunk->getBlockSkyLightArray(), "\xff")),
-            new ByteArrayTag("BlockLight", ChunkUtils::reorderNibbleArray($subChunk->getBlockLightArray()))
-        ]);
-    }
+	protected function serializeSubChunk(SubChunk $subChunk) : CompoundTag{
+		return new CompoundTag("", [
+			new ByteArrayTag("Blocks", ChunkUtils::reorderByteArray($subChunk->getBlockIdArray())), //Generic in-memory chunks are currently always XZY
+			new ByteArrayTag("Data", ChunkUtils::reorderNibbleArray($subChunk->getBlockDataArray())),
+			new ByteArrayTag("SkyLight", ChunkUtils::reorderNibbleArray($subChunk->getBlockSkyLightArray(), "\xff")),
+			new ByteArrayTag("BlockLight", ChunkUtils::reorderNibbleArray($subChunk->getBlockLightArray()))
+		]);
+	}
 
-    public function nbtDeserialize(string $data){
-        $nbt = new BigEndianNBTStream();
-        try{
-            $nbt->readCompressed($data);
+	public function nbtDeserialize(string $data){
+		$nbt = new BigEndianNBTStream();
+		try{
+			$nbt->readCompressed($data);
 
-            $chunk = $nbt->getData()->getCompoundTag("Level");
+			$chunk = $nbt->getData()->getCompoundTag("Level");
 
-            if($chunk === null){
-                throw new ChunkException("Invalid NBT format");
-            }
+			if($chunk === null){
+				throw new ChunkException("Invalid NBT format");
+			}
 
-            $subChunks = [];
-            $subChunksTag = $chunk->getListTag("Sections") ?? [];
-            foreach($subChunksTag as $subChunk){
-                if($subChunk instanceof CompoundTag){
-                    $subChunks[$subChunk->getByte("Y")] = $this->deserializeSubChunk($subChunk);
-                }
-            }
+			$subChunks = [];
+			$subChunksTag = $chunk->getListTag("Sections") ?? [];
+			foreach($subChunksTag as $subChunk){
+				if($subChunk instanceof CompoundTag){
+					$subChunks[$subChunk->getByte("Y")] = $this->deserializeSubChunk($subChunk);
+				}
+			}
 
-            if($chunk->hasTag("BiomeColors", IntArrayTag::class)){
-                $biomeIds = ChunkUtils::convertBiomeColors($chunk->getIntArray("BiomeColors")); //Convert back to original format
-            }else{
-                $biomeIds = $chunk->getByteArray("Biomes", "", true);
-            }
+			if($chunk->hasTag("BiomeColors", IntArrayTag::class)){
+				$biomeIds = ChunkUtils::convertBiomeColors($chunk->getIntArray("BiomeColors")); //Convert back to original format
+			}else{
+				$biomeIds = $chunk->getByteArray("Biomes", "", true);
+			}
 
-            $result = new Chunk(
-                $chunk->getInt("xPos"),
-                $chunk->getInt("zPos"),
-                $subChunks,
-                $chunk->hasTag("Entities", ListTag::class) ? $chunk->getListTag("Entities")->getValue() : [],
-                $chunk->hasTag("TileEntities", ListTag::class) ? $chunk->getListTag("TileEntities")->getValue() : [],
-                $biomeIds,
-                $chunk->getIntArray("HeightMap", [])
-            );
-            $result->setLightPopulated($chunk->getByte("LightPopulated", 0) !== 0);
-            $result->setPopulated($chunk->getByte("TerrainPopulated", 0) !== 0);
-            $result->setGenerated();
-            return $result;
-        }catch(\Throwable $e){
-            MainLogger::getLogger()->logException($e);
-            return null;
-        }
-    }
+			$result = new Chunk(
+				$chunk->getInt("xPos"),
+				$chunk->getInt("zPos"),
+				$subChunks,
+				$chunk->hasTag("Entities", ListTag::class) ? $chunk->getListTag("Entities")->getValue() : [],
+				$chunk->hasTag("TileEntities", ListTag::class) ? $chunk->getListTag("TileEntities")->getValue() : [],
+				$biomeIds,
+				$chunk->getIntArray("HeightMap", [])
+			);
+			$result->setLightPopulated($chunk->getByte("LightPopulated", 0) !== 0);
+			$result->setPopulated($chunk->getByte("TerrainPopulated", 0) !== 0);
+			$result->setGenerated();
+			return $result;
+		}catch(\Throwable $e){
+			MainLogger::getLogger()->logException($e);
+			return null;
+		}
+	}
 
-    protected function deserializeSubChunk(CompoundTag $subChunk) : SubChunk{
-        return new SubChunk(
-            ChunkUtils::reorderByteArray($subChunk->getByteArray("Blocks")),
-            ChunkUtils::reorderNibbleArray($subChunk->getByteArray("Data")),
-            ChunkUtils::reorderNibbleArray($subChunk->getByteArray("SkyLight"), "\xff"),
-            ChunkUtils::reorderNibbleArray($subChunk->getByteArray("BlockLight"))
-        );
-    }
+	protected function deserializeSubChunk(CompoundTag $subChunk) : SubChunk{
+		return new SubChunk(
+			ChunkUtils::reorderByteArray($subChunk->getByteArray("Blocks")),
+			ChunkUtils::reorderNibbleArray($subChunk->getByteArray("Data")),
+			ChunkUtils::reorderNibbleArray($subChunk->getByteArray("SkyLight"), "\xff"),
+			ChunkUtils::reorderNibbleArray($subChunk->getByteArray("BlockLight"))
+		);
+	}
 
-    public static function getProviderName() : string{
-        return "anvil";
-    }
+	public static function getProviderName() : string{
+		return "anvil";
+	}
 
-    public static function getPcWorldFormatVersion() : int{
-        return 19133; //anvil
-    }
+	public static function getPcWorldFormatVersion() : int{
+		return 19133; //anvil
+	}
 
-    public function getWorldHeight() : int{
-        //TODO: add world height options
-        return 256;
-    }
+	public function getWorldHeight() : int{
+		//TODO: add world height options
+		return 256;
+	}
 
 }

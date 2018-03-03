@@ -26,10 +26,11 @@ namespace pocketmine\network\mcpe\protocol;
 #include <rules/DataPacket.h>
 
 use pocketmine\entity\Skin;
+use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\utils\UUID;
 
 class PlayerSkinPacket extends DataPacket{
-	const NETWORK_ID = ProtocolInfo::PLAYER_SKIN_PACKET;
+	public const NETWORK_ID = ProtocolInfo::PLAYER_SKIN_PACKET;
 
 	/** @var UUID */
 	public $uuid;
@@ -65,5 +66,9 @@ class PlayerSkinPacket extends DataPacket{
 		$this->putString($this->skin->getCapeData());
 		$this->putString($this->skin->getGeometryName());
 		$this->putString($this->skin->getGeometryData());
+	}
+
+	public function handle(NetworkSession $session) : bool{
+		return $session->handlePlayerSkin($this);
 	}
 }

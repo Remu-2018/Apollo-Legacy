@@ -26,11 +26,13 @@ namespace pocketmine\network\mcpe\protocol;
 #include <rules/DataPacket.h>
 
 use pocketmine\network\mcpe\NetworkBinaryStream;
+use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\utils\Utils;
+
 
 abstract class DataPacket extends NetworkBinaryStream{
 
-	const NETWORK_ID = 0;
+	public const NETWORK_ID = 0;
 
 	/** @var bool */
 	public $isEncoded = false;
@@ -53,6 +55,14 @@ abstract class DataPacket extends NetworkBinaryStream{
 	}
 
 	public function canBeSentBeforeLogin() : bool{
+		return false;
+	}
+
+	/**
+	 * Returns whether the packet may legally have unread bytes left in the buffer.
+	 * @return bool
+	 */
+	public function mayHaveUnreadBytes() : bool{
 		return false;
 	}
 
@@ -99,6 +109,18 @@ abstract class DataPacket extends NetworkBinaryStream{
 
 	}
 
+	/**
+	 * Performs handling for this packet. Usually you'll want an appropriately named method in the NetworkSession for this.
+	 *
+	 * This method returns a bool to indicate whether the packet was handled or not. If the packet was unhandled, a debug message will be logged with a hexdump of the packet.
+	 * Typically this method returns the return value of the handler in the supplied NetworkSession. See other packets for examples how to implement this.
+	 *
+	 * @param NetworkSession $session
+	 *
+	 * @return bool true if the packet was handled successfully, false if not.
+	 */
+	abstract public function handle(NetworkSession $session) : bool;
+
 	public function clean(){
 		$this->buffer = null;
 		$this->isEncoded = false;
@@ -120,8 +142,4 @@ abstract class DataPacket extends NetworkBinaryStream{
 
 		return $data;
 	}
-
-    public function mayHaveUnreadBytes() : bool{
-	    return false;
-    }
 }

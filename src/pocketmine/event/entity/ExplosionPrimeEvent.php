@@ -2,23 +2,22 @@
 
 /*
  *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
- */
+ *
+*/
 
 declare(strict_types=1);
 
@@ -30,39 +29,22 @@ use pocketmine\event\Cancellable;
 /**
  * Called when a entity decides to explode
  */
-class ExplosionPrimeEvent extends EntityEvent implements Cancellable {
+class ExplosionPrimeEvent extends EntityEvent implements Cancellable{
 	public static $handlerList = null;
 
 	/** @var float */
 	protected $force;
 	/** @var bool */
-	private $blockBreaking = true;
-	/** @var bool */
-	private $dropItem;
+	private $blockBreaking;
 
 	/**
 	 * @param Entity $entity
 	 * @param float  $force
-	 * @param bool   $dropItem
 	 */
-	public function __construct(Entity $entity, float $force, bool $dropItem = true){
+	public function __construct(Entity $entity, float $force){
 		$this->entity = $entity;
 		$this->force = $force;
-		$this->dropItem = $dropItem;
-	}
-
-	/**
-	 * @param bool $dropItem
-	 */
-	public function setDropItem(bool $dropItem){
-		$this->dropItem = $dropItem;
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function dropItem() : bool{
-		return $this->dropItem;
+		$this->blockBreaking = true;
 	}
 
 	/**
@@ -72,9 +54,6 @@ class ExplosionPrimeEvent extends EntityEvent implements Cancellable {
 		return $this->force;
 	}
 
-	/**
-	 * @param $force
-	 */
 	public function setForce(float $force){
 		$this->force = $force;
 	}

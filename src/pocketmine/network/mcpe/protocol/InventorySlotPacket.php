@@ -26,9 +26,10 @@ namespace pocketmine\network\mcpe\protocol;
 #include <rules/DataPacket.h>
 
 use pocketmine\item\Item;
+use pocketmine\network\mcpe\NetworkSession;
 
 class InventorySlotPacket extends DataPacket{
-	const NETWORK_ID = ProtocolInfo::INVENTORY_SLOT_PACKET;
+	public const NETWORK_ID = ProtocolInfo::INVENTORY_SLOT_PACKET;
 
 	/** @var int */
 	public $windowId;
@@ -47,5 +48,9 @@ class InventorySlotPacket extends DataPacket{
 		$this->putUnsignedVarInt($this->windowId);
 		$this->putUnsignedVarInt($this->inventorySlot);
 		$this->putSlot($this->item);
+	}
+
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleInventorySlot($this);
 	}
 }

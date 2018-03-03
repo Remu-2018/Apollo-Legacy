@@ -25,8 +25,11 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
+
+use pocketmine\network\mcpe\NetworkSession;
+
 class AddPaintingPacket extends DataPacket{
-	const NETWORK_ID = ProtocolInfo::ADD_PAINTING_PACKET;
+	public const NETWORK_ID = ProtocolInfo::ADD_PAINTING_PACKET;
 
 	/** @var int|null */
 	public $entityUniqueId = null; //TODO
@@ -54,8 +57,13 @@ class AddPaintingPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putEntityUniqueId($this->entityUniqueId ?? $this->entityRuntimeId);
 		$this->putEntityRuntimeId($this->entityRuntimeId);
-		$this->putBlockPosition((int) $this->x, (int) $this->y, (int) $this->z);
+		$this->putBlockPosition($this->x, $this->y, $this->z);
 		$this->putVarInt($this->direction);
 		$this->putString($this->title);
 	}
+
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleAddPainting($this);
+	}
+
 }

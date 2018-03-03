@@ -25,96 +25,99 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
+
+use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 
 class AdventureSettingsPacket extends DataPacket{
-	const NETWORK_ID = ProtocolInfo::ADVENTURE_SETTINGS_PACKET;
+	public const NETWORK_ID = ProtocolInfo::ADVENTURE_SETTINGS_PACKET;
 
-	const PERMISSION_NORMAL = 0;
-	const PERMISSION_OPERATOR = 1;
-	const PERMISSION_HOST = 2;
-	const PERMISSION_AUTOMATION = 3;
-	const PERMISSION_ADMIN = 4;
+	public const PERMISSION_NORMAL = 0;
+	public const PERMISSION_OPERATOR = 1;
+	public const PERMISSION_HOST = 2;
+	public const PERMISSION_AUTOMATION = 3;
+	public const PERMISSION_ADMIN = 4;
 
-	const WORLD_IMMUTABLE = 1;
-	const NO_PVP = 2;
-	const NO_PVM = 4;
-	const NO_MVP = 8;
-	const NO_EVP = 16;
-	const AUTO_JUMP = 32;
-	const ALLOW_FLIGHT = 64;
-	const NO_CLIP = 128;
-	const FLYING = 512;
-	const MUTED = 1024;
-	
-	const WORLD_BUILDER = 0x100;
+	/**
+	 * This constant is used to identify flags that should be set on the second field. In a sensible world, these
+	 * flags would all be set on the same packet field, but as of MCPE 1.2, the new abilities flags have for some
+	 * reason been assigned a separate field.
+	 */
+	public const BITFLAG_SECOND_SET = 1 << 16;
 
-	const BUILD_AND_MINE = 1;
-	const DOORS_AND_SWITCHES = 2;
-	const OPEN_CONTAINERS = 4;
-	const ATTACK_PLAYERS = 8;
-	const ATTACK_MOBS = 16;
-	const OPERATOR = 32;
-	const TELEPORT = 64;
+	public const WORLD_IMMUTABLE = 0x01;
+	public const NO_PVP = 0x02;
+
+	public const AUTO_JUMP = 0x20;
+	public const ALLOW_FLIGHT = 0x40;
+	public const NO_CLIP = 0x80;
+	public const WORLD_BUILDER = 0x100;
+	public const FLYING = 0x200;
+	public const MUTED = 0x400;
+
+	public const BUILD_AND_MINE = 0x01 | self::BITFLAG_SECOND_SET;
+	public const DOORS_AND_SWITCHES = 0x02 | self::BITFLAG_SECOND_SET;
+	public const OPEN_CONTAINERS = 0x04 | self::BITFLAG_SECOND_SET;
+	public const ATTACK_PLAYERS = 0x08 | self::BITFLAG_SECOND_SET;
+	public const ATTACK_MOBS = 0x10 | self::BITFLAG_SECOND_SET;
+	public const OPERATOR = 0x20 | self::BITFLAG_SECOND_SET;
+	public const TELEPORT = 0x80 | self::BITFLAG_SECOND_SET;
 
 	/** @var int */
 	public $flags = 0;
 	/** @var int */
 	public $commandPermission = self::PERMISSION_NORMAL;
 	/** @var int */
-	public $abilities = -1;
+	public $flags2 = -1;
 	/** @var int */
 	public $playerPermission = PlayerPermissions::MEMBER;
 	/** @var int */
-	public $customPermissions = 0;
+	public $customFlags = 0; //...
 	/** @var int */
 	public $entityUniqueId; //This is a little-endian long, NOT a var-long. (WTF Mojang)
 
 	protected function decodePayload(){
 		$this->flags = $this->getUnsignedVarInt();
 		$this->commandPermission = $this->getUnsignedVarInt();
-		$this->abilities = $this->getUnsignedVarInt();
+		$this->flags2 = $this->getUnsignedVarInt();
 		$this->playerPermission = $this->getUnsignedVarInt();
-		$this->customPermissions = $this->getUnsignedVarInt();
+		$this->customFlags = $this->getUnsignedVarInt();
 		$this->entityUniqueId = $this->getLLong();
 	}
 
 	protected function encodePayload(){
 		$this->putUnsignedVarInt($this->flags);
 		$this->putUnsignedVarInt($this->commandPermission);
-		$this->putUnsignedVarInt($this->abilities);
+		$this->putUnsignedVarInt($this->flags2);
 		$this->putUnsignedVarInt($this->playerPermission);
-		$this->putUnsignedVarInt($this->customPermissions);
+		$this->putUnsignedVarInt($this->customFlags);
 		$this->putLLong($this->entityUniqueId);
 	}
 
-	public function setPlayerFlag(int $flag, bool $value = true){
-		if($value){
-		 $this->flags |= $flag;
+	public function getFlag(int $flag) : bool{
+		if($flag & self::BITFLAG_SECOND_SET){
+			return ($this->flags2 & $flag) !== 0;
 		}
-	}
-	
-	public function getPlayerFlag(int $flag){
+
 		return ($this->flags & $flag) !== 0;
 	}
-	
-	public function setAbility(int $flag, bool $value = true){
+
+	public function setFlag(int $flag, bool $value){
+		if($flag & self::BITFLAG_SECOND_SET){
+			$flagSet =& $this->flags2;
+		}else{
+			$flagSet =& $this->flags;
+		}
+
 		if($value){
-		 $this->abilities |= $flag;
+			$flagSet |= $flag;
+		}else{
+			$flagSet &= ~$flag;
 		}
 	}
-	
-	public function getAbility(int $flag){
-		return ($this->abilities & $flag) !== 0;
+
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleAdventureSettings($this);
 	}
-	
-	public function setCustomPermission(int $flag, bool $value = true){
-		if($value){
-		 $this->customPermissions |= $flag;
-		}
-	}
-	
-	public function getCustomPermission(int $flag){
-		return ($this->customPermissions & $flag) !== 0;
-	}
+
 }

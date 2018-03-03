@@ -2,22 +2,19 @@
 
 /*
  *
- *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
  *
 */
@@ -28,8 +25,6 @@ namespace pocketmine\command\defaults;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\command\overload\CommandEnum;
-use pocketmine\command\overload\CommandParameter;
 use pocketmine\command\utils\InvalidCommandSyntaxException;
 use pocketmine\event\TranslationContainer;
 use pocketmine\level\Level;
@@ -38,21 +33,18 @@ use pocketmine\utils\TextFormat;
 
 class TimeCommand extends VanillaCommand{
 
-	public function __construct($name){
+	public function __construct(string $name){
 		parent::__construct(
 			$name,
 			"%pocketmine.command.time.description",
 			"%pocketmine.command.time.usage"
 		);
 		$this->setPermission("pocketmine.command.time.add;pocketmine.command.time.set;pocketmine.command.time.start;pocketmine.command.time.stop");
-
-        $this->getOverload("default")->setParameter(0, new CommandParameter("args", CommandParameter::TYPE_STRING, false, CommandParameter::FLAG_ENUM, new CommandEnum("args", ["start", "stop", "query", "set", "add"])));
-        $this->getOverload("default")->setParameter(1, new CommandParameter("time", CommandParameter::TYPE_MIXED, true, CommandParameter::FLAG_ENUM, new CommandEnum("time", ["day", "night"])));
 	}
 
-	public function execute(CommandSender $sender, string $currentAlias, array $args){
+	public function execute(CommandSender $sender, string $commandLabel, array $args){
 		if(count($args) < 1){
-            throw new InvalidCommandSyntaxException();
+			throw new InvalidCommandSyntaxException();
 		}
 
 		if($args[0] === "start"){
@@ -98,7 +90,7 @@ class TimeCommand extends VanillaCommand{
 
 
 		if(count($args) < 2){
-            throw new InvalidCommandSyntaxException();
+			throw new InvalidCommandSyntaxException();
 		}
 
 		if($args[0] === "set"){
@@ -137,7 +129,7 @@ class TimeCommand extends VanillaCommand{
 			}
 			Command::broadcastCommandMessage($sender, new TranslationContainer("commands.time.added", [$value]));
 		}else{
-            throw new InvalidCommandSyntaxException();
+			throw new InvalidCommandSyntaxException();
 		}
 
 		return true;

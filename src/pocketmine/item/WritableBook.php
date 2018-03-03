@@ -2,22 +2,19 @@
 
 /*
  *
- *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
  *
 */
@@ -33,9 +30,9 @@ use pocketmine\nbt\tag\StringTag;
 
 class WritableBook extends Item{
 
-	const TAG_PAGES = "pages"; //TAG_List<TAG_Compound>
-	const TAG_PAGE_TEXT = "text"; //TAG_String
-	const TAG_PAGE_PHOTONAME = "photoname"; //TAG_String - TODO
+	public const TAG_PAGES = "pages"; //TAG_List<TAG_Compound>
+	public const TAG_PAGE_TEXT = "text"; //TAG_String
+	public const TAG_PAGE_PHOTONAME = "photoname"; //TAG_String - TODO
 
 	public function __construct(int $meta = 0){
 		parent::__construct(self::WRITABLE_BOOK, $meta, "Book & Quill");
@@ -59,7 +56,7 @@ class WritableBook extends Item{
 	 *
 	 * @return string|null
 	 */
-	public function getPageText(int $pageId){
+	public function getPageText(int $pageId) : ?string{
 		$pages = $this->getNamedTag()->getListTag(self::TAG_PAGES);
 		if($pages === null){
 			return null;
@@ -105,7 +102,7 @@ class WritableBook extends Item{
 	 *
 	 * @param int $pageId
 	 */
-	public function addPage(int $pageId){
+	public function addPage(int $pageId) : void{
 		if($pageId < 0){
 			throw new \InvalidArgumentException("Page number \"$pageId\" is out of range");
 		}
@@ -206,10 +203,9 @@ class WritableBook extends Item{
 	 *
 	 * @param CompoundTag[] $pages
 	 */
-	public function setPages(array $pages){
+	public function setPages(array $pages) : void{
 		$nbt = $this->getNamedTag();
-		$list = new ListTag(self::TAG_PAGES, $pages, NBT::TAG_Compound);
-		$nbt->setTag($list);
+		$nbt->setTag(new ListTag(self::TAG_PAGES, $pages, NBT::TAG_Compound));
 		$this->setNamedTag($nbt);
 	}
 }

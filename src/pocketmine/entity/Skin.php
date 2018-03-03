@@ -2,23 +2,22 @@
 
 /*
  *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
- */
+ *
+*/
 
 declare(strict_types=1);
 
@@ -88,10 +87,17 @@ class Skin{
 		return $this->geometryData;
 	}
 
-    public function debloatGeometryData(){
-        if($this->geometryData !== ""){
-            $this->geometryData = (string) json_encode(json_decode($this->geometryData));
-        }
-    }
+	/**
+	 * Hack to cut down on network overhead due to skins, by un-pretty-printing geometry JSON.
+	 *
+	 * Mojang, some stupid reason, send every single model for every single skin in the selected skin-pack.
+	 * Not only that, they are pretty-printed.
+	 * TODO: find out what model crap can be safely dropped from the packet (unless it gets fixed first)
+	 */
+	public function debloatGeometryData() : void{
+		if($this->geometryData !== ""){
+			$this->geometryData = (string) json_encode(json_decode($this->geometryData));
+		}
+	}
 
 }

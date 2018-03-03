@@ -19,90 +19,21 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\level\generator\normal\biome;
 
 
-use pocketmine\block\Block;
-use pocketmine\block\BlockFactory;
-use pocketmine\level\generator\normal\populator\Temple;
-use pocketmine\level\generator\normal\populator\Well;
-use pocketmine\level\generator\populator\Cactus;
-use pocketmine\level\generator\populator\DeadBush;
-use pocketmine\level\generator\populator\Sugarcane;
+class DesertBiome extends SandyBiome{
 
-class DesertBiome extends SandyBiome {
-
-	/**
-	 * DesertBiome constructor.
-	 */
 	public function __construct(){
 		parent::__construct();
-        $deadBush = new DeadBush();
-        $deadBush->setBaseAmount(1);
-        $deadBush->setRandomAmount(4);
+		$this->setElevation(63, 74);
 
-        $sugarCane = new Sugarcane();
-        $sugarCane->setRandomAmount(20);
-        $sugarCane->setBaseAmount(3);
-
-        $sugarCane = new Cactus();
-        $sugarCane->setRandomAmount(2);
-        $sugarCane->setBaseAmount(3);
-
-        $temple = new Temple();
-        $well = new Well();
-
-        $this->addPopulator($well);
-        $this->addPopulator($temple);
-        $this->addPopulator($deadBush);
-        $this->addPopulator($sugarCane);
-
-		$this->setElevation(63, 71);
-
-		$this->temperature = 0.5;
+		$this->temperature = 2;
 		$this->rainfall = 0;
-        $this->setGroundCover([
-            BlockFactory::get(Block::SAND, 0),
-            BlockFactory::get(Block::SAND, 0),
-            BlockFactory::get(Block::SAND, 0),
-            BlockFactory::get(Block::SAND, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-            BlockFactory::get(Block::SANDSTONE, 0),
-        ]);
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getName() : string{
 		return "Desert";
 	}

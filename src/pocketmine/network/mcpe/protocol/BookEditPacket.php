@@ -25,14 +25,16 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
-class BookEditPacket extends DataPacket{
-	const NETWORK_ID = ProtocolInfo::BOOK_EDIT_PACKET;
+use pocketmine\network\mcpe\NetworkSession;
 
-	const TYPE_REPLACE_PAGE = 0;
-	const TYPE_ADD_PAGE = 1;
-	const TYPE_DELETE_PAGE = 2;
-	const TYPE_SWAP_PAGES = 3;
-	const TYPE_SIGN_BOOK = 4;
+class BookEditPacket extends DataPacket{
+	public const NETWORK_ID = ProtocolInfo::BOOK_EDIT_PACKET;
+
+	public const TYPE_REPLACE_PAGE = 0;
+	public const TYPE_ADD_PAGE = 1;
+	public const TYPE_DELETE_PAGE = 2;
+	public const TYPE_SWAP_PAGES = 3;
+	public const TYPE_SIGN_BOOK = 4;
 
 	/** @var int */
 	public $type;
@@ -105,5 +107,9 @@ class BookEditPacket extends DataPacket{
 			default:
 				throw new \UnexpectedValueException("Unknown book edit type $this->type!");
 		}
+	}
+
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleBookEdit($this);
 	}
 }

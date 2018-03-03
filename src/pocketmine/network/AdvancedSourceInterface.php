@@ -19,13 +19,14 @@
  *
 */
 
+declare(strict_types=1);
+
 /**
  * Network-related classes
  */
-
 namespace pocketmine\network;
 
-interface AdvancedSourceInterface extends SourceInterface {
+interface AdvancedSourceInterface extends SourceInterface{
 
 	/**
 	 * @param string $address
@@ -33,6 +34,9 @@ interface AdvancedSourceInterface extends SourceInterface {
 	 */
 	public function blockAddress(string $address, int $timeout = 300);
 
+	/**
+	 * @param string $address
+	 */
 	public function unblockAddress(string $address);
 
 	/**

@@ -2,37 +2,34 @@
 
 /*
  *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
- */
+ *
+*/
 
 declare(strict_types=1);
 
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+use pocketmine\item\ItemFactory;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 
 class TallGrass extends Flowable{
-
-	const NORMAL = 1;
-	const FERN = 2;
 
 	protected $id = self::TALL_GRASS;
 
@@ -53,16 +50,8 @@ class TallGrass extends Flowable{
 		return $names[$this->getVariant()] ?? "Unknown";
 	}
 
-	public function getBurnChance() : int{
-		return 60;
-	}
-
-	public function getBurnAbility() : int{
-		return 100;
-	}
-
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
-		$down = $this->getSide(0);
+		$down = $this->getSide(Vector3::SIDE_DOWN);
 		if($down->getId() === self::GRASS){
 			$this->getLevel()->setBlock($blockReplace, $this, true);
 
@@ -72,10 +61,11 @@ class TallGrass extends Flowable{
 		return false;
 	}
 
+
 	public function onUpdate(int $type){
 		if($type === Level::BLOCK_UPDATE_NORMAL){
-			if($this->getSide(0)->isTransparent() === true){ //Replace with common break method
-				$this->getLevel()->setBlock($this, new Air(), false, false);
+			if($this->getSide(Vector3::SIDE_DOWN)->isTransparent() === true){ //Replace with common break method
+				$this->getLevel()->setBlock($this, BlockFactory::get(Block::AIR), true, true);
 
 				return Level::BLOCK_UPDATE_NORMAL;
 			}
@@ -88,10 +78,18 @@ class TallGrass extends Flowable{
 		return BlockToolType::TYPE_SHEARS;
 	}
 
-	public function getDropsForCompatibleTool(Item $item) : array{
+	public function getToolHarvestLevel() : int{
+		return 1;
+	}
+
+	public function getDrops(Item $item) : array{
+		if($this->isCompatibleWithTool($item)){
+			return parent::getDrops($item);
+		}
+
 		if(mt_rand(0, 15) === 0){
 			return [
-				Item::get(Item::WHEAT_SEEDS)
+				ItemFactory::get(Item::WHEAT_SEEDS)
 			];
 		}
 

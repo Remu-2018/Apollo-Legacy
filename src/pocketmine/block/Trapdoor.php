@@ -2,23 +2,22 @@
 
 /*
  *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
- */
+ *
+*/
 
 declare(strict_types=1);
 
@@ -30,7 +29,14 @@ use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 
-class Trapdoor extends Transparent {
+class Trapdoor extends Transparent{
+	public const MASK_UPPER = 0x04;
+	public const MASK_OPENED = 0x08;
+	public const MASK_SIDE = 0x03;
+	public const MASK_SIDE_SOUTH = 2;
+	public const MASK_SIDE_NORTH = 3;
+	public const MASK_SIDE_EAST = 0;
+	public const MASK_SIDE_WEST = 1;
 
 	protected $id = self::TRAPDOOR;
 
@@ -46,12 +52,13 @@ class Trapdoor extends Transparent {
 		return 3;
 	}
 
-	protected function recalculateBoundingBox(){
+	protected function recalculateBoundingBox() : ?AxisAlignedBB{
+
 		$damage = $this->getDamage();
 
 		$f = 0.1875;
 
-		if(($damage & 0x08) > 0){
+		if(($damage & self::MASK_UPPER) > 0){
 			$bb = new AxisAlignedBB(
 				$this->x,
 				$this->y + 1 - $f,
@@ -71,8 +78,8 @@ class Trapdoor extends Transparent {
 			);
 		}
 
-		if(($damage & 0x04) > 0){
-			if(($damage & 0x03) === 0){
+		if(($damage & self::MASK_OPENED) > 0){
+			if(($damage & 0x03) === self::MASK_SIDE_NORTH){
 				$bb->setBounds(
 					$this->x,
 					$this->y,
@@ -81,7 +88,7 @@ class Trapdoor extends Transparent {
 					$this->y + 1,
 					$this->z + 1
 				);
-			}elseif(($damage & 0x03) === 1){
+			}elseif(($damage & 0x03) === self::MASK_SIDE_SOUTH){
 				$bb->setBounds(
 					$this->x,
 					$this->y,
@@ -91,7 +98,7 @@ class Trapdoor extends Transparent {
 					$this->z + $f
 				);
 			}
-			if(($damage & 0x03) === 2){
+			if(($damage & 0x03) === self::MASK_SIDE_WEST){
 				$bb->setBounds(
 					$this->x + 1 - $f,
 					$this->y,
@@ -101,7 +108,7 @@ class Trapdoor extends Transparent {
 					$this->z + 1
 				);
 			}
-			if(($damage & 0x03) === 3){
+			if(($damage & 0x03) === self::MASK_SIDE_EAST){
 				$bb->setBounds(
 					$this->x,
 					$this->y,
@@ -127,18 +134,18 @@ class Trapdoor extends Transparent {
 			$this->meta = $directions[$player->getDirection() & 0x03];
 		}
 		if(($clickVector->y > 0.5 and $face !== self::SIDE_UP) or $face === self::SIDE_DOWN){
-			$this->meta |= 0b00000100; //top half of block
+			$this->meta |= self::MASK_UPPER; //top half of block
 		}
 		$this->getLevel()->setBlock($blockReplace, $this, true, true);
 		return true;
 	}
 
-	public function isOpened(){
-		return (($this->meta & 0b00001000) === 0);
+	public function getVariantBitmask() : int{
+		return 0;
 	}
 
 	public function onActivate(Item $item, Player $player = null) : bool{
-		$this->meta ^= 0b00001000;
+		$this->meta ^= self::MASK_OPENED;
 		$this->getLevel()->setBlock($this, $this, true);
 		$this->level->addSound(new DoorSound($this));
 		return true;
@@ -148,7 +155,7 @@ class Trapdoor extends Transparent {
 		return BlockToolType::TYPE_AXE;
 	}
 
-	public function getFuelTime(): int{
-        return 300;
-    }
+	public function getFuelTime() : int{
+		return 300;
+	}
 }

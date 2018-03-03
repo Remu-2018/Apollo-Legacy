@@ -25,8 +25,10 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
+use pocketmine\network\mcpe\NetworkSession;
+
 class WSConnectPacket extends DataPacket{
-	const NETWORK_ID = ProtocolInfo::W_S_CONNECT_PACKET;
+	public const NETWORK_ID = ProtocolInfo::W_S_CONNECT_PACKET;
 
 	/** @var string */
 	public $string1;
@@ -37,5 +39,9 @@ class WSConnectPacket extends DataPacket{
 
 	protected function encodePayload(){
 		$this->putString($this->string1);
+	}
+
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleWSConnect($this);
 	}
 }

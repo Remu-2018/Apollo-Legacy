@@ -25,13 +25,16 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
+
+use pocketmine\network\mcpe\NetworkSession;
+
 class AnimatePacket extends DataPacket{
-	const NETWORK_ID = ProtocolInfo::ANIMATE_PACKET;
+	public const NETWORK_ID = ProtocolInfo::ANIMATE_PACKET;
 
-	const ACTION_SWING_ARM = 1;
+	public const ACTION_SWING_ARM = 1;
 
-	const ACTION_STOP_SLEEP = 3;
-	const ACTION_CRITICAL_HIT = 4;
+	public const ACTION_STOP_SLEEP = 3;
+	public const ACTION_CRITICAL_HIT = 4;
 
 	/** @var int */
 	public $action;
@@ -54,6 +57,10 @@ class AnimatePacket extends DataPacket{
 		if($this->action & 0x80){
 			$this->putLFloat($this->float);
 		}
+	}
+
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleAnimate($this);
 	}
 
 }

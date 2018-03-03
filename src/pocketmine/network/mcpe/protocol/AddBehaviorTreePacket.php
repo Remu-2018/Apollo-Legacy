@@ -25,8 +25,10 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
+use pocketmine\network\mcpe\NetworkSession;
+
 class AddBehaviorTreePacket extends DataPacket{
-	const NETWORK_ID = ProtocolInfo::ADD_BEHAVIOR_TREE_PACKET;
+	public const NETWORK_ID = ProtocolInfo::ADD_BEHAVIOR_TREE_PACKET;
 
 	/** @var string */
 	public $unknownString1;
@@ -37,5 +39,9 @@ class AddBehaviorTreePacket extends DataPacket{
 
 	protected function encodePayload(){
 		$this->putString($this->unknownString1);
+	}
+
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleAddBehaviorTree($this);
 	}
 }

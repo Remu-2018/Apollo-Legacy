@@ -2,23 +2,22 @@
 
 /*
  *
- *    _______                    _
- *   |__   __|                  (_)
- *      | |_   _ _ __ __ _ _ __  _  ___
- *      | | | | | '__/ _` | '_ \| |/ __|
- *      | | |_| | | | (_| | | | | | (__
- *      |_|\__,_|_|  \__,_|_| |_|_|\___|
- *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Turanic
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
- */
+ *
+*/
 
 declare(strict_types=1);
 
@@ -32,13 +31,13 @@ use pocketmine\Player;
 use pocketmine\tile\FlowerPot as TileFlowerPot;
 use pocketmine\tile\Tile;
 
-class FlowerPot extends Flowable {
+class FlowerPot extends Flowable{
 
-	const STATE_EMPTY = 0;
-	const STATE_FULL = 1;
+	public const STATE_EMPTY = 0;
+	public const STATE_FULL = 1;
 
 	protected $id = self::FLOWER_POT_BLOCK;
-    protected $itemId = Item::FLOWER_POT;
+	protected $itemId = Item::FLOWER_POT;
 
 	public function __construct(int $meta = 0){
 		$this->meta = $meta;
@@ -48,7 +47,7 @@ class FlowerPot extends Flowable {
 		return "Flower Pot";
 	}
 
-	protected function recalculateBoundingBox(){
+	protected function recalculateBoundingBox() : ?AxisAlignedBB{
 		return new AxisAlignedBB(
 			$this->x + 0.3125,
 			$this->y,
@@ -65,7 +64,7 @@ class FlowerPot extends Flowable {
 		}
 
 		$this->getLevel()->setBlock($blockReplace, $this, true, true);
-        Tile::createTile(Tile::FLOWER_POT, $this->getLevel(), TileFlowerPot::createNBT($this, $face, $item, $player));
+		Tile::createTile(Tile::FLOWER_POT, $this->getLevel(), TileFlowerPot::createNBT($this, $face, $item, $player));
 		return true;
 	}
 
@@ -93,25 +92,29 @@ class FlowerPot extends Flowable {
 		$this->setDamage(self::STATE_FULL); //specific damage value is unnecessary, it just needs to be non-zero to show an item.
 		$this->getLevel()->setBlock($this, $this, true, false);
 		$pot->setItem($item->pop());
+
 		return true;
 	}
 
-    public function getDropsForCompatibleTool(Item $item) : array{
-        $items = parent::getDropsForCompatibleTool($item);
+	public function getVariantBitmask() : int{
+		return 0;
+	}
 
-        $tile = $this->getLevel()->getTile($this);
-        if($tile instanceof TileFlowerPot){
-            $item = $tile->getItem();
-            if($item->getId() !== Item::AIR){
-                $items[] = $item;
-            }
-        }
+	public function getDropsForCompatibleTool(Item $item) : array{
+		$items = parent::getDropsForCompatibleTool($item);
 
-        return $items;
-    }
+		$tile = $this->getLevel()->getTile($this);
+		if($tile instanceof TileFlowerPot){
+			$item = $tile->getItem();
+			if($item->getId() !== Item::AIR){
+				$items[] = $item;
+			}
+		}
 
-    public function getVariantBitmask(): int{
-        return 0;
-    }
+		return $items;
+	}
 
+	public function isAffectedBySilkTouch() : bool{
+		return false;
+	}
 }
