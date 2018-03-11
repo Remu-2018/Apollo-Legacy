@@ -69,7 +69,7 @@ class Item implements ItemIds, \JsonSerializable{
 		}
 
 		self::$cachedParser->read($tag);
-		$data = self::$cachedParser->getData();
+	//	$data = self::$cachedParser->getData();
 
 		if(!($data instanceof CompoundTag)){
 			throw new \InvalidArgumentException("Invalid item NBT string given, it could not be deserialized");
