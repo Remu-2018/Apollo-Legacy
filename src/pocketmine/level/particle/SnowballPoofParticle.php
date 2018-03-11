@@ -23,13 +23,10 @@ declare(strict_types=1);
 
 namespace pocketmine\level\particle;
 
-use pocketmine\block\Block;
 use pocketmine\math\Vector3;
-use pocketmine\network\mcpe\protocol\LevelEventPacket;
 
-class DestroyBlockParticle extends DestroyParticle{
-
-	public function __construct(Vector3 $pos, Block $b){
-		parent::__construct($pos, $b->getId() | ($b->getDamage() << 8));
+class SnowballPoofParticle extends GenericParticle{
+	public function __construct(Vector3 $pos){
+		parent::__construct($pos, self::TYPE_SNOWBALL_POOF, 0);
 	}
 }
