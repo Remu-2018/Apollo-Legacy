@@ -33,7 +33,6 @@ class Wood extends Solid{
 	public const SPRUCE = 1;
 	public const BIRCH = 2;
 	public const JUNGLE = 3;
-	public const ACACIA = 4;
 
 	protected $id = self::WOOD;
 
