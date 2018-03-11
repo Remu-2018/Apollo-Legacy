@@ -1,4 +1,4 @@
-![Apollo](http://i.imgur.com/KBlbnkp.png)
+![Apollo](https://i.imgur.com/ngjoSVy.png)
 
 Apollo is a Minecraft: PE Server Software with an improved Generator and a lot more features.  
 
