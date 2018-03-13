@@ -41,7 +41,7 @@ class NetworkBinaryStream extends BinaryStream{
 		return $this->get($this->getUnsignedVarInt());
 	}
 
-	public function putString(string $v) : void{
+	public function putString(string $v){
 		$this->putUnsignedVarInt(strlen($v));
 		$this->put($v);
 	}
@@ -56,7 +56,7 @@ class NetworkBinaryStream extends BinaryStream{
 		return new UUID($part0, $part1, $part2, $part3);
 	}
 
-	public function putUUID(UUID $uuid) : void{
+	public function putUUID(UUID $uuid){
 		$this->putLInt($uuid->getPart(1));
 		$this->putLInt($uuid->getPart(0));
 		$this->putLInt($uuid->getPart(3));
@@ -103,7 +103,7 @@ class NetworkBinaryStream extends BinaryStream{
 	}
 
 
-	public function putSlot(Item $item) : void{
+	public function putSlot(Item $item){
 		if($item->getId() === 0){
 			$this->putVarInt(0);
 
@@ -153,17 +153,23 @@ class NetworkBinaryStream extends BinaryStream{
 					$value = $this->getString();
 					break;
 				case Entity::DATA_TYPE_SLOT:
-					$value = $this->getSlot();
+					//TODO: use objects directly
+					$value = [];
+					$item = $this->getSlot();
+					$value[0] = $item->getId();
+					$value[1] = $item->getCount();
+					$value[2] = $item->getDamage();
 					break;
 				case Entity::DATA_TYPE_POS:
-					$value = new Vector3();
-					$this->getSignedBlockPosition($value->x, $value->y, $value->z);
+					$value = [0, 0, 0];
+					$this->getSignedBlockPosition(...$value);
 					break;
 				case Entity::DATA_TYPE_LONG:
 					$value = $this->getVarLong();
 					break;
 				case Entity::DATA_TYPE_VECTOR3F:
-					$value = $this->getVector3();
+					$value = [0.0, 0.0, 0.0];
+					$this->getVector3f(...$value);
 					break;
 				default:
 					$value = [];
@@ -183,7 +189,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 *
 	 * @param array $metadata
 	 */
-	public function putEntityMetadata(array $metadata) : void{
+	public function putEntityMetadata(array $metadata){
 		$this->putUnsignedVarInt(count($metadata));
 		foreach($metadata as $key => $d){
 			$this->putUnsignedVarInt($key); //data key
@@ -205,21 +211,19 @@ class NetworkBinaryStream extends BinaryStream{
 					$this->putString($d[1]);
 					break;
 				case Entity::DATA_TYPE_SLOT:
-					$this->putSlot($d[1]);
+					//TODO: change this implementation (use objects)
+					$this->putSlot(ItemFactory::get($d[1][0], $d[1][2], $d[1][1])); //ID, damage, count
 					break;
 				case Entity::DATA_TYPE_POS:
-					$v = $d[1];
-					if($v !== null){
-						$this->putSignedBlockPosition($v->x, $v->y, $v->z);
-					}else{
-						$this->putSignedBlockPosition(0, 0, 0);
-					}
+					//TODO: change this implementation (use objects)
+					$this->putSignedBlockPosition(...$d[1]);
 					break;
 				case Entity::DATA_TYPE_LONG:
 					$this->putVarLong($d[1]);
 					break;
 				case Entity::DATA_TYPE_VECTOR3F:
-					$this->putVector3Nullable($d[1]);
+					//TODO: change this implementation (use objects)
+					$this->putVector3f(...$d[1]); //x, y, z
 			}
 		}
 	}
@@ -262,7 +266,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 *
 	 * @param Attribute[] ...$attributes
 	 */
-	public function putAttributeList(Attribute ...$attributes) : void{
+	public function putAttributeList(Attribute ...$attributes){
 		$this->putUnsignedVarInt(count($attributes));
 		foreach($attributes as $attribute){
 			$this->putLFloat($attribute->getMinValue());
@@ -286,7 +290,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 *
 	 * @param int $eid
 	 */
-	public function putEntityUniqueId(int $eid) : void{
+	public function putEntityUniqueId(int $eid){
 		$this->putVarLong($eid);
 	}
 
@@ -303,7 +307,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 *
 	 * @param int $eid
 	 */
-	public function putEntityRuntimeId(int $eid) : void{
+	public function putEntityRuntimeId(int $eid){
 		$this->putUnsignedVarLong($eid);
 	}
 
@@ -314,7 +318,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @param int &$y
 	 * @param int &$z
 	 */
-	public function getBlockPosition(&$x, &$y, &$z) : void{
+	public function getBlockPosition(&$x, &$y, &$z){
 		$x = $this->getVarInt();
 		$y = $this->getUnsignedVarInt();
 		$z = $this->getVarInt();
@@ -327,7 +331,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @param int $y
 	 * @param int $z
 	 */
-	public function putBlockPosition(int $x, int $y, int $z) : void{
+	public function putBlockPosition(int $x, int $y, int $z){
 		$this->putVarInt($x);
 		$this->putUnsignedVarInt($y);
 		$this->putVarInt($z);
@@ -340,7 +344,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @param int &$y
 	 * @param int &$z
 	 */
-	public function getSignedBlockPosition(&$x, &$y, &$z) : void{
+	public function getSignedBlockPosition(&$x, &$y, &$z){
 		$x = $this->getVarInt();
 		$y = $this->getVarInt();
 		$z = $this->getVarInt();
@@ -353,18 +357,45 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @param int $y
 	 * @param int $z
 	 */
-	public function putSignedBlockPosition(int $x, int $y, int $z) : void{
+	public function putSignedBlockPosition(int $x, int $y, int $z){
 		$this->putVarInt($x);
 		$this->putVarInt($y);
 		$this->putVarInt($z);
 	}
 
 	/**
-	 * Reads a floating-point Vector3 object with coordinates rounded to 4 decimal places.
+	 * Reads a floating-point vector3 rounded to 4dp.
+	 *
+	 * @param float $x
+	 * @param float $y
+	 * @param float $z
+	 */
+	public function getVector3f(&$x, &$y, &$z){
+		$x = $this->getRoundedLFloat(4);
+		$y = $this->getRoundedLFloat(4);
+		$z = $this->getRoundedLFloat(4);
+	}
+
+	/**
+	 * Writes a floating-point vector3
+	 *
+	 * @param float $x
+	 * @param float $y
+	 * @param float $z
+	 */
+	public function putVector3f(float $x, float $y, float $z){
+		$this->putLFloat($x);
+		$this->putLFloat($y);
+		$this->putLFloat($z);
+	}
+
+	/**
+	 * Reads a floating-point Vector3 object
+	 * TODO: get rid of primitive methods and replace with this
 	 *
 	 * @return Vector3
 	 */
-	public function getVector3() : Vector3{
+	public function getVector3Obj() : Vector3{
 		return new Vector3(
 			$this->getRoundedLFloat(4),
 			$this->getRoundedLFloat(4),
@@ -376,15 +407,13 @@ class NetworkBinaryStream extends BinaryStream{
 	 * Writes a floating-point Vector3 object, or 3x zero if null is given.
 	 *
 	 * Note: ONLY use this where it is reasonable to allow not specifying the vector.
-	 * For all other purposes, use the non-nullable version.
-	 *
-	 * @see NetworkBinaryStream::putVector3()
+	 * For all other purposes, use {@link DataPacket#putVector3Obj}
 	 *
 	 * @param Vector3|null $vector
 	 */
-	public function putVector3Nullable(?Vector3 $vector) : void{
+	public function putVector3ObjNullable(Vector3 $vector = null){
 		if($vector){
-			$this->putVector3($vector);
+			$this->putVector3Obj($vector);
 		}else{
 			$this->putLFloat(0.0);
 			$this->putLFloat(0.0);
@@ -394,10 +423,11 @@ class NetworkBinaryStream extends BinaryStream{
 
 	/**
 	 * Writes a floating-point Vector3 object
+	 * TODO: get rid of primitive methods and replace with this
 	 *
 	 * @param Vector3 $vector
 	 */
-	public function putVector3(Vector3 $vector) : void{
+	public function putVector3Obj(Vector3 $vector){
 		$this->putLFloat($vector->x);
 		$this->putLFloat($vector->y);
 		$this->putLFloat($vector->z);
@@ -407,7 +437,7 @@ class NetworkBinaryStream extends BinaryStream{
 		return (float) ($this->getByte() * (360 / 256));
 	}
 
-	public function putByteRotation(float $rotation) : void{
+	public function putByteRotation(float $rotation){
 		$this->putByte((int) ($rotation / (360 / 256)));
 	}
 
@@ -415,7 +445,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 * Reads gamerules
 	 * TODO: implement this properly
 	 *
-	 * @return array, members are in the structure [name => [type, value]]
+	 * @return array
 	 */
 	public function getGameRules() : array{
 		$count = $this->getUnsignedVarInt();
@@ -443,12 +473,12 @@ class NetworkBinaryStream extends BinaryStream{
 	}
 
 	/**
-	 * Writes a gamerule array, members should be in the structure [name => [type, value]]
+	 * Writes a gamerule array
 	 * TODO: implement this properly
 	 *
 	 * @param array $rules
 	 */
-	public function putGameRules(array $rules) : void{
+	public function putGameRules(array $rules){
 		$this->putUnsignedVarInt(count($rules));
 		foreach($rules as $name => $rule){
 			$this->putString($name);
@@ -484,7 +514,7 @@ class NetworkBinaryStream extends BinaryStream{
 	/**
 	 * @param EntityLink $link
 	 */
-	protected function putEntityLink(EntityLink $link) : void{
+	protected function putEntityLink(EntityLink $link){
 		$this->putEntityUniqueId($link->fromEntityUniqueId);
 		$this->putEntityUniqueId($link->toEntityUniqueId);
 		$this->putByte($link->type);

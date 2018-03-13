@@ -58,7 +58,7 @@ class RCONInstance extends Thread{
 			$this->{"timeout" . $n} = 0;
 		}
 
-		$this->start(PTHREADS_INHERIT_NONE);
+		$this->start();
 	}
 
 	private function writePacket($client, $requestID, $packetType, $payload){
@@ -95,7 +95,7 @@ class RCONInstance extends Thread{
 	}
 
 	public function run(){
-		$this->registerClassLoader();
+
 		while($this->stop !== true){
 			$this->synchronized(function(){
 				$this->wait(2000);

@@ -29,6 +29,7 @@ use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\utils\Utils;
 
+
 abstract class DataPacket extends NetworkBinaryStream{
 
 	public const NETWORK_ID = 0;
@@ -37,9 +38,9 @@ abstract class DataPacket extends NetworkBinaryStream{
 	public $isEncoded = false;
 
 	/** @var int */
-	public $senderSubId = 0;
+	public $extraByte1 = 0;
 	/** @var int */
-	public $recipientSubId = 0;
+	public $extraByte2 = 0;
 
 	public function pid(){
 		return $this::NETWORK_ID;
@@ -75,9 +76,9 @@ abstract class DataPacket extends NetworkBinaryStream{
 		$pid = $this->getUnsignedVarInt();
 		assert($pid === static::NETWORK_ID);
 
-		$this->senderSubId = $this->getByte();
-		$this->recipientSubId = $this->getByte();
-		assert($this->senderSubId === 0 and $this->recipientSubId === 0, "Got unexpected non-zero split-screen bytes (byte1: $this->senderSubId, byte2: $this->recipientSubId");
+		$this->extraByte1 = $this->getByte();
+		$this->extraByte2 = $this->getByte();
+		assert($this->extraByte1 === 0 and $this->extraByte2 === 0, "Got unexpected non-zero split-screen bytes (byte1: $this->extraByte1, byte2: $this->extraByte2");
 	}
 
 	/**
@@ -97,8 +98,8 @@ abstract class DataPacket extends NetworkBinaryStream{
 	protected function encodeHeader(){
 		$this->putUnsignedVarInt(static::NETWORK_ID);
 
-		$this->putByte($this->senderSubId);
-		$this->putByte($this->recipientSubId);
+		$this->putByte($this->extraByte1);
+		$this->putByte($this->extraByte2);
 	}
 
 	/**

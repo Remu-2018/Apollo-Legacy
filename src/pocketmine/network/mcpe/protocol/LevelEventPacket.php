@@ -80,9 +80,7 @@ class LevelEventPacket extends DataPacket{
 	public const EVENT_GUARDIAN_CURSE = 2006;
 
 	public const EVENT_PARTICLE_BLOCK_FORCE_FIELD = 2008;
-	public const EVENT_PARTICLE_PROJECTILE_HIT = 2009;
 
-	public const EVENT_PARTICLE_ENDERMAN_TELEPORT = 2013;
 	public const EVENT_PARTICLE_PUNCH_BLOCK = 2014;
 
 	public const EVENT_START_RAIN = 3001;
@@ -120,13 +118,13 @@ class LevelEventPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->evid = $this->getVarInt();
-		$this->position = $this->getVector3();
+		$this->position = $this->getVector3Obj();
 		$this->data = $this->getVarInt();
 	}
 
 	protected function encodePayload(){
 		$this->putVarInt($this->evid);
-		$this->putVector3Nullable($this->position);
+		$this->putVector3ObjNullable($this->position);
 		$this->putVarInt($this->data);
 	}
 
