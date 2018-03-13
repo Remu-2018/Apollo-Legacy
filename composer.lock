@@ -50,7 +50,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/pmmp/PocketMine-NBT/zipball/f8934c0aed90d1f55452588f7ebef7c4519518a5",
-                "reference": "f8934c0aed90d1f55452588f7ebef7c4519518a5",
+                "reference": "f8934c0aed90d1f55452588f7ebef7c4519518a5"
                 "shasum": ""
             },
             "require": {
