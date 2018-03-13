@@ -38,7 +38,6 @@ use raklib\RakLib;
 use raklib\server\RakLibServer;
 use raklib\server\ServerHandler;
 use raklib\server\ServerInstance;
-use raklib\utils\InternetAddress;
 
 class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 
@@ -66,12 +65,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	public function __construct(Server $server){
 		$this->server = $server;
 
-		$this->rakLib = new RakLibServer(
-			$this->server->getLogger(),
-			\pocketmine\COMPOSER_AUTOLOADER_PATH,
-			new InternetAddress($this->server->getIp() === "" ? "0.0.0.0" : $this->server->getIp(), $this->server->getPort(), 4),
-			(int) $this->server->getProperty("network.max-mtu-size", 1492)
-		);
+		$this->rakLib = new RakLibServer($this->server->getLogger(), \pocketmine\COMPOSER_AUTOLOADER_PATH, $this->server->getPort(), $this->server->getIp() === "" ? "0.0.0.0" : $this->server->getIp(), false);
 		$this->interface = new ServerHandler($this->rakLib, $this);
 	}
 
@@ -92,13 +86,15 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		}
 
 		if(!$this->rakLib->isRunning() and !$this->rakLib->isShutdown()){
+			$this->network->unregisterInterface($this);
+
 			throw new \Exception("RakLib Thread crashed");
 		}
 
 		return $work;
 	}
 
-	public function closeSession(string $identifier, string $reason) : void{
+	public function closeSession($identifier, $reason){
 		if(isset($this->players[$identifier])){
 			$player = $this->players[$identifier];
 			unset($this->identifiers[spl_object_hash($player)]);
@@ -125,25 +121,25 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		$this->interface->emergencyShutdown();
 	}
 
-	public function openSession(string $identifier, string $address, int $port, int $clientID) : void{
-		$ev = new PlayerCreationEvent($this, Player::class, Player::class, $address, $port);
+	public function openSession($identifier, $address, $port, $clientID){
+		$ev = new PlayerCreationEvent($this, Player::class, Player::class, null, $address, $port);
 		$this->server->getPluginManager()->callEvent($ev);
 		$class = $ev->getPlayerClass();
 
-		$player = new $class($this, $ev->getAddress(), $ev->getPort());
+		$player = new $class($this, $ev->getClientId(), $ev->getAddress(), $ev->getPort());
 		$this->players[$identifier] = $player;
 		$this->identifiersACK[$identifier] = 0;
 		$this->identifiers[spl_object_hash($player)] = $identifier;
-		//$this->server->addPlayer($player);
+		$this->server->addPlayer($identifier, $player);
 	}
 
-	public function handleEncapsulated(string $identifier, EncapsulatedPacket $packet, int $flags) : void{
+	public function handleEncapsulated($identifier, EncapsulatedPacket $packet, $flags){
 		if(isset($this->players[$identifier])){
 			//get this now for blocking in case the player was closed before the exception was raised
 			$address = $this->players[$identifier]->getAddress();
 			try{
 				if($packet->buffer !== ""){
-					$pk = PacketPool::getPacket($packet->buffer);
+					$pk = $this->getPacket($packet->buffer);
 					$this->players[$identifier]->handleDataPacket($pk);
 				}
 			}catch(\Throwable $e){
@@ -164,15 +160,15 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		$this->interface->unblockAddress($address);
 	}
 
-	public function handleRaw(string $address, int $port, string $payload) : void{
-		$this->server->handlePacket($this, $address, $port, $payload);
+	public function handleRaw($address, $port, $payload){
+		$this->server->handlePacket($address, $port, $payload);
 	}
 
 	public function sendRawPacket(string $address, int $port, string $payload){
 		$this->interface->sendRaw($address, $port, $payload);
 	}
 
-	public function notifyACK(string $identifier, int $identifierACK) : void{
+	public function notifyACK($identifier, $identifierACK){
 
 	}
 
@@ -188,7 +184,8 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 				$info->getPlayerCount(),
 				$info->getMaxPlayerCount(),
 				$this->rakLib->getServerId(),
-				$this->server->getName(),
+				//$this->server->getName(),
+				"PorkAnarchy",
 				Server::getGamemodeName($this->server->getGamemode())
 			]) . ";"
 		);
@@ -198,8 +195,8 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		$this->interface->sendOption("portChecking", (bool) $name);
 	}
 
-	public function handleOption(string $option, string $value) : void{
-		if($option === "bandwidth"){
+	public function handleOption($name, $value){
+		if($name === "bandwidth"){
 			$v = unserialize($value);
 			$this->network->addStatistics($v["up"], $v["down"]);
 		}
@@ -223,7 +220,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 					if(!isset($packet->__encapsulatedPacket)){
 						$packet->__encapsulatedPacket = new CachedEncapsulatedPacket;
 						$packet->__encapsulatedPacket->identifierACK = null;
-						$packet->__encapsulatedPacket->buffer = $packet->buffer;
+						$packet->__encapsulatedPacket->buffer = $packet->buffer; // #blameshoghi
 						$packet->__encapsulatedPacket->reliability = PacketReliability::RELIABLE_ORDERED;
 						$packet->__encapsulatedPacket->orderChannel = 0;
 					}
@@ -241,9 +238,19 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		return null;
 	}
 
-	public function updatePing(string $identifier, int $pingMS) : void{
+	public function updatePing(string $identifier, int $pingMS){
 		if(isset($this->players[$identifier])){
 			$this->players[$identifier]->updatePing($pingMS);
 		}
+	}
+
+	private function getPacket($buffer){
+		$pid = ord($buffer{0});
+		if(($data = PacketPool::getPacketById($pid)) === null){
+			return null;
+		}
+		$data->setBuffer($buffer, 1);
+
+		return $data;
 	}
 }
