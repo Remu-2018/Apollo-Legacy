@@ -184,8 +184,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 				$info->getPlayerCount(),
 				$info->getMaxPlayerCount(),
 				$this->rakLib->getServerId(),
-				//$this->server->getName(),
-				"PorkAnarchy",
+				$this->server->getName(),
 				Server::getGamemodeName($this->server->getGamemode())
 			]) . ";"
 		);
