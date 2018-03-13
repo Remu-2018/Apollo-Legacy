@@ -1634,7 +1634,7 @@ class Server{
 				$this->logger->debug($this->getLanguage()->translateString("pocketmine.debug.enable"));
 			}
 
-			Generator::registerDefaultGenerators();
+			//Generator::registerDefaultGenerators();
 			Generator::addGenerator(Flat::class, "flat");
 			Generator::addGenerator(Normal::class, "normal");
 			Generator::addGenerator(Normal::class, "default");
