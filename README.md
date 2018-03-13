@@ -5,8 +5,6 @@ Apollo is a Minecraft: BE Server Software with an improved Generator and a lot m
 **CircleCI Build Status** [![CircleCI](https://circleci.com/gh/Apollo-SoftwareTeam/Apollo-Legacy.svg?style=svg)](https://circleci.com/gh/Apollo-SoftwareTeam/Apollo-Legacy)
 
 ## Download link(s)
-**Jenkins** [![Jenkins](https://img.shields.io/jenkins/s/https/jenkins.qa.ubuntu.com/view/Precise/view/All%20Precise/job/precise-desktop-amd64_default.svg?style=plastic)](https://jenkins.zxda.net/job/Apollo-Legacy)
-
 
 **CircleCI** [![CircleCI](https://circleci.com/gh/Apollo-SoftwareTeam/Apollo-Legacy.svg?style=svg)](https://circleci.com/gh/Apollo-SoftwareTeam/Apollo-Legacy)
 
@@ -15,7 +13,7 @@ Apollo is a Minecraft: BE Server Software with an improved Generator and a lot m
 - Need to communicate with us? Join our [discord](https://discord.gg/xBN3WR6) group!
 - We have a web site: [apollope.ml](https://apollope.ml)
 - We are a edited version of PMMP. We have edited their generators to our version and have improved the performance.
-- You can download .phar from Circle CI. Tab to latest build,tap to artifacts selection, tap to DevTools and download Apollo1.0dev.phar
+- You can download .phar from Circle CI. Tab to latest build,tap to artifacts selection, tap to DevTools and download Apollo0.1dev.phar
 
 ## Credits 
 
