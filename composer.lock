@@ -44,13 +44,13 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://api.github.com/repos/pmmp/PocketMine-NBT/zipball/33aaaebab10b501d233b6208d6a170b82f40c3b4",
-                "reference": "33aaaebab10b501d233b6208d6a170b82f40c3b4",
+                "url": "https://github.com/pmmp/PocketMine-NBT.git",
+                "reference": "f8934c0aed90d1f55452588f7ebef7c4519518a5"
             },
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/pmmp/PocketMine-NBT/zipball/f8934c0aed90d1f55452588f7ebef7c4519518a5",
-                "reference": "f8934c0aed90d1f55452588f7ebef7c4519518a5"
+                "reference": "f8934c0aed90d1f55452588f7ebef7c4519518a5",
                 "shasum": ""
             },
             "require": {
