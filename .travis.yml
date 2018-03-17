@@ -23,7 +23,8 @@ before_script:
  - cd ..
  - echo "extension=pthreads.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
  - composer install
- - wget -O plugins/DevTools_v1.12.9.phar  https://github.com/pmmp/PocketMine-DevTools/releases/download/v1.12.9/DevTools_v1.12.9.phar
+ - wget -O plugins/DevTools.phar https://github.com/pmmp/PocketMine-DevTools/releases/download/v1.12.9/DevTools_v1.12.9.phar --no-check-certificate
+ - wget -O PHP7.tar.gz https://jenkins.pmmp.io/job/PHP-7.2-Linux-x86_64/lastSuccessfulBuild/artifact/PHP_Linux-x86_64.tar.gz --no-check-certificate
  
 script:
  - php ci.php
