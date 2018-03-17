@@ -18,9 +18,9 @@ before_script:
  - cd ..
  - echo "extension=pthreads.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
  - composer install
-
+ 
 script:
- - ./tests/travis.sh
+ - php ci.php
 
 notifications:
  email: false
