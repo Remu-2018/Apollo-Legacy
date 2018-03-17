@@ -1,3 +1,5 @@
+sudo: true
+
 language: php
 
 php:
@@ -19,9 +21,9 @@ before_script:
 
 script:
  - ./tests/travis.sh
- 
- before_deploy:
- - mv plugins/DevTools/Apollo*.phar plugins/DevTools/Apollo.phar
 
 notifications:
  email: false
+  
+ before_deploy:
+ - mv plugins/DevTools/Apollo*.phar plugins/DevTools/Apollo.phar
