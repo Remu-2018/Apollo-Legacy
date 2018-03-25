@@ -63,9 +63,9 @@ class MainLogger extends \AttachableThreadedLogger{
 	/**
 	 * @return MainLogger
 	 */
-	public static function getLogger() : MainLogger{
+	//public static function getLogger() : MainLogger{
 	//	return static::$logger;
-	}
+	//}
 
 	/**
 	 * Assigns the MainLogger instance to the {@link MainLogger#logger} static property.
