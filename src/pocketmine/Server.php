@@ -2204,27 +2204,27 @@ class Server{
 					//$report = false; //Don't send crashdumps for locally modified builds
 				//}
 
-				if($report){
-					$url = ($this->getProperty("auto-report.use-https", true) ? "https" : "http") . "://" . $this->getProperty("auto-report.host", "crash.pmmp.io") . "/submit/api";
-					$reply = Utils::postURL($url, [
-						"report" => "yes",
-						"name" => $this->getName() . " " . $this->getPocketMineVersion(),
-						"email" => "crash@pocketmine.net",
-						"reportPaste" => base64_encode($dump->getEncodedData())
-					]);
+				//if($report){
+				//	$url = ($this->getProperty("auto-report.use-https", true) ? "https" : "http") . "://" . $this->getProperty("auto-report.host", "crash.pmmp.io") . "/submit/api";
+				//	$reply = Utils::postURL($url, [
+					//	"report" => "yes",
+					//	"name" => $this->getName() . " " . $this->getPocketMineVersion(),
+					//	"email" => "crash@pocketmine.net",
+					//	"reportPaste" => base64_encode($dump->getEncodedData())
+					//]);
 
-					if($reply !== false and ($data = json_decode($reply)) !== null and isset($data->crashId) and isset($data->crashUrl)){
-						$reportId = $data->crashId;
-						$reportUrl = $data->crashUrl;
-						$this->logger->emergency($this->getLanguage()->translateString("pocketmine.crash.archive", [$reportUrl, $reportId]));
-					}
-				}
-			}
+				//	if($reply !== false and ($data = json_decode($reply)) !== null and isset($data->crashId) and isset($data->crashUrl)){
+					//	$reportId = $data->crashId;
+					//	$reportUrl = $data->crashUrl;
+						//$this->logger->emergency($this->getLanguage()->translateString("pocketmine.crash.archive", [$reportUrl, $reportId]));
+			//		}
+			//	}
+			//}
 		}catch(\Throwable $e){
 			$this->logger->logException($e);
 			try{
 				$this->logger->critical($this->getLanguage()->translateString("pocketmine.crash.error", [$e->getMessage()]));
-			}catch(\Throwable $e){}
+		}catch(\Throwable $e){}
 		}
 
 		//$this->checkMemory();
