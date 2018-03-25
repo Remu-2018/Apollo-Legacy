@@ -2220,12 +2220,12 @@ class Server{
 			//		}
 			//	}
 			//}
-		}catch(\Throwable $e){
-			$this->logger->logException($e);
-			try{
-				$this->logger->critical($this->getLanguage()->translateString("pocketmine.crash.error", [$e->getMessage()]));
-		}catch(\Throwable $e){}
-		}
+		//}catch(\Throwable $e){
+			//$this->logger->logException($e);
+			//try{
+			//	$this->logger->critical($this->getLanguage()->translateString("pocketmine.crash.error", [$e->getMessage()]));
+		//}catch(\Throwable $e){}
+		//}
 
 		//$this->checkMemory();
 		//$dump .= "Memory Usage Tracking: \r\n" . chunk_split(base64_encode(gzdeflate(implode(";", $this->memoryStats), 9))) . "\r\n";
