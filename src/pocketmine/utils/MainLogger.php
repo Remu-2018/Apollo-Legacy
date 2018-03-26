@@ -63,9 +63,9 @@ class MainLogger extends \AttachableThreadedLogger{
 	/**
 	 * @return MainLogger
 	 */
-	//public static function getLogger() : MainLogger{
-	//	return static::$logger;
-	//}
+	public static function getLogger() : MainLogger{
+		return static::$logger;
+	}
 
 	/**
 	 * Assigns the MainLogger instance to the {@link MainLogger#logger} static property.
@@ -108,7 +108,7 @@ class MainLogger extends \AttachableThreadedLogger{
 	}
 
 	public function debug($message, bool $force = false){
-		if($this->logDebug === false and !$force){
+		if(!$this->logDebug and !$force){
 			return;
 		}
 		$this->send($message, \LogLevel::DEBUG, "DEBUG", TextFormat::GRAY);
@@ -263,7 +263,7 @@ class MainLogger extends \AttachableThreadedLogger{
 			throw new \RuntimeException("Couldn't open log file");
 		}
 
-		while($this->shutdown === false){
+		while(!$this->shutdown){
 			$this->writeLogStream($logResource);
 			$this->synchronized(function(){
 				$this->wait(25000);
