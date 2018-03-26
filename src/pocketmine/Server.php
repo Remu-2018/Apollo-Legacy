@@ -2209,14 +2209,14 @@ class Server{
 					$reply = Utils::postURL($url, [
 						"report" => "no",
 						"name" => $this->getName() . " " . $this->getPocketMineVersion(),
-						"email" => "crash@pocketmine.net",
+						"email" => "Apollope@gmail.com", // todo comvurm if fabian already make it
 						"reportPaste" => base64_encode($dump->getEncodedData())
 					]);
 
 					if($reply !== false and ($data = json_decode($reply)) !== null and isset($data->crashId) and isset($data->crashUrl)){
 						$reportId = $data->crashId;
 						$reportUrl = $data->crashUrl;
-						//$this->logger->emergency($this->getLanguage()->translateString("pocketmine.crash.archive", [$reportUrl, $reportId]));
+						$this->logger->emergency($this->getLanguage()->translateString("pocketmine.crash.archive", [$reportUrl, $reportId]));
 					}
 				}
 			}
@@ -2236,9 +2236,9 @@ class Server{
 		exit(1);
 	}
 
-//	public function __debugInfo(){
-	//	return [];
-	//}
+	public function __debugInfo(){
+		return [];
+	}
 
 	private function tickProcessor(){
 		$this->nextTick = microtime(true);
