@@ -264,7 +264,7 @@ class MainLogger extends \AttachableThreadedLogger {
 			}
 		}
 
-		$message = TextFormat::toANSI(TextFormat::GREEN . date("H:i:s", $now) . TextFormat::RESET . $color . " " . $prefix . " §8> " . $color . $message . TextFormat::RESET);
+		$message = Terminal::toANSI(TextFormat::AQUA . "[" . date("H:i:s", $now) . "] " . TextFormat::RESET . $color . "[" . $threadName . "/" . $prefix . "]:" . " " . $message . TextFormat::RESET);
 		$cleanMessage = TextFormat::clean($message);
 
 		if(!Terminal::hasFormattingCodes()){
