@@ -24,7 +24,6 @@ declare(strict_types=1);
 namespace pocketmine\level\format\io\region;
 
 use pocketmine\level\format\ChunkException;
-use pocketmine\level\format\io\exception\CorruptedChunkException;
 use pocketmine\utils\Binary;
 use pocketmine\utils\MainLogger;
 
@@ -96,18 +95,10 @@ class RegionLoader{
 		return !($this->locationTable[$index][0] === 0 or $this->locationTable[$index][1] === 0);
 	}
 
-	/**
-	 * @param int $x
-	 * @param int $z
-	 *
-	 * @return null|string
-	 * @throws \InvalidArgumentException if invalid coordinates are given
-	 * @throws CorruptedChunkException if chunk corruption is detected
-	 */
 	public function readChunk(int $x, int $z) : ?string{
 		$index = self::getChunkOffset($x, $z);
 		if($index < 0 or $index >= 4096){
-			throw new \InvalidArgumentException("Invalid chunk position in region, expected x/z in range 0-31, got x=$x, z=$z");
+			return null;
 		}
 
 		$this->lastUsed = time();
@@ -124,26 +115,27 @@ class RegionLoader{
 			if($length >= self::MAX_SECTOR_LENGTH){
 				$this->locationTable[$index][0] = ++$this->lastSector;
 				$this->locationTable[$index][1] = 1;
-				throw new CorruptedChunkException("Corrupted chunk header detected (sector count larger than max)");
+				MainLogger::getLogger()->error("Corrupted chunk header detected");
 			}
 			return null;
 		}
 
 		if($length > ($this->locationTable[$index][1] << 12)){ //Invalid chunk, bigger than defined number of sectors
-			MainLogger::getLogger()->error("Corrupted bigger chunk detected (bigger than number of sectors given in header)");
+			MainLogger::getLogger()->error("Corrupted bigger chunk detected");
 			$this->locationTable[$index][1] = $length >> 12;
 			$this->writeLocationIndex($index);
 		}elseif($compression !== self::COMPRESSION_ZLIB and $compression !== self::COMPRESSION_GZIP){
-			throw new CorruptedChunkException("Invalid compression type (got $compression, expected " . self::COMPRESSION_ZLIB . " or " . self::COMPRESSION_GZIP . ")");
+			MainLogger::getLogger()->error("Invalid compression type");
+			return null;
 		}
 
 		$chunkData = fread($this->filePointer, $length - 1);
-		if($chunkData === false){
-			throw new CorruptedChunkException("Corrupted chunk detected (failed to read chunk data from disk)");
-
+		if($chunkData !== false){
+			return $chunkData;
+		}else{
+			MainLogger::getLogger()->error("Corrupted chunk detected");
+			return null;
 		}
-
-		return $chunkData;
 	}
 
 	public function chunkExists(int $x, int $z) : bool{
