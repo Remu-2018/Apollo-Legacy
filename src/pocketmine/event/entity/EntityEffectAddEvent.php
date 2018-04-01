@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\event\entity;
 
-use pocketmine\entity\EffectInstance;
+use pocketmine\entity\Effect;
 use pocketmine\entity\Entity;
 
 /**
@@ -32,15 +32,15 @@ use pocketmine\entity\Entity;
 class EntityEffectAddEvent extends EntityEffectEvent{
 	public static $handlerList = null;
 
-	/** @var EffectInstance|null */
+	/** @var Effect|null */
 	private $oldEffect;
 
 	/**
-	 * @param Entity         $entity
-	 * @param EffectInstance $effect
-	 * @param EffectInstance $oldEffect
+	 * @param Entity      $entity
+	 * @param Effect      $effect
+	 * @param Effect|null $oldEffect
 	 */
-	public function __construct(Entity $entity, EffectInstance $effect, EffectInstance $oldEffect = null){
+	public function __construct(Entity $entity, Effect $effect, Effect $oldEffect = null){
 		parent::__construct($entity, $effect);
 		$this->oldEffect = $oldEffect;
 	}
@@ -58,11 +58,11 @@ class EntityEffectAddEvent extends EntityEffectEvent{
 	 * @return bool
 	 */
 	public function hasOldEffect() : bool{
-		return $this->oldEffect instanceof EffectInstance;
+		return $this->oldEffect instanceof Effect;
 	}
 
 	/**
-	 * @return EffectInstance|null
+	 * @return Effect|null
 	 */
 	public function getOldEffect(){
 		return $this->oldEffect;

@@ -24,21 +24,16 @@ declare(strict_types=1);
 namespace pocketmine\event\entity;
 
 use pocketmine\entity\projectile\Projectile;
-use pocketmine\math\RayTraceResult;
 
-abstract class ProjectileHitEvent extends EntityEvent{
+class ProjectileHitEvent extends EntityEvent{
 	public static $handlerList = null;
 
-	/** @var RayTraceResult */
-	private $rayTraceResult;
-
 	/**
-	 * @param Projectile     $entity
-	 * @param RayTraceResult $rayTraceResult
+	 * @param Projectile $entity
 	 */
-	public function __construct(Projectile $entity, RayTraceResult $rayTraceResult){
+	public function __construct(Projectile $entity){
 		$this->entity = $entity;
-		$this->rayTraceResult = $rayTraceResult;
+
 	}
 
 	/**
@@ -48,13 +43,4 @@ abstract class ProjectileHitEvent extends EntityEvent{
 		return $this->entity;
 	}
 
-	/**
-	 * Returns a RayTraceResult object containing information such as the exact position struck, the AABB it hit, and
-	 * the face of the AABB that it hit.
-	 *
-	 * @return RayTraceResult
-	 */
-	public function getRayTraceResult() : RayTraceResult{
-		return $this->rayTraceResult;
-	}
 }
