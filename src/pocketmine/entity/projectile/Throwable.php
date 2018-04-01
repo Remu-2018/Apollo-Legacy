@@ -39,6 +39,7 @@ abstract class Throwable extends Projectile{
 		$hasUpdate = parent::entityBaseTick($tickDiff);
 
 		if($this->age > 1200 or $this->isCollided){
+			//TODO: hit particles
 			$this->flagForDespawn();
 			$hasUpdate = true;
 		}
