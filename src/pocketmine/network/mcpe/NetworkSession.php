@@ -26,9 +26,9 @@ namespace pocketmine\network\mcpe;
 use pocketmine\network\mcpe\protocol\AddBehaviorTreePacket;
 use pocketmine\network\mcpe\protocol\AddEntityPacket;
 use pocketmine\network\mcpe\protocol\AddHangingEntityPacket;
-use pocketmine\network\mcpe\protocol\AddItemEntityPacket;
 use pocketmine\network\mcpe\protocol\AddPaintingPacket;
 use pocketmine\network\mcpe\protocol\AddPlayerPacket;
+use pocketmine\network\mcpe\protocol\AddItemEntityPacket;
 use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
 use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
@@ -40,8 +40,8 @@ use pocketmine\network\mcpe\protocol\BossEventPacket;
 use pocketmine\network\mcpe\protocol\CameraPacket;
 use pocketmine\network\mcpe\protocol\ChangeDimensionPacket;
 use pocketmine\network\mcpe\protocol\ChunkRadiusUpdatedPacket;
-use pocketmine\network\mcpe\protocol\ClientToServerHandshakePacket;
 use pocketmine\network\mcpe\protocol\ClientboundMapItemDataPacket;
+use pocketmine\network\mcpe\protocol\ClientToServerHandshakePacket;
 use pocketmine\network\mcpe\protocol\CommandBlockUpdatePacket;
 use pocketmine\network\mcpe\protocol\CommandOutputPacket;
 use pocketmine\network\mcpe\protocol\CommandRequestPacket;
@@ -61,11 +61,7 @@ use pocketmine\network\mcpe\protocol\FullChunkDataPacket;
 use pocketmine\network\mcpe\protocol\GameRulesChangedPacket;
 use pocketmine\network\mcpe\protocol\GuiDataPickItemPacket;
 use pocketmine\network\mcpe\protocol\HurtArmorPacket;
-use pocketmine\network\mcpe\protocol\InteractPacket;
-use pocketmine\network\mcpe\protocol\InventoryContentPacket;
-use pocketmine\network\mcpe\protocol\InventorySlotPacket;
-use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
-use pocketmine\network\mcpe\protocol\ItemFrameDropItemPacket;
+use pocketmine\network\mcpe\protocol\LabTablePacket;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
@@ -79,15 +75,16 @@ use pocketmine\network\mcpe\protocol\MoveEntityPacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
 use pocketmine\network\mcpe\protocol\NpcRequestPacket;
 use pocketmine\network\mcpe\protocol\PhotoTransferPacket;
-use pocketmine\network\mcpe\protocol\PlaySoundPacket;
-use pocketmine\network\mcpe\protocol\PlayStatusPacket;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\PlayerHotbarPacket;
-use pocketmine\network\mcpe\protocol\PlayerInputPacket;
 use pocketmine\network\mcpe\protocol\PlayerListPacket;
 use pocketmine\network\mcpe\protocol\PlayerSkinPacket;
+use pocketmine\network\mcpe\protocol\PlayerInputPacket;
+use pocketmine\network\mcpe\protocol\PlaySoundPacket;
+use pocketmine\network\mcpe\protocol\PlayStatusPacket;
 use pocketmine\network\mcpe\protocol\PurchaseReceiptPacket;
 use pocketmine\network\mcpe\protocol\RemoveEntityPacket;
+use pocketmine\network\mcpe\protocol\RemoveObjectivePacket;
 use pocketmine\network\mcpe\protocol\RequestChunkRadiusPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackChunkDataPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackChunkRequestPacket;
@@ -103,12 +100,14 @@ use pocketmine\network\mcpe\protocol\ServerToClientHandshakePacket;
 use pocketmine\network\mcpe\protocol\SetCommandsEnabledPacket;
 use pocketmine\network\mcpe\protocol\SetDefaultGameTypePacket;
 use pocketmine\network\mcpe\protocol\SetDifficultyPacket;
+use pocketmine\network\mcpe\protocol\SetDisplayObjectivePacket;
 use pocketmine\network\mcpe\protocol\SetEntityDataPacket;
 use pocketmine\network\mcpe\protocol\SetEntityLinkPacket;
 use pocketmine\network\mcpe\protocol\SetEntityMotionPacket;
 use pocketmine\network\mcpe\protocol\SetHealthPacket;
 use pocketmine\network\mcpe\protocol\SetLastHurtByPacket;
 use pocketmine\network\mcpe\protocol\SetPlayerGameTypePacket;
+use pocketmine\network\mcpe\protocol\SetScorePacket;
 use pocketmine\network\mcpe\protocol\SetSpawnPositionPacket;
 use pocketmine\network\mcpe\protocol\SetTimePacket;
 use pocketmine\network\mcpe\protocol\SetTitlePacket;
@@ -126,9 +125,15 @@ use pocketmine\network\mcpe\protocol\TextPacket;
 use pocketmine\network\mcpe\protocol\TransferPacket;
 use pocketmine\network\mcpe\protocol\UpdateAttributesPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
+use pocketmine\network\mcpe\protocol\UpdateBlockSyncedPacket;
 use pocketmine\network\mcpe\protocol\UpdateEquipPacket;
 use pocketmine\network\mcpe\protocol\UpdateTradePacket;
 use pocketmine\network\mcpe\protocol\WSConnectPacket;
+use pocketmine\network\mcpe\protocol\InteractPacket;
+use pocketmine\network\mcpe\protocol\InventoryContentPacket;
+use pocketmine\network\mcpe\protocol\InventorySlotPacket;
+use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
+use pocketmine\network\mcpe\protocol\ItemFrameDropItemPacket;
 
 abstract class NetworkSession{
 
@@ -551,6 +556,26 @@ abstract class NetworkSession{
 	}
 
 	public function handleSetDefaultGameType(SetDefaultGameTypePacket $packet) : bool{
+		return false;
+	}
+
+	public function handleRemoveObjective(RemoveObjectivePacket $packet) : bool{
+		return false;
+	}
+
+	public function handleSetDisplayObjective(SetDisplayObjectivePacket $packet) : bool{
+		return false;
+	}
+
+	public function handleSetScore(SetScorePacket $packet) : bool{
+		return false;
+	}
+
+	public function handleLabTable(LabTablePacket $packet) : bool{
+		return false;
+	}
+
+	public function handleUpdateBlockSynced(UpdateBlockSyncedPacket $packet) : bool{
 		return false;
 	}
 

@@ -24,7 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\utils;
 
 /**
- * Class used to handle Minecraft chat format, and convert it to other formats like ANSI or HTML
+ * Class used to handle Minecraft chat format, and convert it to other formats like HTML
  */
 abstract class TextFormat{
 	public const ESCAPE = "\xc2\xa7"; //§
@@ -123,50 +123,50 @@ abstract class TextFormat{
 				if($color !== "white"){
 					$pointer["color"] = $color;
 				}
-				if($bold !== false){
+				if($bold){
 					$pointer["bold"] = true;
 				}
-				if($italic !== false){
+				if($italic){
 					$pointer["italic"] = true;
 				}
-				if($underlined !== false){
+				if($underlined){
 					$pointer["underlined"] = true;
 				}
-				if($strikethrough !== false){
+				if($strikethrough){
 					$pointer["strikethrough"] = true;
 				}
-				if($obfuscated !== false){
+				if($obfuscated){
 					$pointer["obfuscated"] = true;
 				}
 				++$index;
 			}
 			switch($token){
 				case TextFormat::BOLD:
-					if($bold === false){
+					if(!$bold){
 						$pointer["bold"] = true;
 						$bold = true;
 					}
 					break;
 				case TextFormat::OBFUSCATED:
-					if($obfuscated === false){
+					if(!$obfuscated){
 						$pointer["obfuscated"] = true;
 						$obfuscated = true;
 					}
 					break;
 				case TextFormat::ITALIC:
-					if($italic === false){
+					if(!$italic){
 						$pointer["italic"] = true;
 						$italic = true;
 					}
 					break;
 				case TextFormat::UNDERLINE:
-					if($underlined === false){
+					if(!$underlined){
 						$pointer["underlined"] = true;
 						$underlined = true;
 					}
 					break;
 				case TextFormat::STRIKETHROUGH:
-					if($strikethrough === false){
+					if(!$strikethrough){
 						$pointer["strikethrough"] = true;
 						$strikethrough = true;
 					}
@@ -176,23 +176,23 @@ abstract class TextFormat{
 						$pointer["color"] = "white";
 						$color = "white";
 					}
-					if($bold !== false){
+					if($bold){
 						$pointer["bold"] = false;
 						$bold = false;
 					}
-					if($italic !== false){
+					if($italic){
 						$pointer["italic"] = false;
 						$italic = false;
 					}
-					if($underlined !== false){
+					if($underlined){
 						$pointer["underlined"] = false;
 						$underlined = false;
 					}
-					if($strikethrough !== false){
+					if($strikethrough){
 						$pointer["strikethrough"] = false;
 						$strikethrough = false;
 					}
-					if($obfuscated !== false){
+					if($obfuscated){
 						$pointer["obfuscated"] = false;
 						$obfuscated = false;
 					}
@@ -396,96 +396,15 @@ abstract class TextFormat{
 		return $newString;
 	}
 
-	/**
-	 * Returns a string with colorized ANSI Escape codes
-	 *
-	 * @param string|array $string
-	 *
-	 * @return string
-	 */
-	public static function toANSI($string) : string{
-		if(!is_array($string)){
-			$string = self::tokenize($string);
-		}
+    public static function center(string $text) : string{
+        $lines = explode("\n", $text);
+        $max = max(array_map("strlen", $lines));
+        return implode("\n", array_map(function($value) use ($max) { return str_pad($value, $max + self::colorCount($value), " ", STR_PAD_BOTH); }, $lines));
+    }
 
-		$newString = "";
-		foreach($string as $token){
-			switch($token){
-				case TextFormat::BOLD:
-					$newString .= Terminal::$FORMAT_BOLD;
-					break;
-				case TextFormat::OBFUSCATED:
-					$newString .= Terminal::$FORMAT_OBFUSCATED;
-					break;
-				case TextFormat::ITALIC:
-					$newString .= Terminal::$FORMAT_ITALIC;
-					break;
-				case TextFormat::UNDERLINE:
-					$newString .= Terminal::$FORMAT_UNDERLINE;
-					break;
-				case TextFormat::STRIKETHROUGH:
-					$newString .= Terminal::$FORMAT_STRIKETHROUGH;
-					break;
-				case TextFormat::RESET:
-					$newString .= Terminal::$FORMAT_RESET;
-					break;
-
-				//Colors
-				case TextFormat::BLACK:
-					$newString .= Terminal::$COLOR_BLACK;
-					break;
-				case TextFormat::DARK_BLUE:
-					$newString .= Terminal::$COLOR_DARK_BLUE;
-					break;
-				case TextFormat::DARK_GREEN:
-					$newString .= Terminal::$COLOR_DARK_GREEN;
-					break;
-				case TextFormat::DARK_AQUA:
-					$newString .= Terminal::$COLOR_DARK_AQUA;
-					break;
-				case TextFormat::DARK_RED:
-					$newString .= Terminal::$COLOR_DARK_RED;
-					break;
-				case TextFormat::DARK_PURPLE:
-					$newString .= Terminal::$COLOR_PURPLE;
-					break;
-				case TextFormat::GOLD:
-					$newString .= Terminal::$COLOR_GOLD;
-					break;
-				case TextFormat::GRAY:
-					$newString .= Terminal::$COLOR_GRAY;
-					break;
-				case TextFormat::DARK_GRAY:
-					$newString .= Terminal::$COLOR_DARK_GRAY;
-					break;
-				case TextFormat::BLUE:
-					$newString .= Terminal::$COLOR_BLUE;
-					break;
-				case TextFormat::GREEN:
-					$newString .= Terminal::$COLOR_GREEN;
-					break;
-				case TextFormat::AQUA:
-					$newString .= Terminal::$COLOR_AQUA;
-					break;
-				case TextFormat::RED:
-					$newString .= Terminal::$COLOR_RED;
-					break;
-				case TextFormat::LIGHT_PURPLE:
-					$newString .= Terminal::$COLOR_LIGHT_PURPLE;
-					break;
-				case TextFormat::YELLOW:
-					$newString .= Terminal::$COLOR_YELLOW;
-					break;
-				case TextFormat::WHITE:
-					$newString .= Terminal::$COLOR_WHITE;
-					break;
-				default:
-					$newString .= $token;
-					break;
-			}
-		}
-
-		return $newString;
-	}
+    public static function colorCount(string $yazi) : int{
+        preg_replace("/(" . TextFormat::ESCAPE ."[0123456789abcdeflo])/", "", $yazi, -1, $sayi);
+        return $sayi;
+    }
 
 }

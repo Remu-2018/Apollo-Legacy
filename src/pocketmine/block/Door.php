@@ -1,30 +1,30 @@
 <?php
 
 /*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *               _ _
+ *         /\   | | |
+ *        /  \  | | |_ __ _ _   _
+ *       / /\ \ | | __/ _` | | | |
+ *      / ____ \| | || (_| | |_| |
+ *     /_/    \_|_|\__\__,_|\__, |
+ *                           __/ |
+ *                          |___/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Altay
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
-use pocketmine\level\Level;
 use pocketmine\level\sound\DoorSound;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
@@ -201,26 +201,20 @@ abstract class Door extends Transparent{
 		return $bb;
 	}
 
-	public function onUpdate(int $type){
-		if($type === Level::BLOCK_UPDATE_NORMAL){
-			if($this->getSide(Vector3::SIDE_DOWN)->getId() === self::AIR){ //Replace with common break method
-				$this->getLevel()->setBlock($this, BlockFactory::get(Block::AIR), false);
-				if($this->getSide(Vector3::SIDE_UP) instanceof Door){
-					$this->getLevel()->setBlock($this->getSide(Vector3::SIDE_UP), BlockFactory::get(Block::AIR), false);
-				}
-
-				return Level::BLOCK_UPDATE_NORMAL;
+	public function onNearbyBlockChange() : void{
+		if($this->getSide(Vector3::SIDE_DOWN)->getId() === self::AIR){ //Replace with common break method
+			$this->getLevel()->setBlock($this, BlockFactory::get(Block::AIR), false);
+			if($this->getSide(Vector3::SIDE_UP) instanceof Door){
+				$this->getLevel()->setBlock($this->getSide(Vector3::SIDE_UP), BlockFactory::get(Block::AIR), false);
 			}
 		}
-
-		return false;
 	}
 
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
 		if($face === Vector3::SIDE_UP){
 			$blockUp = $this->getSide(Vector3::SIDE_UP);
 			$blockDown = $this->getSide(Vector3::SIDE_DOWN);
-			if($blockUp->canBeReplaced() === false or $blockDown->isTransparent() === true){
+			if(!$blockUp->canBeReplaced() or $blockDown->isTransparent()){
 				return false;
 			}
 			$direction = $player instanceof Player ? $player->getDirection() : 0;
@@ -233,7 +227,7 @@ abstract class Door extends Transparent{
 			$next = $this->getSide($faces[($direction + 2) % 4]);
 			$next2 = $this->getSide($faces[$direction]);
 			$metaUp = 0x08;
-			if($next->getId() === $this->getId() or ($next2->isTransparent() === false and $next->isTransparent() === true)){ //Door hinge
+			if($next->getId() === $this->getId() or (!$next2->isTransparent() and $next->isTransparent())){ //Door hinge
 				$metaUp |= 0x01;
 			}
 

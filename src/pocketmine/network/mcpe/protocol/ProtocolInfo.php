@@ -1,23 +1,24 @@
 <?php
 
 /*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *               _ _
+ *         /\   | | |
+ *        /  \  | | |_ __ _ _   _
+ *       / /\ \ | | __/ _` | | | |
+ *      / ____ \| | || (_| | |_| |
+ *     /_/    \_|_|\__\__,_|\__, |
+ *                           __/ |
+ *                          |___/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Altay
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
@@ -29,25 +30,18 @@ namespace pocketmine\network\mcpe\protocol;
 interface ProtocolInfo{
 
 	/**
-	 * NOTE TO DEVELOPERS
-	 * Do not waste your time or ours submitting pull requests changing game and/or protocol version numbers.
-	 * Pull requests changing game and/or protocol version numbers will be closed.
-	 *
-	 * This file is generated automatically, do not edit it manually.
+	 * Actual Minecraft: BE protocol version
 	 */
-
+	public const CURRENT_PROTOCOL = 223;
+	public const ACCEPTED_PROTOCOLS = [223, 240];
 	/**
-	 * Actual Minecraft: PE protocol version
+	 * Current Minecraft BE version reported by the server. This is usually the earliest currently supported version.
 	 */
-	public const CURRENT_PROTOCOL = 201;
-	/**
-	 * Current Minecraft PE version reported by the server. This is usually the earliest currently supported version.
-	 */
-	public const MINECRAFT_VERSION = 'v1.2.11';
+	public const MINECRAFT_VERSION = 'v1.2.13';
 	/**
 	 * Version number sent to clients in ping responses.
 	 */
-	public const MINECRAFT_VERSION_NETWORK = '1.2.11';
+	public const MINECRAFT_VERSION_NETWORK = '1.2.13';
 
 	public const LOGIN_PACKET = 0x01;
 	public const PLAY_STATUS_PACKET = 0x02;
@@ -154,5 +148,10 @@ interface ProtocolInfo{
 	public const SERVER_SETTINGS_RESPONSE_PACKET = 0x67;
 	public const SHOW_PROFILE_PACKET = 0x68;
 	public const SET_DEFAULT_GAME_TYPE_PACKET = 0x69;
+	public const REMOVE_OBJECTIVE_PACKET = 0x6a;
+	public const SET_DISPLAY_OBJECTIVE_PACKET = 0x6b;
+	public const SET_SCORE_PACKET = 0x6c;
+	public const LAB_TABLE_PACKET = 0x6d;
+	public const UPDATE_BLOCK_SYNCED_PACKET = 0x6e;
 
 }

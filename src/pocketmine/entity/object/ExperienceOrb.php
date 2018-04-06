@@ -1,23 +1,24 @@
 <?php
 
 /*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *               _ _
+ *         /\   | | |
+ *        /  \  | | |_ __ _ _   _
+ *       / /\ \ | | __/ _` | | | |
+ *      / ____ \| | || (_| | |_| |
+ *     /_/    \_|_|\__\__,_|\__, |
+ *                           __/ |
+ *                          |___/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Altay
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
@@ -25,8 +26,8 @@ namespace pocketmine\entity\object;
 
 use pocketmine\entity\Entity;
 use pocketmine\entity\Human;
-use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ShortTag;
+use pocketmine\nbt\tag\IntTag;
 use pocketmine\Player;
 
 class ExperienceOrb extends Entity{
@@ -125,14 +126,14 @@ class ExperienceOrb extends Entity{
 	}
 
 	public function getXpValue() : int{
-		return $this->getDataProperty(self::DATA_EXPERIENCE_VALUE) ?? 0;
+		return $this->propertyManager->getInt(self::DATA_EXPERIENCE_VALUE) ?? 0;
 	}
 
 	public function setXpValue(int $amount) : void{
 		if($amount <= 0){
 			throw new \InvalidArgumentException("XP amount must be greater than 0, got $amount");
 		}
-		$this->setDataProperty(self::DATA_EXPERIENCE_VALUE, self::DATA_TYPE_INT, $amount);
+		$this->propertyManager->setInt(self::DATA_EXPERIENCE_VALUE, $amount);
 	}
 
 	public function hasTargetPlayer() : bool{
@@ -165,16 +166,18 @@ class ExperienceOrb extends Entity{
 		}
 
 		$currentTarget = $this->getTargetPlayer();
+		if($currentTarget !== null and $currentTarget->distanceSquared($this) > self::MAX_TARGET_DISTANCE ** 2){
+		    $currentTarget = null;
+		}
 
 		if($this->lookForTargetTime >= 20){
-			if($currentTarget === null or $currentTarget->distanceSquared($this) > self::MAX_TARGET_DISTANCE ** 2){
+			if($currentTarget === null){
 				$this->setTargetPlayer(null);
 
 				$newTarget = $this->level->getNearestEntity($this, self::MAX_TARGET_DISTANCE, Human::class);
 
 				if($newTarget instanceof Human and !($newTarget instanceof Player and $newTarget->isSpectator())){
 					$currentTarget = $newTarget;
-					$this->setTargetPlayer($currentTarget);
 				}
 			}
 
@@ -182,6 +185,8 @@ class ExperienceOrb extends Entity{
 		}else{
 			$this->lookForTargetTime += $tickDiff;
 		}
+
+		$this->setTargetPlayer($currentTarget);
 
 		if($currentTarget !== null){
 			$vector = $currentTarget->subtract($this)->add(0, $currentTarget->getEyeHeight() / 2, 0)->divide(self::MAX_TARGET_DISTANCE);
@@ -206,5 +211,14 @@ class ExperienceOrb extends Entity{
 		}
 
 		return $hasUpdate;
+	}
+
+	protected function tryChangeMovement(){
+		$this->checkObstruction($this->x, $this->y, $this->z);
+		parent::tryChangeMovement();
+	}
+
+	public function canBeCollidedWith(): bool{
+		return false;
 	}
 }

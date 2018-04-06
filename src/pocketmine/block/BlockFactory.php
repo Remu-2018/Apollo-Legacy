@@ -1,23 +1,24 @@
 <?php
 
 /*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *               _ _
+ *         /\   | | |
+ *        /  \  | | |_ __ _ _   _
+ *       / /\ \ | | __/ _` | | | |
+ *      / ____ \| | || (_| | |_| |
+ *     /_/    \_|_|\__\__,_|\__, |
+ *                           __/ |
+ *                          |___/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Altay
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
@@ -25,6 +26,7 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 use pocketmine\level\Position;
+use pocketmine\utils\MainLogger;
 
 /**
  * Manages block registration and instance creation
@@ -49,6 +51,15 @@ class BlockFactory{
 	public static $diffusesSkyLight = null;
 	/** @var \SplFixedArray<float> */
 	public static $blastResistance = null;
+
+	/** @var int[] */
+	public static $staticRuntimeIdMap = [];
+
+	/** @var int[] */
+	public static $legacyIdMap = [];
+
+	/** @var int */
+	private static $lastRuntimeId = 0;
 
 	/**
 	 * Initializes the block factory. By default this is called only once on server start, however you may wish to use
@@ -220,7 +231,7 @@ class BlockFactory{
 		self::registerBlock(new DaylightSensor());
 		self::registerBlock(new Redstone());
 		self::registerBlock(new NetherQuartzOre());
-		//TODO: HOPPER_BLOCK
+		self::registerBlock(new Hopper());
 		self::registerBlock(new Quartz());
 		self::registerBlock(new QuartzStairs());
 		self::registerBlock(new DoubleWoodenSlab());
@@ -322,6 +333,12 @@ class BlockFactory{
 				self::registerBlock(new UnknownBlock($id));
 			}
 		}
+
+		/** @var mixed[] $runtimeIdMap */
+		$runtimeIdMap = json_decode(file_get_contents(\pocketmine\RESOURCE_PATH . "runtimeid_table.json"), true);
+		foreach($runtimeIdMap as $obj){
+			self::registerMapping($obj["runtimeID"], $obj["id"], $obj["data"]);
+		}
 	}
 
 	/**
@@ -412,5 +429,42 @@ class BlockFactory{
 	public static function isRegistered(int $id) : bool{
 		$b = self::$list[$id];
 		return $b !== null and !($b instanceof UnknownBlock);
+	}
+
+	/**
+	 * @internal
+	 *
+	 * @param int $id
+	 * @param int $meta
+	 *
+	 * @return int
+	 */
+	public static function toStaticRuntimeId(int $id, int $meta = 0) : int{
+		$index = ($id << 4) | $meta;
+		if(!isset(self::$staticRuntimeIdMap[$index])){
+			self::registerMapping($rtId = ++self::$lastRuntimeId, $id, $meta);
+			MainLogger::getLogger()->error("ID $id meta $meta does not have a corresponding block static runtime ID, added a new unknown runtime ID ($rtId)");
+			return $rtId;
+		}
+
+		return self::$staticRuntimeIdMap[$index];
+	}
+
+	/**
+	 * @internal
+	 *
+	 * @param int $runtimeId
+	 *
+	 * @return int[] [id, meta]
+	 */
+	public static function fromStaticRuntimeId(int $runtimeId) : array{
+		$v = self::$legacyIdMap[$runtimeId];
+		return [$v >> 4, $v & 0xf];
+	}
+
+	private static function registerMapping(int $staticRuntimeId, int $legacyId, int $legacyMeta) : void{
+		self::$staticRuntimeIdMap[($legacyId << 4) | $legacyMeta] = $staticRuntimeId;
+		self::$legacyIdMap[$staticRuntimeId] = ($legacyId << 4) | $legacyMeta;
+		self::$lastRuntimeId = max(self::$lastRuntimeId, $staticRuntimeId);
 	}
 }

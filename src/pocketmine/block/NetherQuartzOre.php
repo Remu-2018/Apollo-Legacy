@@ -23,9 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\item\TieredTool;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
-use pocketmine\item\TieredTool;
 
 class NetherQuartzOre extends Solid{
 
@@ -56,5 +56,9 @@ class NetherQuartzOre extends Solid{
 			ItemFactory::get(Item::QUARTZ)
 		];
 	}
+
+    public function getXpDropAmount() : int{
+        return mt_rand(2, 5);
+    }
 
 }

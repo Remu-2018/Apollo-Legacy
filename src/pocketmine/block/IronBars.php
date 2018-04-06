@@ -53,3 +53,4 @@ class IronBars extends Thin{
 		return 0;
 	}
 }
+

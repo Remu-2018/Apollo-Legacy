@@ -1,23 +1,24 @@
 <?php
 
 /*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *               _ _
+ *         /\   | | |
+ *        /  \  | | |_ __ _ _   _
+ *       / /\ \ | | __/ _` | | | |
+ *      / ____ \| | || (_| | |_| |
+ *     /_/    \_|_|\__\__,_|\__, |
+ *                           __/ |
+ *                          |___/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Altay
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
@@ -30,14 +31,14 @@ use pocketmine\event\Cancellable;
  * Called when an entity takes damage.
  */
 class EntityDamageEvent extends EntityEvent implements Cancellable{
-	public static $handlerList = null;
-
 	public const MODIFIER_BASE = 0;
 	public const MODIFIER_ARMOR = 1;
 	public const MODIFIER_STRENGTH = 2;
 	public const MODIFIER_WEAKNESS = 3;
 	public const MODIFIER_RESISTANCE = 4;
 	public const MODIFIER_ABSORPTION = 5;
+	public const MODIFIER_ARMOR_ENCHANTMENTS = 6;
+	public const MODIFIER_CRITICAL = 7;
 
 	public const CAUSE_CONTACT = 0;
 	public const CAUSE_ENTITY_ATTACK = 1;
@@ -150,7 +151,6 @@ class EntityDamageEvent extends EntityEvent implements Cancellable{
 			case self::CAUSE_VOID:
 			case self::CAUSE_MAGIC:
 			case self::CAUSE_SUICIDE:
-				//TODO: lightning
 				return false;
 
 		}

@@ -35,6 +35,10 @@ class Bow extends Tool{
 		parent::__construct(self::BOW, $meta, "Bow");
 	}
 
+	public function getEnchantability() : int{
+		return 1;
+	}
+
 	public function getFuelTime() : int{
 		return 200;
 	}
@@ -90,7 +94,7 @@ class Bow extends Tool{
 						$ev->getProjectile()->flagForDespawn();
 					}else{
 						$ev->getProjectile()->spawnToAll();
-						$player->getLevel()->broadcastLevelSoundEvent($player, LevelSoundEventPacket::SOUND_BOW);
+                        $player->getLevel()->broadcastLevelSoundEvent($player, LevelSoundEventPacket::SOUND_BOW);
 					}
 				}else{
 					$entity->spawnToAll();

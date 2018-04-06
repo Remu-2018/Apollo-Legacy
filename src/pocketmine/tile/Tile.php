@@ -1,23 +1,24 @@
 <?php
 
 /*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *               _ _
+ *         /\   | | |
+ *        /  \  | | |_ __ _ _   _
+ *       / /\ \ | | __/ _` | | | |
+ *      / ____ \| | || (_| | |_| |
+ *     /_/    \_|_|\__\__,_|\__, |
+ *                           __/ |
+ *                          |___/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Altay
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
@@ -28,18 +29,17 @@ declare(strict_types=1);
 namespace pocketmine\tile;
 
 use pocketmine\block\Block;
-use pocketmine\event\Timings;
-use pocketmine\event\TimingsHandler;
 use pocketmine\item\Item;
-use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\StringTag;
+use pocketmine\nbt\tag\IntTag;
 use pocketmine\Player;
 use pocketmine\Server;
+use pocketmine\timings\Timings;
+use pocketmine\timings\TimingsHandler;
 
 abstract class Tile extends Position{
 
@@ -56,10 +56,13 @@ abstract class Tile extends Position{
 	public const ENDER_CHEST = "EnderChest";
 	public const FLOWER_POT = "FlowerPot";
 	public const FURNACE = "Furnace";
+	public const HOPPER = "Hopper";
 	public const ITEM_FRAME = "ItemFrame";
 	public const MOB_SPAWNER = "MobSpawner";
 	public const SIGN = "Sign";
 	public const SKULL = "Skull";
+
+	public const VIRTUAL = "Virtual";
 
 	/** @var int */
 	public static $tileCount = 1;
@@ -69,8 +72,6 @@ abstract class Tile extends Position{
 	/** @var string[][] */
 	private static $saveNames = [];
 
-	/** @var Chunk */
-	public $chunk;
 	/** @var string */
 	public $name;
 	/** @var int */
@@ -92,9 +93,12 @@ abstract class Tile extends Position{
 		self::registerTile(EnderChest::class, [self::ENDER_CHEST, "minecraft:ender_chest"]);
 		self::registerTile(FlowerPot::class, [self::FLOWER_POT, "minecraft:flower_pot"]);
 		self::registerTile(Furnace::class, [self::FURNACE, "minecraft:furnace"]);
+		self::registerTile(Hopper::class, [self::HOPPER, "minecraft:hopper"]);
 		self::registerTile(ItemFrame::class, [self::ITEM_FRAME]); //this is an entity in PC
 		self::registerTile(Sign::class, [self::SIGN, "minecraft:sign"]);
 		self::registerTile(Skull::class, [self::SKULL, "minecraft:skull"]);
+
+		self::registerTile(VirtualHolder::class, [self::VIRTUAL]);
 	}
 
 	/**
@@ -161,10 +165,6 @@ abstract class Tile extends Position{
 		$this->namedtag = $nbt;
 		$this->server = $level->getServer();
 		$this->setLevel($level);
-		$this->chunk = $level->getChunk($this->namedtag->getInt(self::TAG_X) >> 4, $this->namedtag->getInt(self::TAG_Z) >> 4, false);
-		if($this->chunk === null){
-			throw new \InvalidStateException("Cannot create tiles in unloaded chunks");
-		}
 
 		$this->name = "";
 		$this->id = Tile::$tileCount++;
@@ -172,7 +172,6 @@ abstract class Tile extends Position{
 		$this->y = $this->namedtag->getInt(self::TAG_Y);
 		$this->z = $this->namedtag->getInt(self::TAG_Z);
 
-		$this->chunk->addTile($this);
 		$this->getLevel()->addTile($this);
 	}
 
@@ -223,8 +222,8 @@ abstract class Tile extends Position{
 		static::createAdditionalNBT($nbt, $pos, $face, $item, $player);
 
 		if($item !== null){
-			$customBlockData = $item->getCustomBlockData();
-			if($customBlockData !== null){
+		    $customBlockData = $item->getCustomBlockData();
+			if($customBlockData != null){
 				foreach($customBlockData as $customBlockDataTag){
 					$nbt->setTag(clone $customBlockDataTag);
 				}
@@ -276,11 +275,7 @@ abstract class Tile extends Position{
 	public function close() : void{
 		if(!$this->closed){
 			$this->closed = true;
-			unset($this->level->updateTiles[$this->id]);
-			if($this->chunk instanceof Chunk){
-				$this->chunk->removeTile($this);
-				$this->chunk = null;
-			}
+
 			if(($level = $this->getLevel()) instanceof Level){
 				$level->removeTile($this);
 				$this->setLevel(null);

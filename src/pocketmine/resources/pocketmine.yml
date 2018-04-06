@@ -1,4 +1,4 @@
-# Main configuration file for PocketMine-MP
+# Main configuration file for Altay
 # These settings are the ones that cannot be included in server.properties
 # Some of these settings are safe, others can break your server if modified incorrectly
 # New settings/defaults won't appear automatically in this file when upgrading.
@@ -104,13 +104,13 @@ debug:
  level: 1
  #Enables /status, /gc
  commands: false
-
+ 
 player:
  #Choose whether to enable player data saving.
  save-player-data: true
  anti-cheat:
   #If false, will try to prevent speed and noclip cheats. May cause movement issues.
-  allow-movement-cheats: true
+  allow-movement-cheats: false
 
 level-settings:
  #The default format that levels will use when created
@@ -142,6 +142,8 @@ chunk-ticking:
   #- 2 # grass
 
 chunk-generation:
+ #Max. amount of chunks in the waiting queue to be generated
+ queue-size: 8
  #Max. amount of chunks in the waiting queue to be populated
  population-queue-size: 8
 
@@ -150,7 +152,7 @@ ticks-per:
 
 auto-report:
  #Send crash reports for processing
- enabled: true
+ enabled: false
  send-code: true
  send-settings: true
  send-phpinfo: false
@@ -163,7 +165,7 @@ anonymous-statistics:
  host: stats.pocketmine.net
 
 auto-updater:
- enabled: true
+ enabled: false #TODO: Don't enable this.
  on-update:
   warn-console: true
   warn-ops: true

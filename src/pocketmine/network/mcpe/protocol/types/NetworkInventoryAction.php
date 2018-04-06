@@ -1,35 +1,41 @@
 <?php
 
 /*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *               _ _
+ *         /\   | | |
+ *        /  \  | | |_ __ _ _   _
+ *       / /\ \ | | __/ _` | | | |
+ *      / ____ \| | || (_| | |_| |
+ *     /_/    \_|_|\__\__,_|\__, |
+ *                           __/ |
+ *                          |___/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Altay
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types;
 
-use pocketmine\inventory\transaction\action\CraftingTakeResultAction;
-use pocketmine\inventory\transaction\action\CraftingTransferMaterialAction;
+use pocketmine\block\Block;
+use pocketmine\inventory\AnvilInventory;
+use pocketmine\inventory\EnchantInventory;
+use pocketmine\inventory\TradeInventory;
 use pocketmine\inventory\transaction\action\CreativeInventoryAction;
 use pocketmine\inventory\transaction\action\DropItemAction;
-use pocketmine\inventory\transaction\action\InventoryAction;
+use pocketmine\inventory\transaction\action\EnchantAction;
 use pocketmine\inventory\transaction\action\SlotChangeAction;
+use pocketmine\inventory\transaction\action\TradeAction;
+use pocketmine\inventory\transaction\action\InventoryAction;
 use pocketmine\item\Item;
+use pocketmine\item\ItemFactory;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\Player;
 
@@ -111,9 +117,14 @@ class NetworkInventoryAction{
 			case self::SOURCE_TODO:
 				$this->windowId = $packet->getVarInt();
 				switch($this->windowId){
-					case self::SOURCE_TYPE_CRAFTING_USE_INGREDIENT:
+					/** @noinspection PhpMissingBreakStatementInspection */
 					case self::SOURCE_TYPE_CRAFTING_RESULT:
-						$packet->isCraftingPart = true;
+						$packet->isFinalCraftingPart = true;
+					case self::SOURCE_TYPE_CRAFTING_USE_INGREDIENT:
+						$packet->inventoryType = "Crafting";
+						break;
+					case self::SOURCE_TYPE_ENCHANT_OUTPUT:
+						$packet->inventoryType = "Enchant";
 						break;
 				}
 				break;
@@ -159,12 +170,6 @@ class NetworkInventoryAction{
 	public function createInventoryAction(Player $player){
 		switch($this->sourceType){
 			case self::SOURCE_CONTAINER:
-				if($this->windowId === ContainerIds::ARMOR){
-					//TODO: HACK!
-					$this->inventorySlot += 36;
-					$this->windowId = ContainerIds::INVENTORY;
-				}
-
 				$window = $player->getWindow($this->windowId);
 				if($window !== null){
 					return new SlotChangeAction($window, $this->inventorySlot, $this->oldItem, $this->newItem);
@@ -176,7 +181,7 @@ class NetworkInventoryAction{
 					throw new \UnexpectedValueException("Only expecting drop-item world actions from the client!");
 				}
 
-				return new DropItemAction($this->oldItem, $this->newItem);
+				return new DropItemAction($this->newItem);
 			case self::SOURCE_CREATIVE:
 				switch($this->inventorySlot){
 					case self::ACTION_MAGIC_SLOT_CREATIVE_DELETE_ITEM:
@@ -199,9 +204,8 @@ class NetworkInventoryAction{
 						$window = $player->getCraftingGrid();
 						return new SlotChangeAction($window, $this->inventorySlot, $this->oldItem, $this->newItem);
 					case self::SOURCE_TYPE_CRAFTING_RESULT:
-						return new CraftingTakeResultAction($this->oldItem, $this->newItem);
 					case self::SOURCE_TYPE_CRAFTING_USE_INGREDIENT:
-						return new CraftingTransferMaterialAction($this->oldItem, $this->newItem, $this->inventorySlot);
+						return null;
 
 					case self::SOURCE_TYPE_CONTAINER_DROP_CONTENTS:
 						//TODO: this type applies to all fake windows, not just crafting
@@ -213,6 +217,42 @@ class NetworkInventoryAction{
 							throw new \InvalidStateException("Fake container " . get_class($window) . " for " . $player->getName() . " does not contain $this->oldItem");
 						}
 						return new SlotChangeAction($window, $inventorySlot, $this->oldItem, $this->newItem);
+
+					case self::SOURCE_TYPE_ANVIL_INPUT:
+						$window = $player->getWindowFromClass(AnvilInventory::class);
+						return new SlotChangeAction($window, 0, $this->oldItem, $this->newItem);
+					case self::SOURCE_TYPE_ANVIL_MATERIAL:
+						$window = $player->getWindowFromClass(AnvilInventory::class);
+						return new SlotChangeAction($window, 1, $this->oldItem, $this->newItem);
+					case self::SOURCE_TYPE_ANVIL_RESULT:
+						$window = $player->getWindowFromClass(AnvilInventory::class);
+						$air = ItemFactory::get(Block::AIR);
+						$window->setContents([
+							$air, $air, $this->oldItem
+						], false);
+						return new SlotChangeAction($window, 2, $this->oldItem, $this->newItem);
+					case self::SOURCE_TYPE_ANVIL_OUTPUT:
+						throw new \RuntimeException("Anvil inventory source type OUTPUT");
+
+					case self::SOURCE_TYPE_ENCHANT_INPUT:
+						$window = $player->getWindowFromClass(EnchantInventory::class);
+						return new EnchantAction($window, 0, $this->oldItem, $this->newItem);
+					case self::SOURCE_TYPE_ENCHANT_MATERIAL:
+						$window = $player->getWindowFromClass(EnchantInventory::class);
+						return new EnchantAction($window, 1, $this->oldItem, $this->newItem);
+					case self::SOURCE_TYPE_ENCHANT_OUTPUT:
+						$window = $player->getWindowFromClass(EnchantInventory::class);
+						return new EnchantAction($window, -1, $this->oldItem, $this->newItem);
+
+					case self::SOURCE_TYPE_TRADING_INPUT_1:
+					case self::SOURCE_TYPE_TRADING_INPUT_2:
+						$window = $player->getWindowFromClass(TradeInventory::class);
+						return new SlotChangeAction($window, abs($this->windowId) - 20, $this->oldItem, $this->newItem);
+					case self::SOURCE_TYPE_TRADING_USE_INPUTS:
+					case self::SOURCE_TYPE_TRADING_OUTPUT:
+						/** @var TradeInventory $window */
+						$window = $player->getWindowFromClass(TradeInventory::class);
+						return new TradeAction($this->oldItem, $this->newItem, $window, (abs($this->windowId) - 23) === 0);
 				}
 
 				//TODO: more stuff

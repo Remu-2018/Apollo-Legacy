@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\command;
 
+use pocketmine\Server;
 use pocketmine\Thread;
 
 class CommandReader extends Thread{
@@ -102,7 +103,7 @@ class CommandReader extends Thread{
 	 */
 	private function readLine() : bool{
 		$line = "";
-		if($this->type === self::TYPE_READLINE){
+		if($this->type === self::TYPE_READLINE and Server::$readLine){
 			if(($raw = readline("> ")) !== false and ($line = trim($raw)) !== ""){
 				readline_add_history($line);
 			}else{

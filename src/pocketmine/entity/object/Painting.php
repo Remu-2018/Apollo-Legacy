@@ -1,29 +1,31 @@
 <?php
 
 /*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *               _ _
+ *         /\   | | |
+ *        /  \  | | |_ __ _ _   _
+ *       / /\ \ | | __/ _` | | | |
+ *      / ____ \| | || (_| | |_| |
+ *     /_/    \_|_|\__\__,_|\__, |
+ *                           __/ |
+ *                          |___/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Altay
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
 namespace pocketmine\entity\object;
 
 use pocketmine\entity\Entity;
+use pocketmine\entity\utils\PaintingMotive;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
@@ -50,8 +52,6 @@ class Painting extends Entity{
 	protected $direction = 0;
 	/** @var string */
 	protected $motive;
-	/** @var int */
-	protected $checkDestroyedTicker = 0;
 
 	public function __construct(Level $level, CompoundTag $nbt){
 		$this->motive = $nbt->getString("Motive");
@@ -78,33 +78,6 @@ class Painting extends Entity{
 
 		$this->namedtag->setByte("Facing", (int) $this->direction);
 		$this->namedtag->setByte("Direction", (int) $this->direction); //Save both for full compatibility
-	}
-
-	public function entityBaseTick(int $tickDiff = 1) : bool{
-		static $directions = [
-			0 => Vector3::SIDE_SOUTH,
-			1 => Vector3::SIDE_WEST,
-			2 => Vector3::SIDE_NORTH,
-			3 => Vector3::SIDE_EAST
-		];
-
-		$hasUpdate = parent::entityBaseTick($tickDiff);
-
-		if($this->checkDestroyedTicker++ > 10){
-			/*
-			 * we don't have a way to only update on local block updates yet! since random chunk ticking always updates
-			 * all the things
-			 * ugly hack, but vanilla uses 100 ticks so on there it looks even worse
-			 */
-			$this->checkDestroyedTicker = 0;
-			$face = $directions[$this->direction];
-			if(!self::canFit($this->level, $this->blockIn->getSide($face), $face, false, $this->getMotive())){
-				$this->kill();
-				$hasUpdate = true;
-			}
-		}
-
-		return $hasUpdate; //doesn't need to be ticked always
 	}
 
 	public function kill(){
@@ -139,8 +112,24 @@ class Painting extends Entity{
 		$this->boundingBox->setBB(self::getPaintingBB($this->blockIn->getSide($facing), $facing, $this->getMotive()));
 	}
 
-	protected function tryChangeMovement(){
-		$this->motionX = $this->motionY = $this->motionZ = 0;
+	public function onNearbyBlockChange() : void{
+		parent::onNearbyBlockChange();
+
+		static $directions = [
+			0 => Vector3::SIDE_SOUTH,
+			1 => Vector3::SIDE_WEST,
+			2 => Vector3::SIDE_NORTH,
+			3 => Vector3::SIDE_EAST
+		];
+
+		$face = $directions[$this->direction];
+		if(!self::canFit($this->level, $this->blockIn->getSide($face), $face, false, $this->getMotive())){
+			$this->kill();
+		}
+	}
+
+	public function hasMovementUpdate() : bool{
+		return false;
 	}
 
 	protected function updateMovement(bool $teleport = false){

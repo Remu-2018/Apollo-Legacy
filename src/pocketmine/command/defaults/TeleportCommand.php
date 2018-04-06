@@ -1,23 +1,24 @@
 <?php
 
 /*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *               _ _
+ *         /\   | | |
+ *        /  \  | | |_ __ _ _   _
+ *       / /\ \ | | __/ _` | | | |
+ *      / ____ \| | || (_| | |_| |
+ *     /_/    \_|_|\__\__,_|\__, |
+ *                           __/ |
+ *                          |___/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Altay
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
@@ -25,6 +26,9 @@ namespace pocketmine\command\defaults;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
+use pocketmine\command\overload\CommandEnum;
+use pocketmine\command\overload\CommandOverload;
+use pocketmine\command\overload\CommandParameter;
 use pocketmine\command\utils\InvalidCommandSyntaxException;
 use pocketmine\lang\TranslationContainer;
 use pocketmine\math\Vector3;
@@ -37,9 +41,60 @@ class TeleportCommand extends VanillaCommand{
 		parent::__construct(
 			$name,
 			"%pocketmine.command.tp.description",
-			"%commands.tp.usage"
+			"%commands.tp.usage",
+			["teleport"]
 		);
 		$this->setPermission("pocketmine.command.teleport");
+
+		// TODO : Vanilla ile uyumlu olsun && optimize
+
+		$destination = new CommandParameter("destination", CommandParameter::ARG_TYPE_POSITION, false);
+		$facing = new CommandParameter("facing", CommandParameter::ARG_TYPE_STRING, false, new CommandEnum("facing", ["facing"]));
+		$lookAtEntity = new CommandParameter("lookAtEntity", CommandParameter::ARG_TYPE_TARGET, false);
+		$yRot = new CommandParameter("yRot", CommandParameter::ARG_TYPE_VALUE);
+
+		$this->setOverloads([
+			new CommandOverload("1", [
+				$destination,
+				$yRot,
+				(clone $yRot)->setName("xRot")
+			]),
+			new CommandOverload("2", [
+				$destination,
+				$facing,
+				(clone $destination)->setName("lookAtPosition")
+			]),
+			new CommandOverload("3", [
+				$destination,
+				$facing,
+				$lookAtEntity
+			]),
+			new CommandOverload("4", [
+				(clone $lookAtEntity)->setName("victim"),
+				$destination,
+				$yRot,
+				$yRot->setName("xRot")
+			]),
+			new CommandOverload("5", [
+				(clone $lookAtEntity)->setName("victim"),
+				$destination,
+				$facing,
+				(clone $destination)->setName("lookAtPosition")
+			]),
+			new CommandOverload("6", [
+				(clone $lookAtEntity)->setName("victim"),
+				$destination,
+				$facing,
+				$lookAtEntity
+			]),
+			new CommandOverload("7", [
+				(clone $lookAtEntity)->setName("destination")
+			]),
+			new CommandOverload("8", [
+				(clone $lookAtEntity)->setName("victim"),
+				(clone $lookAtEntity)->setName("destination")
+			])
+		]);
 	}
 
 	public function execute(CommandSender $sender, string $commandLabel, array $args){

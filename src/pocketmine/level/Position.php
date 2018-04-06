@@ -25,8 +25,6 @@ namespace pocketmine\level;
 
 use pocketmine\math\Vector3;
 use pocketmine\utils\MainLogger;
-use pocketmine\block\Block;
-use pocketmine\Server;
 
 class Position extends Vector3{
 
@@ -40,10 +38,8 @@ class Position extends Vector3{
 	 * @param Level $level
 	 */
 	public function __construct($x = 0, $y = 0, $z = 0, Level $level = null){
-		$this->x = $x;
-		$this->y = $y;
-		$this->z = $z;
-		$this->level = $level;
+	    parent::__construct($x, $y, $z);
+		$this->setLevel($level);
 	}
 
 	public static function fromObject(Vector3 $pos, Level $level = null){
@@ -100,10 +96,6 @@ class Position extends Vector3{
 	public function isValid() : bool{
 		return $this->getLevel() instanceof Level;
 	}
-	
-	public function isValidBed(): bool   {
-	    return Server::getInstance()->getDefaultLevel()->getBlockIdAt($this->x, $this->y, $this->z) == Block::BED_BLOCK;
-	}
 
 	/**
 	 * Returns a side Vector
@@ -115,7 +107,7 @@ class Position extends Vector3{
 	 *
 	 * @throws LevelException
 	 */
-	public function getSide($side, $step = 1){
+	public function getSide(int $side, int $step = 1){
 		assert($this->isValid());
 
 		return Position::fromObject(parent::getSide($side, $step), $this->level);
@@ -123,20 +115,6 @@ class Position extends Vector3{
 
 	public function __toString(){
 		return "Position(level=" . ($this->isValid() ? $this->getLevel()->getName() : "null") . ",x=" . $this->x . ",y=" . $this->y . ",z=" . $this->z . ")";
-	}
-
-	/**
-	 * @param $x
-	 * @param $y
-	 * @param $z
-	 *
-	 * @return Position
-	 */
-	public function setComponents($x, $y, $z){
-		$this->x = $x;
-		$this->y = $y;
-		$this->z = $z;
-		return $this;
 	}
 
 	public function equals(Vector3 $v) : bool{

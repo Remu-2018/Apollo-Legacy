@@ -23,9 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\item\TieredTool;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
-use pocketmine\item\TieredTool;
 
 class CoalOre extends Solid{
 
@@ -56,5 +56,9 @@ class CoalOre extends Solid{
 			ItemFactory::get(Item::COAL)
 		];
 	}
+
+	public function getXpDropAmount() : int{
+        return mt_rand(0, 2);
+    }
 
 }

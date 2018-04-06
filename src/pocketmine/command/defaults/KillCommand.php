@@ -1,23 +1,24 @@
 <?php
 
 /*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *               _ _
+ *         /\   | | |
+ *        /  \  | | |_ __ _ _   _
+ *       / /\ \ | | __/ _` | | | |
+ *      / ____ \| | || (_| | |_| |
+ *     /_/    \_|_|\__\__,_|\__, |
+ *                           __/ |
+ *                          |___/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Altay
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
@@ -25,7 +26,10 @@ namespace pocketmine\command\defaults;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
+use pocketmine\command\overload\CommandParameter;
+use pocketmine\command\utils\CommandSelector;
 use pocketmine\command\utils\InvalidCommandSyntaxException;
+use pocketmine\entity\Living;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\lang\TranslationContainer;
 use pocketmine\Player;
@@ -38,9 +42,11 @@ class KillCommand extends VanillaCommand{
 			$name,
 			"%pocketmine.command.kill.description",
 			"%pocketmine.command.kill.usage",
-			["suicide"]
+			[],
+			[new CommandParameter("target", CommandParameter::ARG_TYPE_TARGET, false)]
 		);
-		$this->setPermission("pocketmine.command.kill.self;pocketmine.command.kill.other");
+
+		$this->setPermission("altay.command.kill.self;altay.command.kill.other");
 	}
 
 	public function execute(CommandSender $sender, string $commandLabel, array $args){
@@ -53,34 +59,34 @@ class KillCommand extends VanillaCommand{
 		}
 
 		if(count($args) === 1){
-			if(!$sender->hasPermission("pocketmine.command.kill.other")){
+			if(!$sender->hasPermission("altay.command.kill.other")){
 				$sender->sendMessage(new TranslationContainer(TextFormat::RED . "%commands.generic.permission"));
-
 				return true;
 			}
 
-			$player = $sender->getServer()->getPlayer($args[0]);
+			$selectors = (new CommandSelector($args[0], $sender))->getSelected();
+			$names = [];
 
-			if($player instanceof Player){
-				$sender->getServer()->getPluginManager()->callEvent($ev = new EntityDamageEvent($player, EntityDamageEvent::CAUSE_SUICIDE, 1000));
+			foreach($selectors as $selector){
+				$sender->getServer()->getPluginManager()->callEvent($ev = new EntityDamageEvent($selector, EntityDamageEvent::CAUSE_SUICIDE, 1000));
 
 				if($ev->isCancelled()){
 					return true;
 				}
 
-				$player->setLastDamageCause($ev);
-				$player->setHealth(0);
+				$selector->setLastDamageCause($ev);
+				$selector->setHealth(0);
 
-				Command::broadcastCommandMessage($sender, new TranslationContainer("commands.kill.successful", [$player->getName()]));
-			}else{
-				$sender->sendMessage(new TranslationContainer(TextFormat::RED . "%commands.generic.player.notFound"));
+				$names[] = $selector instanceof Living ? $selector->getName() : $selector->getSaveId();
 			}
+
+			Command::broadcastCommandMessage($sender, new TranslationContainer("commands.kill.successful", [implode(", ", $names)]));
 
 			return true;
 		}
 
 		if($sender instanceof Player){
-			if(!$sender->hasPermission("pocketmine.command.kill.self")){
+			if(!$sender->hasPermission("altay.command.kill.self")){
 				$sender->sendMessage(new TranslationContainer(TextFormat::RED . "%commands.generic.permission"));
 
 				return true;

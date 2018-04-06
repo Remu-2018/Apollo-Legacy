@@ -29,3 +29,4 @@ class Compass extends Item{
 	}
 
 }
+

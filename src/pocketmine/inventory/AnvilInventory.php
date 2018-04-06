@@ -45,7 +45,7 @@ class AnvilInventory extends ContainerInventory{
 	}
 
 	public function getDefaultSize() : int{
-		return 2; //1 input, 1 material
+		return 3; //1 input, 1 material, 1 result
 	}
 
 	/**
@@ -59,6 +59,16 @@ class AnvilInventory extends ContainerInventory{
 	public function onClose(Player $who) : void{
 		parent::onClose($who);
 
-		$this->dropContents($this->holder->getLevel(), $this->holder->add(0.5, 0.5, 0.5));
+        $inv = $who->getInventory();
+        for($i = 0, $size = $this->getSize(); $i < $size; ++$i){
+            $item = $this->getItem($i);
+            if(!$item->isNull()){
+                if($inv->canAddItem($item)){
+                    $inv->addItem($item);
+                }else{
+                    $who->dropItem($item);
+                }
+            }
+        }
 	}
 }

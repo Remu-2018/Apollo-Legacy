@@ -26,7 +26,7 @@ namespace pocketmine\plugin;
 use pocketmine\permission\Permission;
 
 class PluginDescription{
-	private $map;
+    private $map;
 
 	private $name;
 	private $main;
@@ -68,7 +68,7 @@ class PluginDescription{
 	 * @throws PluginException
 	 */
 	private function loadMap(array $plugin){
-		$this->map = $plugin;
+	    $this->map = $plugin;
 
 		$this->name = $plugin["name"];
 		if(preg_match('/^[A-Za-z0-9 _.-]+$/', $this->name) === 0){
@@ -292,7 +292,7 @@ class PluginDescription{
 		return $this->website;
 	}
 
-	public function getMap() : array{
-		return $this->map;
-	}
+    public function getMap() : array{
+        return $this->map;
+    }
 }

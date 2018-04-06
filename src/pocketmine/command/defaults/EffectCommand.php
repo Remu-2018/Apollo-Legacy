@@ -1,29 +1,34 @@
 <?php
 
 /*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *               _ _
+ *         /\   | | |
+ *        /  \  | | |_ __ _ _   _
+ *       / /\ \ | | __/ _` | | | |
+ *      / ____ \| | || (_| | |_| |
+ *     /_/    \_|_|\__\__,_|\__, |
+ *                           __/ |
+ *                          |___/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Altay
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
 namespace pocketmine\command\defaults;
 
 use pocketmine\command\CommandSender;
+use pocketmine\command\overload\CommandEnum;
+use pocketmine\command\overload\CommandEnumValues;
+use pocketmine\command\overload\CommandOverload;
+use pocketmine\command\overload\CommandParameter;
 use pocketmine\command\utils\InvalidCommandSyntaxException;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
@@ -39,6 +44,20 @@ class EffectCommand extends VanillaCommand{
 			"%commands.effect.usage"
 		);
 		$this->setPermission("pocketmine.command.effect");
+
+		$this->setOverloads([
+			new CommandOverload("clear", [
+				new CommandParameter("player", CommandParameter::ARG_TYPE_TARGET, false),
+				new CommandParameter("clear", CommandParameter::ARG_TYPE_STRING, false, new CommandEnum("clear", ["clear"]))
+			]),
+			new CommandOverload("effect", [
+				new CommandParameter("player", CommandParameter::ARG_TYPE_TARGET, false),
+				new CommandParameter("effect", CommandParameter::ARG_TYPE_STRING, false, CommandEnumValues::getEffect()),
+				new CommandParameter("seconds", CommandParameter::ARG_TYPE_INT),
+				new CommandParameter("amplifier", CommandParameter::ARG_TYPE_INT),
+				new CommandParameter("bool", CommandParameter::ARG_TYPE_VALUE, false, CommandEnumValues::getBoolean())
+			])
+		]);
 	}
 
 	public function execute(CommandSender $sender, string $commandLabel, array $args){
@@ -80,19 +99,18 @@ class EffectCommand extends VanillaCommand{
 		$amplification = 0;
 
 		if(count($args) >= 3){
-			$duration = ((int) $args[2]) * 20; //ticks
+			if(($d = $this->getBoundedInt($sender, $args[2], 0, INT32_MAX)) === null){
+				return false;
+			}
+			$duration = $d * 20; //ticks
 		}else{
 			$duration = null;
 		}
 
 		if(count($args) >= 4){
-			$amplification = (int) $args[3];
-			if($amplification > 255){
-				$sender->sendMessage(new TranslationContainer(TextFormat::RED . "%commands.generic.num.tooBig", [(string) $args[3], "255"]));
-				return true;
-			}elseif($amplification < 0){
-				$sender->sendMessage(new TranslationContainer(TextFormat::RED . "%commands.generic.num.tooSmall", [(string) $args[3], "0"]));
-				return true;
+			$amplification = $this->getBoundedInt($sender, $args[3], 0, 255);
+			if($amplification === null){
+				return false;
 			}
 		}
 

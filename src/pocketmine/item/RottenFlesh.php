@@ -43,7 +43,7 @@ class RottenFlesh extends Food{
 	public function getAdditionalEffects() : array{
 		if(lcg_value() <= 0.8){
 			return [
-				new EffectInstance(Effect::getEffect(Effect::HUNGER), 600)
+                new EffectInstance(Effect::getEffect(Effect::HUNGER), 600)
 			];
 		}
 

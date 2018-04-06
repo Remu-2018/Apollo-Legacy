@@ -1,23 +1,24 @@
 <?php
 
 /*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *               _ _
+ *         /\   | | |
+ *        /  \  | | |_ __ _ _   _
+ *       / /\ \ | | __/ _` | | | |
+ *      / ____ \| | || (_| | |_| |
+ *     /_/    \_|_|\__\__,_|\__, |
+ *                           __/ |
+ *                          |___/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Altay
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
@@ -26,18 +27,20 @@ declare(strict_types=1);
  */
 namespace pocketmine\command;
 
-use pocketmine\event\TimingsHandler;
+use pocketmine\command\overload\CommandOverload;
+use pocketmine\command\overload\CommandParameter;
 use pocketmine\lang\TextContainer;
 use pocketmine\lang\TranslationContainer;
+use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
 use pocketmine\Server;
+use pocketmine\timings\TimingsHandler;
 use pocketmine\utils\TextFormat;
+use pocketmine\utils\Utils;
 
 abstract class Command{
 
 	/** @var string */
 	private $name;
-	/** @var array */
-	protected $commandData = null;
 
 	/** @var string */
 	private $nextLabel;
@@ -71,18 +74,28 @@ abstract class Command{
 	/** @var TimingsHandler */
 	public $timings;
 
+	/** @var array */
+	private $overloads = [];
+
+	private $permissionLevel = AdventureSettingsPacket::PERMISSION_NORMAL; // TODO
+
+	/** @var int */
+	private $flags = 0; // TODO
+
 	/**
-	 * @param string   $name
-	 * @param string   $description
-	 * @param string   $usageMessage
+	 * @param string $name
+	 * @param string $description
+	 * @param string $usageMessage
 	 * @param string[] $aliases
+	 * @param array|null $parameters
 	 */
-	public function __construct(string $name, string $description = "", string $usageMessage = null, array $aliases = []){
+	public function __construct(string $name, string $description = "", string $usageMessage = null, array $aliases = [], array $parameters = null){
 		$this->name = $name;
 		$this->setLabel($name);
 		$this->setDescription($description);
 		$this->usageMessage = $usageMessage ?? ("/" . $name);
 		$this->setAliases($aliases);
+		$this->addOverload(new CommandOverload("default", $parameters ?? [new CommandParameter("args", CommandParameter::ARG_TYPE_STRING)]));
 	}
 
 	/**
@@ -99,6 +112,14 @@ abstract class Command{
 	 */
 	public function getName() : string{
 		return $this->name;
+	}
+
+	public function getPermissionLevel() : int{
+		return $this->permissionLevel;
+	}
+
+	public function setPermissionLevel(int $permissionLevel) : void{
+		$this->permissionLevel = $permissionLevel;
 	}
 
 	/**
@@ -268,6 +289,9 @@ abstract class Command{
 	 * @param string $description
 	 */
 	public function setDescription(string $description){
+		if(strlen($description) > 0 and $description{0} == '%'){
+			$description = Server::getInstance()->getLanguage()->translateString($description);
+		}
 		$this->description = $description;
 	}
 
@@ -283,6 +307,34 @@ abstract class Command{
 	 */
 	public function setUsage(string $usage){
 		$this->usageMessage = $usage;
+	}
+
+	/**
+	 * @return CommandOverload[]
+	 */
+	public function getOverloads() : array{
+		return $this->overloads;
+	}
+
+	public function addOverload(CommandOverload $overload){
+		$this->overloads[$overload->getName()] = $overload;
+	}
+
+	public function removeAllOverload(){
+		$this->overloads = [];
+	}
+
+	public function getOverload(string $overloadName) : ?CommandOverload{
+		return $this->overloads[$overloadName] ?? null;
+	}
+
+	public function setOverloads(array $overloads) : void{
+		Utils::validateObjectArray($overloads, CommandOverload::class);
+		$this->overloads = $overloads;
+	}
+
+	public function getFlags() : int{
+		return $this->flags;
 	}
 
 	/**
@@ -308,7 +360,7 @@ abstract class Command{
 			$colored = new TranslationContainer(TextFormat::GRAY . TextFormat::ITALIC . "%chat.type.admin", [$source->getName(), $message]);
 		}
 
-		if($sendToSource === true and !($source instanceof ConsoleCommandSender)){
+		if($sendToSource and !($source instanceof ConsoleCommandSender)){
 			$source->sendMessage($message);
 		}
 

@@ -23,9 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\item\TieredTool;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
-use pocketmine\item\TieredTool;
 
 class LapisOre extends Solid{
 
@@ -56,5 +56,9 @@ class LapisOre extends Solid{
 			ItemFactory::get(Item::DYE, 4, mt_rand(4, 8))
 		];
 	}
+
+    public function getXpDropAmount() : int{
+        return mt_rand(2, 5);
+    }
 
 }

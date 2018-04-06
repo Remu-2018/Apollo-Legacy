@@ -1,31 +1,30 @@
 <?php
 
 /*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *               _ _
+ *         /\   | | |
+ *        /  \  | | |_ __ _ _   _
+ *       / /\ \ | | __/ _` | | | |
+ *      / ____ \| | || (_| | |_| |
+ *     /_/    \_|_|\__\__,_|\__, |
+ *                           __/ |
+ *                          |___/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Altay
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
 namespace pocketmine\network\mcpe;
 
-
 use pocketmine\event\server\DataPacketReceiveEvent;
-use pocketmine\event\Timings;
 use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
 use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\network\mcpe\protocol\BlockEntityDataPacket;
@@ -41,30 +40,33 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\EntityEventPacket;
 use pocketmine\network\mcpe\protocol\EntityFallPacket;
 use pocketmine\network\mcpe\protocol\EntityPickRequestPacket;
-use pocketmine\network\mcpe\protocol\InteractPacket;
-use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
-use pocketmine\network\mcpe\protocol\ItemFrameDropItemPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\network\mcpe\protocol\MapInfoRequestPacket;
 use pocketmine\network\mcpe\protocol\MobArmorEquipmentPacket;
 use pocketmine\network\mcpe\protocol\MobEquipmentPacket;
 use pocketmine\network\mcpe\protocol\ModalFormResponsePacket;
+use pocketmine\network\mcpe\protocol\MoveEntityPacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\PlayerHotbarPacket;
-use pocketmine\network\mcpe\protocol\PlayerInputPacket;
 use pocketmine\network\mcpe\protocol\PlayerSkinPacket;
+use pocketmine\network\mcpe\protocol\PlayerInputPacket;
 use pocketmine\network\mcpe\protocol\RequestChunkRadiusPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackChunkRequestPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\mcpe\protocol\ServerSettingsRequestPacket;
+use pocketmine\network\mcpe\protocol\SetEntityMotionPacket;
 use pocketmine\network\mcpe\protocol\SetPlayerGameTypePacket;
 use pocketmine\network\mcpe\protocol\ShowCreditsPacket;
 use pocketmine\network\mcpe\protocol\SpawnExperienceOrbPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
+use pocketmine\network\mcpe\protocol\InteractPacket;
+use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
+use pocketmine\network\mcpe\protocol\ItemFrameDropItemPacket;
 use pocketmine\Player;
 use pocketmine\Server;
+use pocketmine\timings\Timings;
 
 class PlayerNetworkSessionAdapter extends NetworkSession{
 
@@ -116,6 +118,10 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 		return false;
 	}
 
+	public function handleMoveEntity(MoveEntityPacket $packet) : bool{
+		return $this->player->handleMoveEntity($packet);
+	}
+
 	public function handleMovePlayer(MovePlayerPacket $packet) : bool{
 		return $this->player->handleMovePlayer($packet);
 	}
@@ -129,7 +135,7 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 	}
 
 	public function handleInventoryTransaction(InventoryTransactionPacket $packet) : bool{
-		return $this->player->handleInventoryTransaction($packet); //TODO
+		return $this->player->handleInventoryTransaction($packet);
 	}
 
 	public function handleMobEquipment(MobEquipmentPacket $packet) : bool{
@@ -149,7 +155,7 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 	}
 
 	public function handleEntityPickRequest(EntityPickRequestPacket $packet) : bool{
-		return false; //TODO
+		return true; //TODO : Test for boat
 	}
 
 	public function handlePlayerAction(PlayerActionPacket $packet) : bool{
@@ -157,7 +163,13 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 	}
 
 	public function handleEntityFall(EntityFallPacket $packet) : bool{
-		return true; //Not used
+	    $this->player->fall($packet->fallDistance);
+		return true;
+	}
+
+	public function handleSetEntityMotion(SetEntityMotionPacket $packet) : bool{
+		$this->player->getServer()->broadcastPacket($this->player->getViewers(), $packet);
+		return true;
 	}
 
 	public function handleAnimate(AnimatePacket $packet) : bool{
@@ -185,7 +197,7 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 	}
 
 	public function handlePlayerInput(PlayerInputPacket $packet) : bool{
-		return false; //TODO
+		return $this->player->handlePlayerInput($packet);
 	}
 
 	public function handleSetPlayerGameType(SetPlayerGameTypePacket $packet) : bool{
@@ -201,7 +213,9 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 	}
 
 	public function handleRequestChunkRadius(RequestChunkRadiusPacket $packet) : bool{
-		return $this->player->handleRequestChunkRadius($packet);
+		$this->player->setViewDistance($packet->radius);
+
+		return true;
 	}
 
 	public function handleItemFrameDropItem(ItemFrameDropItemPacket $packet) : bool{
@@ -237,10 +251,14 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 	}
 
 	public function handleModalFormResponse(ModalFormResponsePacket $packet) : bool{
-		return false; //TODO: GUI stuff
+		return $this->player->onFormSubmit($packet->formId, json_decode($packet->formData, true));
 	}
 
 	public function handleServerSettingsRequest(ServerSettingsRequestPacket $packet) : bool{
-		return false; //TODO: GUI stuff
+		if($this->server->allowServerSettingsForm){
+			$this->player->sendServerSettings($this->server->getServerSettingsForm());
+		}
+
+		return true;
 	}
 }

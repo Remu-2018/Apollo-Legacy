@@ -1,23 +1,24 @@
 <?php
 
 /*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *               _ _
+ *         /\   | | |
+ *        /  \  | | |_ __ _ _   _
+ *       / /\ \ | | __/ _` | | | |
+ *      / ____ \| | || (_| | |_| |
+ *     /_/    \_|_|\__\__,_|\__, |
+ *                           __/ |
+ *                          |___/
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
+ * @author TuranicTeam
+ * @link https://github.com/TuranicTeam/Altay
  *
- *
-*/
+ */
 
 declare(strict_types=1);
 
@@ -66,7 +67,7 @@ class Item implements ItemIds, \JsonSerializable{
 			self::$cachedParser = new LittleEndianNBTStream();
 		}
 
-		$data = self::$cachedParser->read($tag);
+        $data = self::$cachedParser->read($tag);
 		if(!($data instanceof CompoundTag)){
 			throw new \InvalidArgumentException("Invalid item NBT string given, it could not be deserialized");
 		}
@@ -79,7 +80,7 @@ class Item implements ItemIds, \JsonSerializable{
 			self::$cachedParser = new LittleEndianNBTStream();
 		}
 
-		return self::$cachedParser->write($tag);
+        return self::$cachedParser->write($tag);
 	}
 
 	/**
@@ -171,7 +172,6 @@ class Item implements ItemIds, \JsonSerializable{
 
 		return -1;
 	}
-
 	/** @var int */
 	protected $id;
 	/** @var int */
@@ -270,6 +270,15 @@ class Item implements ItemIds, \JsonSerializable{
 	}
 
 	/**
+	 * Return the enchantability factor of the item
+	 *
+	 * @return int
+	 */
+	public function getEnchantability() : int{
+		return 0;
+	}
+
+	/**
 	 * @return bool
 	 */
 	public function hasEnchantments() : bool{
@@ -335,7 +344,7 @@ class Item implements ItemIds, \JsonSerializable{
 		/** @var CompoundTag $entry */
 		foreach($ench as $k => $entry){
 			if($entry->getShort("id") === $id and ($level === -1 or $entry->getShort("lvl") === $level)){
-				$ench->remove($k);
+                $ench->remove($k);
 				break;
 			}
 		}
@@ -360,7 +369,7 @@ class Item implements ItemIds, \JsonSerializable{
 			/** @var CompoundTag $entry */
 			foreach($ench as $k => $entry){
 				if($entry->getShort("id") === $enchantment->getId()){
-					$ench->set($k, new CompoundTag("", [
+				    $ench->set($k, new CompoundTag("", [
 						new ShortTag("id", $enchantment->getId()),
 						new ShortTag("lvl", $enchantment->getLevel())
 					]));
@@ -371,7 +380,7 @@ class Item implements ItemIds, \JsonSerializable{
 		}
 
 		if(!$found){
-			$ench->push(new CompoundTag("", [
+		    $ench->push(new CompoundTag("", [
 				new ShortTag("id", $enchantment->getId()),
 				new ShortTag("lvl", $enchantment->getLevel())
 			]));
@@ -626,13 +635,9 @@ class Item implements ItemIds, \JsonSerializable{
 		return $this->hasCustomName() ? $this->getCustomName() : $this->getVanillaName();
 	}
 
-	/**
-	 * Returns the vanilla name of the item, disregarding custom names.
-	 * @return string
-	 */
 	public function getVanillaName() : string{
-		return $this->name;
-	}
+	    return $this->name;
+    }
 
 	/**
 	 * @return bool
@@ -646,7 +651,7 @@ class Item implements ItemIds, \JsonSerializable{
 	 * @return Block
 	 */
 	public function getBlock() : Block{
-		return BlockFactory::get(self::AIR);
+        return BlockFactory::get(Block::AIR);
 	}
 
 	/**
@@ -821,14 +826,14 @@ class Item implements ItemIds, \JsonSerializable{
 		return false;
 	}
 
-	/**
-	 * Returns the number of ticks a player must wait before activating this item again.
-	 *
-	 * @return int
-	 */
-	public function getCooldownTicks() : int{
-		return 0;
-	}
+    /**
+     * Returns the number of ticks a player must wait before activating this item again.
+     *
+     * @return int
+     */
+    public function getCooldownTicks() : int{
+	    return 0;
+    }
 
 	/**
 	 * Compares an Item to this Item and check if they match.
@@ -840,7 +845,7 @@ class Item implements ItemIds, \JsonSerializable{
 	 * @return bool
 	 */
 	final public function equals(Item $item, bool $checkDamage = true, bool $checkCompound = true) : bool{
-		if($this->id === $item->getId() and ($checkDamage === false or $this->getDamage() === $item->getDamage())){
+		if($this->id === $item->getId() and (!$checkDamage or $this->getDamage() === $item->getDamage())){
 			if($checkCompound){
 				if($item->getCompoundTag() === $this->getCompoundTag()){
 					return true;
@@ -981,5 +986,15 @@ class Item implements ItemIds, \JsonSerializable{
 	public function __clone(){
 		$this->cachedNBT = null;
 	}
+
+	// ALTAY
+
+	public function getRepairCost() : int{
+        return $this->getNamedTag()->getInt("RepairCost", 0);
+    }
+
+    public function setRepairCost(int $repairCost) : void{
+	    $this->getNamedTag()->setInt("RepairCost", $repairCost);
+    }
 
 }
