@@ -1441,7 +1441,7 @@ class Server{
 	//	$yazi = str_replace("{}", TextFormat::ESCAPE.$randColor, $yazi);
 
 	//	$this->logger->info($yazi);
-	//}
+	}
 
 	/**
 	 * @param \ClassLoader    $autoloader
