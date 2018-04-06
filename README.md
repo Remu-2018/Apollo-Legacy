@@ -25,11 +25,11 @@ Apollo is a Minecraft: BE Server Software with an improved Generator and a lot m
  
 ## TODO :
 
-- Recreate all banners @nikoskon2003
-- Improve and add all feature of 1.2
-- Redstone
-- Mob AI
-- Fix any bugs that are left
+- [X] Recreate all banners @nikoskon2003
+- [X] Improve and add all feature of 1.2 (most of them we have it)
+- [ ] Redstone
+- [ ] Mob AI
+- [ ] Fix any bugs that are left
 
  If you have epic ideas, create an issue and tell us the idea!
 
