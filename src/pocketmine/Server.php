@@ -1494,14 +1494,14 @@ class Server{
 			}
 			$this->config = new Config($this->dataPath . "pocketmine.yml", Config::YAML, []);
 
-			if(!file_exists($this->dataPath . "altay.yml")){
-				$content = file_get_contents(\pocketmine\RESOURCE_PATH . "altay.yml");
-				@file_put_contents($this->dataPath . "altay.yml", $content);
+			if(!file_exists($this->dataPath . "apollo.yml")){
+				$content = file_get_contents(\pocketmine\RESOURCE_PATH . "apollo.yml");
+				@file_put_contents($this->dataPath . "apollo.yml", $content);
 			}
-			$this->altayConfig = new Config($this->dataPath . "altay.yml", Config::YAML, []);
+			$this->altayConfig = new Config($this->dataPath . "apollo.yml", Config::YAML, []);
 			$this->loadAltayConfig();
 
-			$this->setServerSettingsForm(new class("Altay Server Software", [new Label("Altay is a MC:BE Server Software\nYou can download it from github: https://github.com/TuranicTeam/Altay")], new FormIcon("https://avatars2.githubusercontent.com/u/31800317?s=400&v=4")) extends ServerSettingsForm{});
+			$this->setServerSettingsForm(new class("Apollo Server Software", [new Label("apollo is a MC:BE Server Software\nYou can download it from github: https://github.com/Apollo-SoftwareTeam/Apollo-Legacy")], new FormIcon("https://cdn.discordapp.com/attachments/324190792346501120/422435247498592256/apollo.png")) extends ServerSettingsForm{});
 
 			define('pocketmine\DEBUG', (int) $this->getProperty("debug.level", 1));
 
@@ -1509,7 +1509,7 @@ class Server{
 				$this->logger->warning("Debugging assertions are enabled, this may impact on performance. To disable them, set `zend.assertions = -1` in php.ini.");
 			}
 
-			ini_set('assert.exception', '1');
+			ini_set('assert.exception', '1'); //altay
 
 			if($this->logger instanceof MainLogger){
 				$this->logger->setLogDebug(\pocketmine\DEBUG > 1);
@@ -1708,7 +1708,7 @@ class Server{
 			Generator::addGenerator(Normal::class, "default");
 			Generator::addGenerator(Nether::class, "hell");
 			Generator::addGenerator(Nether::class, "nether");
-			Generator::addGenerator(PorkWorld::class, "testing"); //not tested and maby not stable who knows
+			Generator::addGenerator(PorkWorld::class, "testing"); //not tested and maby not stable who knows altay
 
 			foreach((array) $this->getProperty("worlds", []) as $name => $options){
 				if(!is_array($options)){
