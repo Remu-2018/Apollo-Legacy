@@ -85,6 +85,9 @@ use pocketmine\utils\Utils;
 use pocketmine\utils\UUID;
 use pocketmine\utils\VersionString;
 
+use net\daporkchop\world\generator\PorkWorld;
+
+
 /**
  * The class that manages everything
  */
@@ -1705,7 +1708,7 @@ class Server{
 			Generator::addGenerator(Normal::class, "default");
 			Generator::addGenerator(Nether::class, "hell");
 			Generator::addGenerator(Nether::class, "nether");
-			//Generator::addGenerator(PorkWorld::class, "porkworld");
+			Generator::addGenerator(PorkWorld::class, "testing"); //not tested and maby not stable who knows
 
 			foreach((array) $this->getProperty("worlds", []) as $name => $options){
 				if(!is_array($options)){
