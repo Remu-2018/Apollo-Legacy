@@ -1,31 +1,7 @@
 <?php
 
-/*
- *               _ _
- *         /\   | | |
- *        /  \  | | |_ __ _ _   _
- *       / /\ \ | | __/ _` | | | |
- *      / ____ \| | || (_| | |_| |
- *     /_/    \_|_|\__\__,_|\__, |
- *                           __/ |
- *                          |___/
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Altay
- *
- */
-
 declare(strict_types=1);
 
-/**
- * Altay is the Minecraft: BE multiplayer server software
- * Homepage: https://github.com/TuranicTeam/Altay
- */
 namespace pocketmine;
 
 use pocketmine\block\BlockFactory;
@@ -1456,16 +1432,16 @@ class Server{
 
 		//$yazi = base64_decode("CsKnYuKUjOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUgOKUkCAgwqdiLS0gTG9hZGVkOiBQcm9wZXJ0aWVzIGFuZCBDb25maWd1cmF0aW9uIC0tCsKnYuKUgnt9ICAgICAgICAgICAgICAgICAgICBfIF8gICAgICAgICAgICAgICAgICAgICAgICAgIMKnYuKUgiAgwqc2RGF0ZTogwqdmeyUwfQrCp2LilIJ7fSAgICAgICAgICAgICAgL1wgICB8IHwgfCAgICAgICAgICAgICAgICAgICAgICAgICDCp2LilIIgIMKnNlZlcnNpb246IMKnZnslMX0gwqc2Q29kZW5hbWU6IMKnZnslMn0Kwqdi4pSCe30gICAgICAgICAgICAgLyAgXCAgfCB8IHxfIF9fIF8gXyAgIF8gICAgICAgICAgICAgwqdi4pSCICDCpzZNQ1BFOiDCp2Z7JTN9IMKnNlByb3RvY29sOiDCp2Z7JTR9CsKnYuKUgnt9ICAgICAgICAgICAgLyAvXCBcIHwgfCBfXy8gX2AgfCB8IHwgfCAgICAgICAgICAgIMKnYuKUgiAgwqc2TG9jYWwgSVA6IMKnZnslNX0gwqc2UG9ydDogwqdmeyU2fQrCp2LilIJ7fSAgICAgICAgICAgLyBfX19fIFx8IHwgfHwgKF98IHwgfF98IHwgICAgICAgICAgICDCp2LilIIgIMKnNk1PVEQ6IMKnZnslN30Kwqdi4pSCe30gICAgICAgICAgL18vICAgIFxfXF98XF9fXF9fLF98XF9fLCB8ICAgICAgICAgICAgwqdi4pSCICDCpzZBdXRoZW50aWNhdGlvbjogwqdmeyU4fQrCp2LilIJ7fSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgX18vIHwgICAgICAgICAgICDCp2LilIIgIMKnNlNTTCBFeHRlbnNpb246IMKnZnslOX0Kwqdi4pSCe30gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfF9fXy8gICAgICAgICAgICAgwqdi4pSCICDCp2ItLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0Kwqdi4pSCe30gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgwqdi4pSCICDCpzZBUEkgVmVyc2lvbjogwqdmeyUxMH0Kwqdi4pSCwqdhICAgICDCpzlTdXBwb3J0OiDCp2ZnaXRodWIuY29tL1R1cmFuaWNUZWFtL0FsdGF5ICAgICAgIMKnYuKUgiAgwqc2TGFuZ3VhZ2U6IMKnZnslMTF9CsKnYuKUgnt9ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIMKnYuKUgiAgwqc2UGFja2FnZTogwqdmeyUxMn0Kwqdi4pSU4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSYICDCp2ItLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0=");
 
-		foreach($about as $index => $value){
-			$yazi = str_ireplace("{%$index}", $value, $yazi);
-		}
+		//foreach($about as $index => $value){
+		//	$yazi = str_ireplace("{%$index}", $value, $yazi);
+		//}
 
-		$randColor = "0123456789abcdef";
-		$randColor = $randColor{mt_rand(0, 15)};
-		$yazi = str_replace("{}", TextFormat::ESCAPE.$randColor, $yazi);
+	//	$randColor = "0123456789abcdef";
+	///	$randColor = $randColor{mt_rand(0, 15)};
+	//	$yazi = str_replace("{}", TextFormat::ESCAPE.$randColor, $yazi);
 
-		$this->logger->info($yazi);
-	}
+	//	$this->logger->info($yazi);
+	//}
 
 	/**
 	 * @param \ClassLoader    $autoloader
