@@ -144,9 +144,9 @@ class SimpleCommandMap implements CommandMap{
 
 		if($this->server->getAltayProperty("developer.commands", true)){
 			$this->registerAll("altay", [
-				new ExtractPluginCommand("extractplugin"),
-				new MakePluginCommand("makeplugin"),
-				new MakeServerCommand("makeserver")
+			//	new ExtractPluginCommand("extractplugin"),
+			//	new MakePluginCommand("makeplugin"),
+			//	new MakeServerCommand("makeserver")
 			]);
 		}
 
