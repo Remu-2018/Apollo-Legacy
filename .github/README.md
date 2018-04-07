@@ -11,7 +11,7 @@ Apollo is a Minecraft: BE Server Software with an improved Generator and a lot m
 ## Information
 
 - Need to communicate with us? Join our [discord](https://discord.gg/xBN3WR6) group!
-- We have a web site: [apollope.ml](https://apollope.ml)
+- We have a web site: [apolloBE forums](http://apollope.freeforums.net)
 - We are a edited version of PMMP. We have edited their generators to our version and have improved the performance.
 - You can download .phar from Circle CI. Tab to latest build,tap to artifacts selection, tap to DevTools and download Apollo0.1dev.phar
 
